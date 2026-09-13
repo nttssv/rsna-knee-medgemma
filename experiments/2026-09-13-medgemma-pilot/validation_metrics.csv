@@ -1,0 +1,25 @@
+model,label,n,auc
+base,ACL,15,0.6071428571428571
+base,MCL,15,0.5113636363636364
+base,Medial Meniscus,15,0.47321428571428564
+base,Lateral Meniscus,15,0.7946428571428572
+base,Medial OA,15,0.4772727272727273
+base,Lateral OA,15,0.8409090909090909
+base,PF OA,15,0.5446428571428571
+base,Effusion,15,0.8295454545454546
+base,Synovitis,15,0.41666666666666663
+base,Baker's,15,0.76
+base,Contusion,15,0.81
+base,Fracture,15,0.69
+adapted,ACL,15,0.5982142857142857
+adapted,MCL,15,0.48863636363636365
+adapted,Medial Meniscus,15,0.5089285714285714
+adapted,Lateral Meniscus,15,0.7589285714285715
+adapted,Medial OA,15,0.5
+adapted,Lateral OA,15,0.8636363636363636
+adapted,PF OA,15,0.5446428571428571
+adapted,Effusion,15,0.8409090909090908
+adapted,Synovitis,15,0.4629629629629629
+adapted,Baker's,15,0.75
+adapted,Contusion,15,0.8200000000000001
+adapted,Fracture,15,0.76

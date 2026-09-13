@@ -1,0 +1,10 @@
+{
+  "status": "data_audit_complete",
+  "model": "google/medgemma-1.5-4b-it",
+  "training_enabled": true,
+  "studies": 4407,
+  "organizer_labeled_studies": 58,
+  "pilot_train": 43,
+  "pilot_validation": 15,
+  "slices_per_plane": 2
+}

@@ -1,0 +1,15 @@
+# Critical training versions recorded on the completed A100 pilot.
+torch==2.8.0
+transformers==4.57.6
+peft==0.20.0
+bitsandbytes==0.50.2
+accelerate==1.15.0
+pydicom==3.0.2
+python-gdcm==3.2.6
+pandas==3.0.5
+scikit-learn==1.9.1
+trackio==0.37.1
+kaggle==2.2.4
+kagglesdk==0.1.37
+# This is a constraints file for key versions, not a historical full pip freeze.
+

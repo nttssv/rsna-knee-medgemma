@@ -1,0 +1,23 @@
+# Relative paths resolve from RSNA_STATE_DIR, or ./state when unset.
+[paths]
+data = "data"
+cache = "cache"
+runs = "runs"
+
+[experiment]
+model = "google/medgemma-1.5-4b-it"
+revision = "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b"
+seed = 42
+max_studies = 80
+holdout_fraction = 0.25
+slices_per_plane = 2
+image_size = 448
+max_steps = 20
+accumulation = 4
+lora_rank = 8
+learning_rate = 0.00005
+checkpoint_every = 5
+# Conservative guard used by the original pilot; lower-memory GPUs unverified.
+minimum_gpu_gib = 37
+export_train_targets = true
+

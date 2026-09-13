@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MedGemma · MRI case review</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#f8fafc,#10151c);--text:light-dark(#172336,#e5eaf1);--muted:light-dark(#526277,#b1bed0);--line:light-dark(#d6dfe9,#364354);--panel:light-dark(#fff,#17212d);--accent:light-dark(#176b91,#66bedf);--error:light-dark(#a8422e,#ffb39f);--errorbg:light-dark(#fff1ec,#382821);--ok:light-dark(#23704e,#8dd9b0)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,sans-serif}main{max-width:1460px;margin:auto;padding:28px}h1{font-size:27px;margin:4px 0 8px;font-weight:650}h2{font-size:18px;margin:0 0 12px;font-weight:600}p{margin:8px 0 16px}a{color:var(--accent)}.eyebrow{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.muted{color:var(--muted)}.toolbar{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:24px 0}.toolbar label{display:flex;gap:10px;align-items:center}.controls{display:flex;gap:8px;align-items:center}button,select,input{font:inherit}button,select{padding:9px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text)}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}button:hover:not(:disabled){border-color:var(--accent)}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(540px,1fr);gap:30px}.gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.slice{margin:0}.slice button{border:1px solid var(--line);padding:0;border-radius:3px;overflow:hidden;width:100%;display:block;background:#000}.slice img{width:100%;height:auto;display:block;aspect-ratio:1;object-fit:contain}.slice figcaption{font-size:12px;padding:5px 0;color:var(--muted)}.plane-labels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;font-size:14px;margin-bottom:8px}.input-note{font-size:13px;color:var(--muted);margin-top:13px}.scores{width:100%;border-collapse:collapse;font-size:13px}.scores th{text-align:left;font-size:12px;color:var(--muted);font-weight:500;vertical-align:bottom}.scores td,.scores th{padding:9px 7px;border-bottom:1px solid var(--line)}.scores td:first-child,.scores th:first-child{padding-left:0}.scores .num{text-align:right;font-variant-numeric:tabular-nums}.scores .wrong{background:var(--errorbg)}.scores .wrong td:first-child{padding-left:7px}.scores .verdict{white-space:nowrap}.scores .wrong .verdict{color:var(--error);font-weight:600}.scores .right .verdict{color:var(--ok)}.scorecell{min-width:76px}.track{height:4px;margin-top:4px;background:var(--line)}.bar{height:100%;background:var(--accent)}.threshold{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0 8px;font-size:13px}.threshold input{width:170px;accent-color:var(--accent)}.threshold output{font-variant-numeric:tabular-nums;min-width:3ch}#case-summary{font-size:14px;min-height:21px;margin-bottom:12px}details{border-top:1px solid var(--line);padding:16px 0;margin-top:16px}summary{cursor:pointer;font-weight:550}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.7;background:var(--panel);padding:15px;border-radius:6px}#study-uid{font:11px/1.5 ui-monospace,monospace;overflow-wrap:anywhere}dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:16px;max-width:min(650px,95vw)}dialog::backdrop{background:#000b}dialog img{width:min(560px,83vw);max-height:72vh;object-fit:contain;background:#000;display:block;margin:12px auto}dialog header{display:flex;justify-content:space-between;gap:12px;align-items:center}.foot{margin-top:24px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.score-note{font-size:13px;color:var(--muted);margin-top:12px}.tag{display:inline-block;margin-left:10px;font-size:12px;font-weight:400;color:var(--muted)}#load-error{color:var(--error)}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}.gallery,.plane-labels{max-width:750px}.scores{font-size:14px}}@media(max-width:560px){main{padding:16px}.toolbar{gap:10px}.toolbar label{flex-wrap:wrap}.gallery,.plane-labels{gap:6px}.slice figcaption{font-size:11px}.scores{font-size:12px}.scores td,.scores th{padding:8px 4px}.scorecell{min-width:52px}.scores .verdict{white-space:normal}.tag{margin-left:0;display:block}.controls{flex-wrap:wrap}}
+</style>
+</head>
+<body><main>
+<div class="eyebrow">RSNA knee · MedGemma 1.5 4B · 20-step pilot</div>
+<h1>MRI input → prediction → ground truth</h1>
+<p class="muted">Explore all 15 held-out validation studies. These cases were excluded from training. Kaggle's hidden test labels are unavailable.</p>
+<div class="toolbar">
+ <label for="case-select">Validation study <select id="case-select" aria-label="Validation study"></select></label>
+ <div class="controls"><button id="previous" type="button">← Previous</button><button id="next" type="button">Next →</button></div>
+ <a href="http://127.0.0.1:7861/?project=rsna-knee-medgemma&metrics=train/loss,train/loss_5step_mean,validation/mean_auc&smoothing=0" target="_blank" rel="noopener">Training curves ↗</a>
+</div>
+<p id="load-error" role="alert" hidden></p>
+<div class="layout">
+ <section aria-labelledby="input-heading">
+  <h2 id="input-heading">Model input <span class="tag">6 images · 448 × 448 pixels each</span></h2>
+  <div class="plane-labels"><span>Sagittal</span><span>Coronal</span><span>Axial</span></div>
+  <div class="gallery" id="gallery"></div>
+  <p class="input-note">Click a slice to enlarge. Images are shown after the same sampling, orientation, contrast, and padding used in the pilot, before the MedGemma processor. Only two sampled slices per plane were supplied; the ground truth describes the entire study.</p>
+  <details><summary>See the exact question sent with these images</summary>
+   <p><label for="condition">Condition <select id="condition"></select></label></p>
+   <pre id="prompt"></pre>
+   <p class="input-note">The same six images accompanied each of the 12 questions. Ground-truth labels and radiology reports were not included in the model input.</p>
+  </details>
+  <details><summary>Study and input provenance</summary><p id="study-uid"></p><p class="input-note">Run: 20260913T135620Z. Images were reconstructed deterministically from the original DICOMs using the matching pilot preprocessing code. Predictions are the saved outputs from that run.</p><a href="cases.json">Download case data (JSON)</a> · <a href="prediction_comparison.csv">Download comparison (CSV)</a></details>
+ </section>
+ <section aria-labelledby="output-heading">
+  <h2 id="output-heading">Model output vs ground truth</h2>
+  <div id="case-summary" aria-live="polite"></div>
+  <table class="scores"><thead><tr><th scope="col">Condition</th><th scope="col">Ground<br>truth</th><th scope="col" class="num">Before<br>training</th><th scope="col" class="num">After<br>training</th><th scope="col">Predicted<br>label</th><th scope="col">Comparison</th></tr></thead><tbody id="score-rows"></tbody></table>
+  <label class="threshold" for="threshold">Yes/No threshold <output id="threshold-value" for="threshold">0.50</output><input id="threshold" type="range" min="0.05" max="0.95" step="0.01" value="0.5"></label>
+  <p class="score-note">Predicted labels use the <strong>after-training score ≥ threshold</strong>. “False positive” means the model says Yes while ground truth is No; “Missed positive” means the reverse.</p>
+  <p class="score-note">Scores range from 0 to 1 and compare the next-token logits for Yes and No. They are <strong>uncalibrated ranking scores</strong>, not clinical confidence estimates. The 0.50 threshold is illustrative; changing it does not retrain the model. The pilot AUC metric evaluates rankings without this cutoff.</p>
+ </section>
+</div>
+<div class="foot">Ground truth: organizer-provided study labels in train.csv. This viewer compares study-level classifications; no lesion locations, segmentation masks, or generated reports were produced. Cases remain in the saved validation split order.</div>
+<dialog id="enlarge"><header><span id="enlarge-title"></span><button id="close-image" type="button">Close</button></header><img id="large-image" alt=""><p id="slice-info" class="input-note"></p></dialog>
+</main><script src="data.js"></script>
+<script>
+(() => {
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ if(typeof MEDGEMMA_DATA==='undefined'){ $('load-error').hidden=false;$('load-error').textContent='Case data could not be loaded. Keep data.js and the case image folders alongside this page.';return;}
+ const data=MEDGEMMA_DATA;let current=0;
+ const names={'ACL':'ACL tear','MCL':'MCL tear',"Baker's":"Baker’s cyst"};
+ for(const [i,c] of data.cases.entries()){let o=document.createElement('option');o.value=i;o.textContent=`Case ${String(c.case).padStart(2,'0')} / ${data.cases.length}`;$('case-select').append(o);}
+ for(const label of data.labels){let o=document.createElement('option');o.value=label;o.textContent=names[label]||label;$('condition').append(o);}
+ function showPrompt(){const c=data.cases[current];$('prompt').textContent=['These are ordered sampled slices from one knee MRI study. Some anatomy may not be visible.',...c.slices.flatMap((s,i)=>[s.prompt_text,`[Image ${i+1}: ${s.plane}, 448 × 448 RGB]`]),`Is there ${data.definitions[$('condition').value]}? Answer with only Yes or No.`].join('\n\n');}
+ function showScores(){const c=data.cases[current],t=Number($('threshold').value);$('threshold-value').value=t.toFixed(2);$('score-rows').replaceChildren();let fp=0,fn=0,known=0;
+  for(const label of data.labels){const truth=c.truth[label],p=c.after[label]>=t?1:0,wrong=truth!==null&&p!==truth;if(truth!==null)known++;let result=truth===null?'Unknown':wrong?(p?'False positive':'Missed positive'):'Match';if(wrong){if(p)fp++;else fn++;}
+   const row=document.createElement('tr');row.className=wrong?'wrong':'right';
+   const values=[names[label]||label,truth===null?'Unknown':truth?'Yes':'No',c.before[label]===null?'—':c.before[label].toFixed(3),c.after[label].toFixed(3),p?'Yes':'No',result];
+   values.forEach((v,i)=>{const td=document.createElement('td');td.textContent=v;if(i===2||i===3)td.className='num scorecell';if(i===5)td.className='verdict';if(i===3){const track=document.createElement('div');track.className='track';track.setAttribute('aria-hidden','true');const bar=document.createElement('div');bar.className='bar';bar.style.width=`${c.after[label]*100}%`;track.append(bar);td.append(track);}row.append(td);});$('score-rows').append(row);
+  }
+  $('case-summary').textContent=`Case ${String(c.case).padStart(2,'0')}: ${known-fp-fn} / ${known} known labels match · ${fp} false positive${fp!==1?'s':''} · ${fn} missed positive${fn!==1?'s':''}`;
+ }
+ function render(){const c=data.cases[current];$('case-select').value=current;$('previous').disabled=current===0;$('next').disabled=current===data.cases.length-1;$('gallery').replaceChildren();
+  // Display the first sample of each plane in row one, second sample in row two.
+  for(const i of [0,2,4,1,3,5]){const s=c.slices[i],fig=document.createElement('figure');fig.className='slice';const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`Enlarge image ${i+1}: ${s.plane}, position ${s.position.toFixed(2)}`);const img=document.createElement('img');img.src=s.path;img.alt=`Case ${c.case}, ${s.plane} MRI, sampled position ${s.position.toFixed(2)}`;img.width=448;img.height=448;b.append(img);b.onclick=()=>{$('large-image').src=s.path;$('large-image').alt=img.alt;$('enlarge-title').textContent=`Case ${c.case} · image ${i+1} · ${s.plane}`;$('slice-info').textContent=`${s.prompt_text} Input size: 448 × 448 RGB.`;$('enlarge').showModal();};const cap=document.createElement('figcaption');cap.textContent=`Image ${i+1} · position ${s.position.toFixed(2)}`;fig.append(b,cap);$('gallery').append(fig);}
+  $('study-uid').textContent=`StudyInstanceUID: ${c.uid}`;showScores();showPrompt();
+ }
+ $('case-select').onchange=()=>{current=Number($('case-select').value);render();};$('previous').onclick=()=>{if(current>0){current--;render();}};$('next').onclick=()=>{if(current<data.cases.length-1){current++;render();}};$('threshold').oninput=showScores;$('condition').onchange=showPrompt;$('close-image').onclick=()=>$('enlarge').close();render();
+})();
+</script></body></html>

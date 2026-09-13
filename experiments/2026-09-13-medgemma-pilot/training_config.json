@@ -1,0 +1,18 @@
+{
+  "model": "google/medgemma-1.5-4b-it",
+  "resolved_revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "precision": "nf4_with_bf16_autocast",
+  "seed": 42,
+  "steps": 20,
+  "accumulation": 4,
+  "lora_rank": 8,
+  "learning_rate": 5e-05,
+  "slices_per_plane": 2,
+  "versions": {
+    "torch": "2.8.0+cu128",
+    "transformers": "4.57.6",
+    "peft": "0.20.0",
+    "bitsandbytes": "0.50.2",
+    "pydicom": "3.0.2"
+  }
+}

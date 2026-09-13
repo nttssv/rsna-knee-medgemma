@@ -1,0 +1,13 @@
+.git
+.venv
+state
+private
+data
+runs
+cache
+backups
+.env*
+.credentials
+.ssh
+__pycache__
+

@@ -1,0 +1,9 @@
+{
+  "status": "teacher_pilot_complete",
+  "training_seconds": 178.88126730918884,
+  "training_studies": 43,
+  "validation_studies": 15,
+  "peak_training_allocated_gib": 20.035561561584473,
+  "teacher_scores": "uncalibrated_yes_no_ranking_scores",
+  "student_trained": false
+}

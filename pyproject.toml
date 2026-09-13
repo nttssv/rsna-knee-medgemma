@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rsna-knee-medgemma"
+version = "0.1.0"
+description = "Portable MedGemma knee MRI research pilot"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "numpy>=1.26,<3", "pandas>=2.2,<4", "Pillow>=10,<13",
+  "pydicom==3.0.2", "python-gdcm==3.2.6", "scikit-learn>=1.5,<2",
+  "matplotlib>=3.8,<4", "tqdm>=4.66,<5", "requests>=2.32,<3",
+]
+
+[project.optional-dependencies]
+gpu = ["torch==2.8.0", "transformers==4.57.6", "peft==0.20.0", "bitsandbytes==0.50.2", "accelerate==1.15.0", "sentencepiece>=0.2,<0.3"]
+tracking = ["trackio==0.37.1"]
+kaggle = ["kaggle==2.2.4", "kagglesdk==0.1.37"]
+test = ["pytest>=8,<10"]
+
+[project.scripts]
+rsna-knee = "rsna_knee.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rsna_knee = ["assets/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
