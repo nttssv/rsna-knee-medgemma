@@ -1,0 +1,39 @@
+file,column,rows,nonmissing,missing,missing_percent,unique_nonempty_values
+sample_submission.csv,StudyInstanceUID,3,3,0,0.0,3
+sample_submission.csv,ACL,3,3,0,0.0,1
+sample_submission.csv,MCL,3,3,0,0.0,1
+sample_submission.csv,Medial Meniscus,3,3,0,0.0,1
+sample_submission.csv,Lateral Meniscus,3,3,0,0.0,1
+sample_submission.csv,Medial OA,3,3,0,0.0,1
+sample_submission.csv,Lateral OA,3,3,0,0.0,1
+sample_submission.csv,PF OA,3,3,0,0.0,1
+sample_submission.csv,Effusion,3,3,0,0.0,1
+sample_submission.csv,Synovitis,3,3,0,0.0,1
+sample_submission.csv,Baker's,3,3,0,0.0,1
+sample_submission.csv,Contusion,3,3,0,0.0,1
+sample_submission.csv,Fracture,3,3,0,0.0,1
+test.csv,StudyInstanceUID,3,3,0,0.0,3
+test_series.csv,StudyInstanceUID,15,15,0,0.0,3
+test_series.csv,SeriesInstanceUID,15,15,0,0.0,15
+test_series.csv,Fluid_Sensitive,15,15,0,0.0,2
+test_series.csv,Fat_Suppression,15,15,0,0.0,2
+test_series.csv,Anatomical_Plane,15,15,0,0.0,3
+train.csv,StudyInstanceUID,4407,4407,0,0.0,4407
+train.csv,Report,4407,4407,0,0.0,4276
+train.csv,ACL,4407,58,4349,98.68391195824825,2
+train.csv,MCL,4407,58,4349,98.68391195824825,2
+train.csv,Medial Meniscus,4407,58,4349,98.68391195824825,2
+train.csv,Lateral Meniscus,4407,58,4349,98.68391195824825,2
+train.csv,Medial OA,4407,58,4349,98.68391195824825,2
+train.csv,Lateral OA,4407,58,4349,98.68391195824825,2
+train.csv,PF OA,4407,58,4349,98.68391195824825,2
+train.csv,Effusion,4407,58,4349,98.68391195824825,2
+train.csv,Synovitis,4407,58,4349,98.68391195824825,2
+train.csv,Baker's,4407,58,4349,98.68391195824825,2
+train.csv,Contusion,4407,58,4349,98.68391195824825,2
+train.csv,Fracture,4407,58,4349,98.68391195824825,2
+train_series.csv,StudyInstanceUID,24371,24371,0,0.0,4407
+train_series.csv,SeriesInstanceUID,24371,24371,0,0.0,24371
+train_series.csv,Fluid_Sensitive,24371,24371,0,0.0,2
+train_series.csv,Fat_Suppression,24371,24371,0,0.0,2
+train_series.csv,Anatomical_Plane,24371,24371,0,0.0,3

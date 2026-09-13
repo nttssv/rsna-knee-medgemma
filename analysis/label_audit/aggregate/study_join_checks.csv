@@ -1,0 +1,6 @@
+file,unique_studies,matched_studies,unmatched_table_studies,image_studies_missing_from_table
+sample_submission.csv,3,3,0,0
+test.csv,3,3,0,0
+test_series.csv,3,3,0,0
+train.csv,4407,4407,0,0
+train_series.csv,4407,4407,0,0

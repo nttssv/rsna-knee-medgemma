@@ -33,6 +33,8 @@ The portable training implementation preserves the pilot model, prompts, quantiz
 
 ## Next session
 
+The later report-labeling experiment is recorded in [analysis/report_labeling/RESULTS.md](../analysis/report_labeling/RESULTS.md). Its frozen v1 rule extractor made 92/216 held-out binary decisions, with 87 correct and five incorrect. The recommendation is more manual validation before scaling; it does not authorize further MRI training or labeling the remaining 4,349 reports. Its split is 40/18 and distinct from the MRI pilot's 43/15 split. All detailed report evidence is private state.
+
 1. Read this file and `docs/MIGRATION.md`.
 2. Inspect `state/runs/20260913T135620Z` and the case viewer before proposing further training.
 3. Keep the current MedGemma focus; do not resume YOLO work without user direction.

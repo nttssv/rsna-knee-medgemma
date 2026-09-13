@@ -1,0 +1,17 @@
+split,disagreement_type,error_category,count
+development,abstention,anatomy_mismatch,18
+development,abstention,report_omission_or_synonym_miss,161
+development,abstention,severity_mismatch,53
+development,abstention,uncertainty,33
+development,binary_disagreement,negation_failure_or_reference_discordance,5
+development,binary_disagreement,organizer_label_ambiguity_or_extraction_scope,13
+development,binary_disagreement,severity_mismatch,13
+validation,abstention,anatomy_mismatch,12
+validation,abstention,report_omission,45
+validation,abstention,severity_mismatch,14
+validation,abstention,synonym_miss,15
+validation,abstention,uncertainty,2
+validation,abstention,unsupported_language,36
+validation,binary_disagreement,organizer_label_ambiguity,2
+validation,binary_disagreement,severity_mismatch,2
+validation,binary_disagreement,uncertainty,1

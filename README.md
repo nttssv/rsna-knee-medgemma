@@ -6,6 +6,8 @@ This repository contains the code, configuration, experiment record, and instruc
 
 ## Current experiment
 
+The dataset label audit and report-labeling analysis are now preserved under [analysis/](analysis/README.md). The report-only baseline used 40 development / 18 validation studies and remains frozen. Its current recommendation is **more validation/manual annotation before scaling**; MRI training and bulk report labeling remain paused. Full study-level analysis snapshots are in ignored `state/runs/`, with aggregate findings and reproducible code in Git.
+
 The completed run `20260913T135620Z` used `google/medgemma-1.5-4b-it`, a pinned model revision, six MRI slices per study, and 20 QLoRA updates. It trained on 43 studies and evaluated 15 held-out studies. Mean AUC changed from **0.6463 to 0.6581**. This small pilot does not establish a reliable performance improvement.
 
 The trained adapter, processor, fixed split, per-study predictions, case viewer, and teacher targets have been preserved locally under `state/runs/20260913T135620Z/`. A verified private migration archive is under `backups/`. These directories are excluded from Git.
@@ -23,6 +25,7 @@ docs/MIGRATION.md                 Move state to another GPU server
 docs/EXPERIMENT.md                What was actually run and what is unverified
 notebooks/                        Original pilot recipe, without saved outputs
 experiments/2026-09-13-medgemma-pilot/  Aggregate measurements and training config
+analysis/                        Dataset label audit and frozen report-labeling analysis
 archive/student_pilot/             Preserved student code; development paused
 tests/                            CPU portability and recovery checks
 state/                            PRIVATE data, adapters, runs; ignored by Git
@@ -123,6 +126,8 @@ git commit -m "Describe the change"
 ```
 
 The CPU tests verify checkpoint/optimizer recovery, interrupted-save behavior, archive safety and integrity, unknown-label handling, split separation, directory relocation, and preprocessing parity with the recorded notebook. The refactored GPU path still needs a bounded CUDA smoke run before a longer experiment. No GPU was restarted to assemble this repository.
+
+The default test run also includes the report extractor's semantic checks and analysis migration/fingerprint checks. To reproduce the frozen report analysis with restored private state, run `python analysis/report_labeling/reproduce.py`; see its [README](analysis/report_labeling/README.md).
 
 The optional Dockerfile uses an official PyTorch CUDA base. The image tag was checked, but a container build and GPU execution were not performed as part of this packaging task. Dependency constraints record key pilot versions, not a complete historical environment lock.
 

@@ -3,6 +3,9 @@
 - Keep this GitHub repository private. Do not change visibility.
 - Read README.md, docs/EXPERIMENT.md, and docs/MIGRATION.md before starting work.
 - Current focus: MedGemma input/output review and teacher improvement. YOLO work is paused.
+- Read analysis/README.md and analysis/report_labeling/RESULTS.md before further label or model work. MRI training and bulk extraction on the 4,349 reports remain paused.
+- Keep the report-labeling v1 source/config/tests byte-identical to analysis/report_labeling/frozen_code_manifest.json. Its 18-study holdout has been inspected; make future fixes in a separately versioned experiment with a new validation plan.
+- Per-study report-label outputs and evidence belong in ignored state/runs/report-labeling-20260913-v1, never in analysis/ or Git. Only aggregate findings are committed.
 - The completed pilot is preserved under state/runs/20260913T135620Z locally; it is not in GitHub. Inspect it before assuming training must start over.
 - The original adapter supports inference and warm-start training, not exact optimizer resume. New-format checkpoints include full training state.
 - Keep credentials, competition metadata, per-study IDs, MRI files, and model weights out of Git. Use state/ and a private backup.

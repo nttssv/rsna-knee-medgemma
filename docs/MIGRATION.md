@@ -17,6 +17,10 @@ The old run has no optimizer or RNG checkpoint. Its adapter is sufficient for in
 
 ## Create a backup before leaving a server
 
+The analysis packaging also adds `runs/report-labeling-20260913-v1/` and `runs/label-audit-20260913/` to private state. These preserve original fingerprints, fixed splits, all gold-study extractions, report evidence and local analysis documents. The bundle command below includes them automatically. The older `medgemma-pilot-migration.tar.gz` predates these analyses; use the newer `rsna-knee-with-analyses-20260914.tar.gz` recovery point or create a fresh bundle.
+
+After restoring, `python analysis/report_labeling/reproduce.py` uses `RSNA_STATE_DIR` to verify the frozen report experiment and write a new private result directory. No provider-specific settings or GPU are needed. GitHub contains only source and aggregate results, so preserve this private backup as well.
+
 Wait until an atomic checkpoint completes; pause training before copying the rest of a changing run directory. Then:
 
 ```bash

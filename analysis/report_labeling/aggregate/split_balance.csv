@@ -1,0 +1,13 @@
+condition,development_positive,development_negative,validation_positive,validation_negative
+ACL,16,24,8,10
+MCL,6,34,3,15
+Medial Meniscus,18,22,8,10
+Lateral Meniscus,16,24,7,11
+Medial OA,11,29,4,14
+Lateral OA,7,33,4,14
+PF OA,15,25,6,12
+Effusion,25,15,10,8
+Synovitis,19,21,8,10
+Baker's,8,32,4,14
+Contusion,13,27,6,12
+Fracture,12,28,6,12

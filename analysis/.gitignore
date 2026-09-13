@@ -1,0 +1,13 @@
+# Per-study inputs and outputs belong in ignored private state, even in a private repo.
+**/splits.csv
+**/split_manifest.json
+**/freeze_manifest.json
+**/evaluation_manifest.json
+**/development_gold.csv
+**/development_reports.txt
+**/*extractions.csv
+**/disagreements.csv
+**/error_analysis.csv
+**/report_characteristics*.csv
+**/review_annotations.csv
+**/REPORT*.md

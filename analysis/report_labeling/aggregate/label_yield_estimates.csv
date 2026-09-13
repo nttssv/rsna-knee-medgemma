@@ -1,0 +1,13 @@
+condition,validation_accepted,validation_studies,estimated_candidate_labels,candidate_count_ci_low,candidate_count_ci_high,estimated_positive_candidates,estimated_negative_candidates,passes_predeclared_scaling_gate,quality_approved_usable_count,assumption,unlabeled_studies_processed
+ACL,10,18,2416,1466,3281,966,1450,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+MCL,11,18,2658,1680,3466,0,2658,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+Medial Meniscus,11,18,2658,1680,3466,1450,1208,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+Lateral Meniscus,10,18,2416,1466,3281,1450,966,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+Medial OA,6,18,1450,708,2446,242,1208,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+Lateral OA,5,18,1208,544,2212,242,966,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+PF OA,7,18,1691,883,2669,242,1450,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+Effusion,8,18,1933,1068,2883,483,1450,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+Synovitis,4,18,966,391,1966,966,0,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+Baker's,3,18,725,254,1706,0,725,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+Contusion,5,18,1208,544,2212,725,483,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0
+Fracture,8,18,1933,1068,2883,1208,725,False,not_established,58-study labeled subset representative of 4349 unlabeled studies; not verified,0

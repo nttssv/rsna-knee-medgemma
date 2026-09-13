@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Report-derived condition label, kept separate from organizer reference",
+  "type": "object",
+  "required": ["StudyInstanceUID", "condition", "organizer_label", "extracted_label", "confidence", "evidence_text", "normalized_finding", "rule_id", "extraction_method", "extraction_version", "report_sha256", "split"],
+  "properties": {
+    "StudyInstanceUID": {"type": "string"},
+    "condition": {"enum": ["ACL", "MCL", "Medial Meniscus", "Lateral Meniscus", "Medial OA", "Lateral OA", "PF OA", "Effusion", "Synovitis", "Baker's", "Contusion", "Fracture"]},
+    "organizer_label": {"enum": [0, 1], "description": "Read-only reference joined for evaluation; never passed to extractor."},
+    "extracted_label": {"enum": ["positive", "negative", "uncertain", "not_mentioned"]},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1, "description": "Uncalibrated heuristic rule strength, not P(disease)."},
+    "evidence_text": {"type": "string", "description": "Verbatim report span; empty if not mentioned."},
+    "normalized_finding": {"type": "string"},
+    "rule_id": {"type": "string"},
+    "extraction_method": {"const": "multilingual_rules"},
+    "extraction_version": {"type": "string"},
+    "report_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "split": {"enum": ["development", "validation"]},
+    "section": {"type": "string"},
+    "historical_or_postoperative": {"type": "boolean"},
+    "uncertainty_detected": {"type": "boolean"},
+    "negation_detected": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

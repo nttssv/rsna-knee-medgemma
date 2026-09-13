@@ -1,0 +1,17 @@
+{
+  "method": "multilingual_rules",
+  "version": "1.0.0",
+  "frozen_utc": "2026-09-13T15:53:35.465128+00:00",
+  "files_sha256": {
+    "src/common.py": "4ff92fb5eeb2160a92de665a14e3f1591541fc62943b2159604289841e72bc4c",
+    "src/evaluation.py": "b653e8baaec5130c5acfba5c3fc990942d5c1d25e9513a51f268593c8cfd53cd",
+    "src/extractor.py": "67f480269a4a55bf5fa5969814cdcd0486b2934595d7a728dc29b9b0c6449e47",
+    "src/make_split.py": "d100d69e1c9d5d3f596283a5887fcb769ee91dbaf4217afe06a8572ae6e35719",
+    "src/pipeline.py": "31abbe08e755ea24d8dc235a09e315c78b05a90f9c71e1de37a4658d9ff68620",
+    "config/output_schema.json": "003545cdef275992e8974417e89e67c3e9299d38b3c94afffc6f0eba9ec9b8d5",
+    "config/rules.json": "7cca527a8f1aa81d455a0470114cd0c94f3c007211d827da9870205c6a75222c",
+    "tests/test_semantics.py": "6d696023d6677c83b5d2b77d9160cb3a709c5a16945a6b6c0c6fef0529a644c9",
+    "PROTOCOL.md": "ba07c0b8e9067f6ac143d546a7cb7dbabe0ee473dbdcc5ebf540140eb6e7ac73",
+    "requirements.txt": "5a088544f149ccfc58a072cc762fd08bdadead89553e3ee3681afd9e2b1554be"
+  }
+}

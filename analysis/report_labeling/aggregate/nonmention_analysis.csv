@@ -1,0 +1,13 @@
+condition,extractor_no_match_count,no_match_gold_positive,no_match_gold_negative,no_match_negative_agreement,no_match_negative_agreement_ci_low,no_match_negative_agreement_ci_high,analyst_omission_count,analyst_omission_gold_positive,analyst_omission_gold_negative,analyst_omission_negative_agreement,analyst_omission_negative_agreement_ci_low,analyst_omission_negative_agreement_ci_high,negative_default_supported,review_status
+ACL,6,2,4,0.6666666666666666,0.299993315138392,0.9032285888942196,2,0,2,1.0,0.34238022750665303,1.0,False,exploratory_analyst_triage_not_clinically_adjudicated
+MCL,6,1,5,0.8333333333333334,0.4364971778135298,0.9699466302516936,1,0,1,1.0,0.20654931437723745,1.0,False,exploratory_analyst_triage_not_clinically_adjudicated
+Medial Meniscus,6,2,4,0.6666666666666666,0.299993315138392,0.9032285888942196,1,0,1,1.0,0.20654931437723745,1.0,False,exploratory_analyst_triage_not_clinically_adjudicated
+Lateral Meniscus,6,1,5,0.8333333333333334,0.4364971778135298,0.9699466302516936,2,1,1,0.5,0.09453120573423074,0.9054687942657693,False,exploratory_analyst_triage_not_clinically_adjudicated
+Medial OA,9,1,8,0.8888888888888888,0.5650002944233439,0.9801091123614551,2,0,2,1.0,0.34238022750665303,1.0,False,exploratory_analyst_triage_not_clinically_adjudicated
+Lateral OA,11,1,10,0.9090909090909092,0.6226415635484043,0.9837678271141151,5,0,5,1.0,0.5655175352168251,1.0,False,exploratory_analyst_triage_not_clinically_adjudicated
+PF OA,8,3,5,0.625,0.3057423946026273,0.8631557141764026,3,1,2,0.6666666666666666,0.2076596008020477,0.9385080552796037,False,exploratory_analyst_triage_not_clinically_adjudicated
+Effusion,5,3,2,0.4,0.1176207742326478,0.769275718723987,1,0,1,1.0,0.20654931437723745,1.0,False,exploratory_analyst_triage_not_clinically_adjudicated
+Synovitis,14,4,10,0.7142857142857143,0.4535091567010681,0.8827862135542308,11,3,8,0.7272727272727273,0.43435469882387084,0.902539407099751,False,exploratory_analyst_triage_not_clinically_adjudicated
+Baker's,11,1,10,0.9090909090909092,0.6226415635484043,0.9837678271141151,8,0,8,1.0,0.6755924351161198,1.0,False,exploratory_analyst_triage_not_clinically_adjudicated
+Contusion,12,3,9,0.75,0.4676946650664342,0.9110583316059452,2,0,2,1.0,0.34238022750665303,1.0,False,exploratory_analyst_triage_not_clinically_adjudicated
+Fracture,10,3,7,0.7,0.3967781474611453,0.8922087325936989,7,1,6,0.8571428571428571,0.4868721707256811,0.9743203756552565,False,exploratory_analyst_triage_not_clinically_adjudicated

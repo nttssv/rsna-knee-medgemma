@@ -1,0 +1,100 @@
+{
+  "method": "multilingual_rules",
+  "version": "1.0.0",
+  "states": [
+    "positive",
+    "negative",
+    "uncertain",
+    "not_mentioned"
+  ],
+  "confidence_semantics": "Heuristic rule strength, not a calibrated probability. 0 for not_mentioned means no supported binary decision.",
+  "high_confidence_threshold": 0.9,
+  "organizer_definition_url": "https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/discussion/733343",
+  "definition_policy": "Match organizer severity where text supports it; otherwise uncertain. Imaging borderline-negative convention is not report omission-negative convention.",
+  "uncertainty": "\\b(suspect\\w*|suggestive|suggest\\w*|possib\\w*|probab\\w*|might|could|may|cannot\\s+(?:be\\s+)?exclud\\w*|can.t\\s+(?:totally\\s+)?exclud\\w*|r\\s*/\\s*o|rule\\s+out|questionable|in\\s+favor\\s+of|sugier\\w*|sugest\\w*|sospech\\w*|posib\\w*|mogel\\w*|moze|moguc\\w*|vjerojat\\w*|najvjerojat\\w*|dusundur\\w*|suphe\\w*|olasil\\w*|wohl|fraglich|nicht\\s+sicher|dd|dif\\.?\\s*dg|πιθαν\\w*|θα\\s+μπορουσε)\\b",
+  "history": "\\b(postoperativ\\w*|post[- ]?surg\\w*|previous\\w*|prior\\s+(?:tear|injury|surgery)|meniscectom\\w*|meniscectom\\w*|reconstruct\\w*|graft|status\\s+post|s\\s*/\\s*p|chronic\\w*|remote|healed|old\\s+(?:tear|fracture)|antigu\\w*|secuela\\w*|cron\\w*|chron\\w*|ranij\\w*|starij\\w*|eski|anamnest\\w*)\\b",
+  "remote": "\\b(remote|healed|old|antigu\\w*|secuela\\w*|chron\\w*|cron\\w*|ranij\\w*|starij\\w*|eski)\\b",
+  "postoperative": "\\b(postoperativ\\w*|post[- ]?surg\\w*|meniscectom\\w*|reconstruct\\w*|graft|status\\s+post|s\\s*/\\s*p)\\b",
+  "recurrent": "\\b(recurrent|re[- ]?tear|reruptur\\w*|nueva\\s+rotura)\\b",
+  "negative_before": "\\b(no(?:\\s+hay)?(?:\\s+(?:evidence|signs|significant|obvious|frank|acute|focal|abnormal|other))*(?:\\s+of)?|without(?:\\s+evidence\\s+of)?|not|sin(?:\\s+(?:signos|caracteres)(?:\\s+propios)?\\s+de)?|bez(?:\\s+(?:znakova|evidentne))?|geen|ohne|kein\\w*|δεν(?:\\s+παρατηρουνται)?)\\s+(?:\\w+[\\s,/&-]+){0,4}$",
+  "normal": "\\b(normal\\w*|intact\\w*|preserv\\w*|unremarkable|within\\s+normal|conservad\\w*|sin\\s+alteraciones|limites\\s+normales|normaal|intakt|unauffallig\\w*|ured\\w*|odrzan\\w*.{0,25}kontinuitet\\w*|primjeren\\w*.{0,30}signala|korun\\w*|normaldir|φυσιολογ\\w*)\\b",
+  "low": "\\b(small|tiny|trace|minimal\\w*|mild|slight|low[- ]grade|superficial|leve|minim\\w*|discret\\w*|klein\\w*|gering\\w*|beperkt\\w*|licht\\w*|manj\\w*|blag\\w*|pocet\\w*|hafif|kucuk|az\\b|ηπι\\w*|μικρ\\w*)\\b",
+  "high": "\\b(moderate|large|marked|massive|abundant|extensive|severe|moderad\\w*|abundant\\w*|importante|matig\\w*|uitgebreid\\w*|groot\\w*|opsez\\w*|umjeren\\w*|obil\\w*|yaygin|belirgin|buyuk|μεγαλ\\w*|ικαν\\w*)\\b",
+  "complete": "\\b(complete\\w*|full[- ]thickness|high[- ]grade|grade\\s*(?:3|iii)\\b|grado\\s*(?:3|iii)\\b|total\\w*|complet\\w*|volledig\\w*|potpun\\w*|komplet\\w*|tam\\s+kat|υφολικ\\w*|πληρ\\w*|σχεδον\\s+πληρ\\w*)\\b|(?:more\\s+than|greater\\s+than|>)\\s*50\\s*%",
+  "low_ligament": "\\b(low[- ]grade|grade\\s*(?:1|i)\\b|grado\\s*(?:1|i)\\b|graad\\s*1\\b|sprain|distenz\\w*|mucoid\\w*|mukoid\\w*|degenera\\w*|dejenera\\w*|εκφυλι\\w*)\\b",
+  "tear": "\\b(tear\\w*|torn|ruptur\\w*|rotur\\w*|desgarr\\w*|scheur\\w*|riss\\w*|yirt\\w*|ρηξ\\w*|ασυνεχει\\w*|discontinuit\\w*|discontinu\\w*|macerat\\w*|bucket[- ]?handle|kova\\s+sapi|truncated|amputacion|displaced\\s+(?:meniscal\\s+)?fragment|ramp\\s+(?:lesion|lezija))\\b",
+  "cartilage": "\\b(cartilag\\w*|chondr\\w*|condr\\w*|kraakbeen\\w*|knorpel\\w*|hrskavic\\w*|hondromal\\w*|kikirdak\\w*|χονδρ\\w*|osteoarthr\\w*|artros\\w*|gonartros\\w*|gonarthr\\w*|artrots\\w*|οστεοαρθρ\\w*|oa)\\b",
+  "high_cartilage": "\\b(full[- ]thickness|high[- ]grade|grade\\s*(?:3|4|iii|iv)\\b|grado\\s*(?:3|4|iii|iv)\\b|(?:iii|iv)\\s*(?:°|stup)|espesor\\s+total|volledig\\w*\\s+kraakbeenverlies|denudaci\\w*|denudat\\w*|bone[- ]on[- ]bone)\\b|(?:greater\\s+than|more\\s+than|>)\\s*50\\s*%",
+  "broad_cartilage": "\\b(diffuse\\w*|widespread|extensive|large|broad|difus\\w*|uitgebreid\\w*|opsez\\w*|yaygin|διαχυτ\\w*)\\b",
+  "low_cartilage": "\\b(low[- ]grade|grade\\s*(?:1|2|i|ii)\\b|grado\\s*(?:1|2|i|ii)\\b|(?:i|ii)\\s*(?:°|stup)|mild|slight|superficial|leve|hafif|blag\\w*|pocet\\w*)\\b|(?:less\\s+than|<)\\s*50\\s*%",
+  "conditions": {
+    "ACL": {
+      "kind": "ligament",
+      "definition": "High-grade or complete ACL disruption; isolated low-grade injury or degeneration excluded.",
+      "anatomy": "\\b(acl|lca|vkb|anterior\\s+cruciate(?:\\s+ligament)?|cruciate\\s+ligaments|anterior\\s+and\\s+posterior\\s+cruciate\\s+ligaments|ligamentos?\\s+cruzados?|voorste\\s+kruisband|predn\\w*\\s+kriz\\w*\\s+ligament\\w*|(?:on|anterior)\\s+capraz\\s+bag\\w*|προσθ\\w*\\s+χιαστ\\w*|χιαστων)\\b",
+      "global_normal": "\\b(?:cruciate\\s+ligaments|ligamentos?\\s+cruzados?)\\b"
+    },
+    "MCL": {
+      "kind": "ligament",
+      "definition": "High-grade current MCL tear; low-grade or remote stress injury excluded.",
+      "anatomy": "\\b(mcl|lcm|medial\\s+collateral\\s+ligament\\w*|(?:medial\\s*(?:&|and)\\s*lateral|lateral\\s+and\\s+medial)\\s+collateral\\s+ligaments?|collateral\\s+ligaments|ligamentos?\\s+colaterales|colaterales|mediale\\s+collaterale\\s+ligament\\w*|medijaln\\w*\\s+kolateraln\\w*\\s+ligament\\w*|(?:medial|medyal)\\s+kollateral\\s+ligam\\w*|yan\\s+bag\\w*|εσω\\s+πλαγι\\w*|πλαγιων\\s+συνδεσ\\w*)\\b"
+    },
+    "Medial Meniscus": {
+      "kind": "meniscus",
+      "definition": "Definite medial meniscal tear or pathological morphology; isolated intrasubstance degeneration excluded.",
+      "anatomy": "\\b(medial\\s+menisc\\w*|medial\\s+(?:and|&)\\s+lateral\\s+menisc\\w*|medial\\s+and\\s+lateral\\s+menisci|menisc[ou]\\s+(?:medial|interno)|menisco\\s+interno\\s+y\\s+lateral|mediale\\s+meniscus|innenmenisk\\w*|medijaln\\w*\\s+menisk\\w*|(?:medial|medyal)\\s+menisk\\w*|oba\\s+meniska|εσω\\s+μηνισ\\w*)\\b",
+      "context": "\\bmedial\\s+compartment\\b",
+      "generic": "\\b(?:both\\s+menisci|menisci|meniskusler|meniscos)\\b"
+    },
+    "Lateral Meniscus": {
+      "kind": "meniscus",
+      "definition": "Definite lateral meniscal tear or pathological morphology; isolated intrasubstance degeneration excluded.",
+      "anatomy": "\\b(lateral\\s+menisc\\w*|medial\\s+(?:and|&)\\s+lateral\\s+menisc\\w*|menisc[ou]\\s+(?:lateral|externo)|menisco\\s+interno\\s+y\\s+lateral|laterale\\s+meniscus|aussenmenisk\\w*|lateraln\\w*\\s+menisk\\w*|lateral\\s+menisk\\w*|oba\\s+meniska|εξω\\s+μηνισ\\w*)\\b",
+      "context": "\\blateral\\s+compartment\\b",
+      "generic": "\\b(?:both\\s+menisci|menisci|meniskusler|meniscos)\\b"
+    },
+    "Medial OA": {
+      "kind": "cartilage",
+      "definition": "Medial cartilage loss deeper than 50%, over an area roughly at least 1 cm.",
+      "anatomy": "\\b(medial\\s+(?:(?:femoral|tibial|tibiofemoral|femorotibial)\\s+)?(?:compartment|condyl\\w*|plateau)|(?:condilo\\s+femoral|platillo\\s+tibial|compartimento\\s+femorotibial|femorotibial)\\s+medial|(?:mediale?\\s+femorotibiaal|mediale?\\s+femorale\\s+condyl)|medijaln\\w*\\s+(?:kompartment\\w*|kondil\\w*)|medial\\w*\\s+tibiaplateau|εσω\\s+(?:διαμερισ\\w*|μεσαρθρι\\w*|μηριαι\\w*))\\b",
+      "context": "\\bmedial\\s+compartment\\b"
+    },
+    "Lateral OA": {
+      "kind": "cartilage",
+      "definition": "Lateral cartilage loss deeper than 50%, over an area roughly at least 1 cm.",
+      "anatomy": "\\b((?:postero)?lateral\\s+(?:(?:femoral|tibial|tibiofemoral|femorotibial)\\s+)?(?:compartment|condyl\\w*|plateau)|(?:condilo\\s+femoral|platillo\\s+tibial|compartimento\\s+femorotibial|femorotibial)\\s+lateral|lateraal\\s+femorotibiaal|laterale?\\s+(?:tibiaplateau|femorale\\s+condyl)|lateraln\\w*\\s+(?:kompartment\\w*|plato\\w*|kondil\\w*)|εξω\\s+(?:διαμερισ\\w*|μεσαρθρι\\w*|μηριαι\\w*))\\b",
+      "context": "\\blateral\\s+compartment\\b"
+    },
+    "PF OA": {
+      "kind": "cartilage",
+      "definition": "Patellofemoral cartilage loss deeper than 50%, over an area roughly at least 1 cm.",
+      "anatomy": "\\b(patellofemoral|patello[- ]femoral|patelofemoral|femoropatell\\w*|patell\\w*|trochle\\w*|trochel\\w*|trocle\\w*|rotul\\w*|patel\\w*|trohle\\w*|pf\\s+(?:joint|zglob\\w*)|επιγονατιδ\\w*)\\b",
+      "context": "\\b(?:patellofemoral|anterior)\\s+compartment\\b"
+    },
+    "Effusion": {
+      "kind": "sized",
+      "definition": "Moderate or large joint fluid accumulation.",
+      "anatomy": "\\b(effusion|effsuion|hemarthros\\w*|haemarthros\\w*|derrame|hydrops|gelenkerguss|izljev\\w*|efuzyon|eklem\\w*.{0,40}sivi|suprapatellar\\s+bursa.{0,30}sivi|ενδαρθρ\\w*.{0,30}υγρ\\w*|ενθαρθρ\\w*.{0,30}υγρ\\w*|συλλογ\\w*\\s+υγρ\\w*|opzetting\\s+van\\s+suprapatellaire\\s+recessus)\\b"
+    },
+    "Synovitis": {
+      "kind": "direct",
+      "definition": "Inflamed or thickened joint synovial lining.",
+      "anatomy": "\\b(synovitis|synovialitis|reizsynovialitis|sinovitis|sinovit\\w*|υμενιτιδ\\w*|synovi\\w*\\s+(?:membrane\\s+)?(?:thicken\\w*|hypertroph\\w*|inflamm\\w*)|(?:thicken\\w*|thickend|hypertroph\\w*).{0,30}synovi\\w*|verdikk\\w*.{0,30}synovium|proliferac\\w*\\s+sinovij\\w*|παχυν\\w*\\s+του\\s+υμεν\\w*)\\b"
+    },
+    "Baker's": {
+      "kind": "sized",
+      "definition": "Moderate or large popliteal cyst.",
+      "anatomy": "\\b(baker\\w*|popliteal\\w*\\s+(?:cyst\\w*|cist\\w*)|quistes?\\s+poplite\\w*|poplitealna\\s+cista|poplitealne\\s+ciste)\\b"
+    },
+    "Contusion": {
+      "kind": "contusion",
+      "definition": "Traumatic bone marrow injury without a fracture line at that site.",
+      "anatomy": "\\b(bone\\s+(?:contusion|bruise)|(?:bony|osseous)\\s+contusion|contusiones?\\s+oseas?|botcontusie|knochenkontusion|kontuzyon\\w*\\s+kemik|kemik\\s+kontuzyon\\w*|οστικ\\w*\\s+μωλωπ\\w*|bone\\s+marrow\\s+edema|botoedeem|knochenodem|kostan\\w*\\s+edem|kemik\\s+iligi\\s+odem\\w*)\\b"
+    },
+    "Fracture": {
+      "kind": "fracture",
+      "definition": "An acute cortical break or fracture line.",
+      "anatomy": "\\b(fractur\\w*|fracutr\\w*|fractuur|fraktur\\w*|frakt\\w*|kirig\\w*|kirik\\w*|καταγ\\w*|knoche\\w*\\s+ausriss)\\b"
+    }
+  }
+}
