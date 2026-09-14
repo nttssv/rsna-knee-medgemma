@@ -1,0 +1,18 @@
+{
+  "status": "NOT_RUN",
+  "primary": "single_generation_with_deterministic_normalization",
+  "secondary_generation": false,
+  "outer_fence": "one_json_or_untyped_fence_only",
+  "whitespace_characters": "space_tab_CR_LF",
+  "evidence_match": "unique_exact_occurrence_first; ASCII_whitespace_fallback_only_when_zero_exact_occurrences",
+  "casefold": false,
+  "unicode_normalization": false,
+  "punctuation_changes": false,
+  "confidence_threshold": null,
+  "smoke_studies": 5,
+  "repeats_per_model": 2,
+  "development_total": 40,
+  "validation_total": 18,
+  "gpu_execution_enabled": false,
+  "bulk_labeling_allowed": false
+}

@@ -1,0 +1,31 @@
+{
+  "model_id": "Qwen/Qwen3-14B",
+  "revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+  "parameters": 14768307200,
+  "weight_bytes": 29536665640,
+  "architecture": "AutoModelForCausalLM",
+  "prompt_file": "qwen_prompt_v2.txt",
+  "prompt_version": "shared_report_extraction_v2_candidate",
+  "dtype": "bfloat16",
+  "quantization": null,
+  "adapter": null,
+  "batch_size": 1,
+  "minimum_free_gpu_gib": 36,
+  "expected_peak_gpu_gib_range": [
+    36,
+    44
+  ],
+  "do_sample": false,
+  "enable_thinking": false,
+  "seed": 20260914,
+  "max_input_tokens": 8192,
+  "max_new_tokens": 2048,
+  "max_time_seconds": 300,
+  "max_run_seconds": 1800,
+  "attn_implementation": "sdpa",
+  "gated": false,
+  "trust_remote_code": false,
+  "status": "NOT_RUN",
+  "execution_enabled": false,
+  "num_beams": 1
+}

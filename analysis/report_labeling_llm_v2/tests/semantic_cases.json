@@ -1,0 +1,234 @@
+[
+  {
+    "name": "opposite_meniscus",
+    "condition": "Lateral Meniscus",
+    "report": "A medial meniscus tear is present.",
+    "expected_review_label": "not_mentioned",
+    "rationale": "An adjacent different structure is not evidence for the target.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "vein_not_cyst",
+    "condition": "Baker's",
+    "report": "The popliteal vein is enlarged.",
+    "expected_review_label": "not_mentioned",
+    "rationale": "Vein wording alone is not cyst evidence.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "fluid_not_lining",
+    "condition": "Synovitis",
+    "report": "Moderate joint effusion.",
+    "expected_review_label": "not_mentioned",
+    "rationale": "Fluid alone says nothing about lining inflammation.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "normal_meniscus",
+    "condition": "Medial Meniscus",
+    "report": "The medial meniscus is normal.",
+    "expected_review_label": "negative",
+    "rationale": "Explicit normal target.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "small_fluid",
+    "condition": "Effusion",
+    "report": "Small joint effusion.",
+    "expected_review_label": "negative",
+    "rationale": "Explicit below-threshold finding.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "moderate_fluid",
+    "condition": "Effusion",
+    "report": "Moderate joint effusion.",
+    "expected_review_label": "positive",
+    "rationale": "Meets operational threshold.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "unspecified_fluid",
+    "condition": "Effusion",
+    "report": "Joint effusion is present.",
+    "expected_review_label": "uncertain",
+    "rationale": "Missing required severity.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "low_acl",
+    "condition": "ACL",
+    "report": "Low-grade ACL sprain.",
+    "expected_review_label": "negative",
+    "rationale": "Below target.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "low_mcl",
+    "condition": "MCL",
+    "report": "Low-grade acute MCL sprain.",
+    "expected_review_label": "negative",
+    "rationale": "Below target.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "unknown_acl",
+    "condition": "ACL",
+    "report": "Partial ACL tear of unspecified grade.",
+    "expected_review_label": "uncertain",
+    "rationale": "High grade not established.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "unknown_mcl",
+    "condition": "MCL",
+    "report": "MCL injury of unspecified severity.",
+    "expected_review_label": "uncertain",
+    "rationale": "High grade not established.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "low_oa",
+    "condition": "Medial OA",
+    "report": "Mild superficial medial tibiofemoral cartilage thinning.",
+    "expected_review_label": "negative",
+    "rationale": "Explicit below-depth target.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "unknown_compartment",
+    "condition": "Medial OA",
+    "report": "Extensive full-thickness cartilage loss in an unspecified knee compartment.",
+    "expected_review_label": "uncertain",
+    "rationale": "Relevant lesion but no target localization.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "trochlea",
+    "condition": "Lateral OA",
+    "report": "Full-thickness lateral trochlear cartilage loss.",
+    "expected_review_label": "not_mentioned",
+    "rationale": "Patellofemoral is not lateral tibiofemoral.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "healed_fracture",
+    "condition": "Fracture",
+    "report": "A fully healed remote fracture without a current fracture line.",
+    "expected_review_label": "negative",
+    "rationale": "Explicitly outside acute target.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "old_tear",
+    "condition": "ACL",
+    "report": "History of ACL tear; current status not assessed.",
+    "expected_review_label": "uncertain",
+    "rationale": "History does not establish current disease or normality.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "contradictory",
+    "condition": "Fracture",
+    "report": "No acute fracture. Impression: acute fracture present.",
+    "expected_review_label": "uncertain",
+    "rationale": "Unresolved contradictory current statements.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "muscle_not_bone",
+    "condition": "Contusion",
+    "report": "Popliteus muscle contusion.",
+    "expected_review_label": "not_mentioned",
+    "rationale": "Wrong tissue for bone target.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "small_cyst",
+    "condition": "Baker's",
+    "report": "Small Baker cyst.",
+    "expected_review_label": "negative",
+    "rationale": "Below target.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "unknown_cyst",
+    "condition": "Baker's",
+    "report": "Baker cyst of unspecified size.",
+    "expected_review_label": "uncertain",
+    "rationale": "Size not established.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "opposite_medial",
+    "condition": "Medial Meniscus",
+    "report": "Lateral meniscus tear.",
+    "expected_review_label": "not_mentioned",
+    "rationale": "Synthetic expectation from the written target definition; not a model result.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "opposite_oa",
+    "condition": "Lateral OA",
+    "report": "Severe medial tibiofemoral cartilage loss.",
+    "expected_review_label": "not_mentioned",
+    "rationale": "Synthetic expectation from the written target definition; not a model result.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "large_cyst",
+    "condition": "Baker's",
+    "report": "Large Baker cyst.",
+    "expected_review_label": "positive",
+    "rationale": "Synthetic expectation from the written target definition; not a model result.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "complete_acl",
+    "condition": "ACL",
+    "report": "Complete current ACL tear.",
+    "expected_review_label": "positive",
+    "rationale": "Synthetic expectation from the written target definition; not a model result.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "high_oa",
+    "condition": "Medial OA",
+    "report": "Full-thickness medial tibiofemoral cartilage loss over a 2 cm area.",
+    "expected_review_label": "positive",
+    "rationale": "Synthetic expectation from the written target definition; not a model result.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "unknown_extent",
+    "condition": "PF OA",
+    "report": "Full-thickness patellar cartilage defect of unspecified size.",
+    "expected_review_label": "uncertain",
+    "rationale": "Synthetic expectation from the written target definition; not a model result.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "acute_fracture",
+    "condition": "Fracture",
+    "report": "Acute cortical fracture line.",
+    "expected_review_label": "positive",
+    "rationale": "Synthetic expectation from the written target definition; not a model result.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "postoperative",
+    "condition": "ACL",
+    "report": "ACL reconstruction; current graft integrity cannot be assessed.",
+    "expected_review_label": "uncertain",
+    "rationale": "Synthetic expectation from the written target definition; not a model result.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  },
+  {
+    "name": "spanish_lines",
+    "condition": "Medial Meniscus",
+    "report": "Menisco medial\nsin rotura.",
+    "expected_review_label": "negative",
+    "rationale": "Synthetic expectation from the written target definition; not a model result.",
+    "fixture_kind": "synthetic_manual_review_expectation_not_model_output"
+  }
+]

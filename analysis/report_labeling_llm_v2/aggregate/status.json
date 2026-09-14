@@ -1,0 +1,11 @@
+{
+  "status": "NOT_RUN",
+  "v2_model_calls": 0,
+  "prepared_development_studies": 5,
+  "unresolved_development_review_items": 12,
+  "validation_model_calls": 0,
+  "bulk_reports_processed": 0,
+  "gpu_started": false,
+  "clinical_adjudication_completed": false,
+  "protected_public_files": 70
+}
