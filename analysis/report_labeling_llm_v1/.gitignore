@@ -1,0 +1,9 @@
+**/*predictions*.jsonl
+**/private_*
+**/*disagreements*.csv
+**/*extractions*.csv
+**/*manifest.json
+**/development.jsonl
+**/validation.jsonl
+**/case_*.json
+**/__pycache__/

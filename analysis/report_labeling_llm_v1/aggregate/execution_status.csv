@@ -1,0 +1,4 @@
+extractor,status,llm_reports_processed,real_validation_metrics_available
+rule_v1,previously_completed_reference,0,True
+medgemma,not_run,0,False
+qwen,not_run,0,False

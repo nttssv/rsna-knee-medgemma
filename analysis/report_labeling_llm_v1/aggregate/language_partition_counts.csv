@@ -1,0 +1,13 @@
+partition,language_analyst_review,studies
+development,Croatian,4
+development,Dutch,2
+development,English,19
+development,German,2
+development,Greek,2
+development,Spanish,6
+development,Turkish,5
+validation,Bulgarian,3
+validation,English,9
+validation,Greek,1
+validation,Spanish,4
+validation,Turkish,1

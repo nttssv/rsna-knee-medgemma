@@ -6,6 +6,8 @@ This repository contains the code, configuration, experiment record, and instruc
 
 ## Current experiment
 
+The new [MedGemma / Qwen report-extraction benchmark](analysis/report_labeling_llm_v1/README.md) is implemented and locally tested, with draft prompts, pinned checkpoints and a resource proposal. Real LLM inference has **not run**; its [results page](analysis/report_labeling_llm_v1/RESULTS.md) separates existing baseline evidence from pending comparisons.
+
 The dataset label audit and report-labeling analysis are now preserved under [analysis/](analysis/README.md). The report-only baseline used 40 development / 18 validation studies and remains frozen. Its current recommendation is **more validation/manual annotation before scaling**; MRI training and bulk report labeling remain paused. Full study-level analysis snapshots are in ignored `state/runs/`, with aggregate findings and reproducible code in Git.
 
 The completed run `20260913T135620Z` used `google/medgemma-1.5-4b-it`, a pinned model revision, six MRI slices per study, and 20 QLoRA updates. It trained on 43 studies and evaluated 15 held-out studies. Mean AUC changed from **0.6463 to 0.6581**. This small pilot does not establish a reliable performance improvement.

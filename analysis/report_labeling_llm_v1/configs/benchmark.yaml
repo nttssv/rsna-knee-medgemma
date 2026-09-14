@@ -1,0 +1,22 @@
+{
+  "experiment": "report_labeling_llm_v1",
+  "status": "implementation_only_not_run",
+  "interpretation": "exploratory_reused_validation_not_fresh_independent_validation",
+  "source_sha256": "8ca2203c0e9d61c080c7a314c7cdb51c1b03a1d9eb4770819f7f34af53ef4e33",
+  "split_sha256": "0900a46a7d47c47451ce14c4f18237b31b72cd90b19d3af535d744ad07ef1133",
+  "partition_sizes": {"development": 40, "validation": 18},
+  "primary_variant": "first_pass",
+  "primary_endpoint": "all_study_correct_label_yield",
+  "secondary_variant": "repair_assisted",
+  "repair_policy": "one_separately_recorded_second_pass_for_format_errors_only",
+  "infrastructure_retries": 0,
+  "bootstrap_replicates": 2000,
+  "bootstrap_seed": 20260914,
+  "bootstrap_unit": "study",
+  "confidence_threshold": null,
+  "scaling_authorized": false,
+  "bulk_unlabeled_processing_allowed": false,
+  "language_source": "recorded_post_baseline_analyst_review_with_original_heuristic_retained",
+  "language_review_sha256": "ab96554c18d0e0c20181fcbed9a03cf176ff2b6149c74b5ed1fc272c0be2c8ba",
+  "repeatability_studies": 5
+}

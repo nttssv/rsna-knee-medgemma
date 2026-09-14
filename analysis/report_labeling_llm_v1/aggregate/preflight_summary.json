@@ -1,0 +1,20 @@
+{
+  "status": "implementation_and_local_tests_only",
+  "prepared_studies": 58,
+  "partition_counts": {
+    "development": 40,
+    "validation": 18
+  },
+  "inference_inputs_have_organizer_labels": false,
+  "llm_inference_started": false,
+  "tokenizer_preflight_executed": false,
+  "gpu_started": false,
+  "runpod_migration_compute_status": "not_running",
+  "displayed_start_price_usd_per_hour": 1.59,
+  "live_remote_package_and_free_disk_audit": "pending_stopped_pod",
+  "unlabeled_studies_processed": 0,
+  "source_sha256": "8ca2203c0e9d61c080c7a314c7cdb51c1b03a1d9eb4770819f7f34af53ef4e33",
+  "split_sha256": "0900a46a7d47c47451ce14c4f18237b31b72cd90b19d3af535d744ad07ef1133",
+  "frozen_baseline_hashes_verified": 10,
+  "model_metadata_checked_utc_date": "2026-09-14"
+}
