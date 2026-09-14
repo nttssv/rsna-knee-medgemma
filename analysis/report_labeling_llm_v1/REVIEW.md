@@ -21,3 +21,12 @@ Implemented or documented in response:
 One suggestion was not adopted for primary acceptance: broad Unicode/whitespace/punctuation normalization of quotations. The user requested verbatim evidence, so v1 uses exact source spans, records evidence failures and documents possible false rejections. A future normalization sensitivity analysis must be separately specified; it must not silently change accepted labels.
 
 Model/runtime code remains untested against actual weights and CUDA. The review is not a claim that the models work, that clinical extraction quality is established or that the benchmark has completed inference.
+
+## Review of the implementation commit
+
+ChatGPT reviewed public commit `0ec86743265dc9b9355985844835a1ddb306dadf` after GitHub CPU CI passed. It identified two changes before the development smoke test, both adopted locally and covered by synthetic regression tests:
+
+- `verify_preflight()` now rejects any model with an overflowing input; the tokenizer-preflight command also exits unsuccessfully after saving its diagnostic manifest. Runtime overflow handling remains for later checks and longer second-pass prompts.
+- MedGemma now uses the processor's `apply_chat_template(..., tokenize=True, return_dict=True, return_tensors="pt")` path for input construction, preserving processor-specific tensors. Both preflight and inference call that same path. Qwen retains its non-thinking template and no-truncation tokenizer path. This follows the [publisher's usage example](https://huggingface.co/google/medgemma-1.5-4b-it); actual CUDA compatibility still awaits the approved smoke test.
+
+The review recommended retaining the prompts, checkpoints, decoding recipe, statistical design and exact split for the smoke test. It also flagged two follow-ups before validation: explicitly review development technical-failure rates before accepting the execution freeze, and distinguish duplicate nested fields from duplicate condition keys in failure reporting. Those are recorded as pending; the current automatic freeze checks do not impose a maximum development failure rate, and nested duplicate keys currently share the `duplicate_condition` category. Do not mistake the passing synthetic checks for a completed execution freeze or authorization to run validation.

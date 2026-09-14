@@ -273,3 +273,53 @@ def test_tampered_run_is_rejected_before_evaluation(private_dataset):
     (run / 'predictions.jsonl').write_text('{}\n')
     with pytest.raises(ValueError, match='fingerprint'):
         core.verify_run(state, run, 'medgemma', 'development', prepared)
+
+
+@pytest.mark.parametrize('overflow_model', ['medgemma', 'qwen'])
+def test_preflight_blocks_either_models_overflow(tmp_path, overflow_model):
+    from tokenizer_preflight import verify_preflight
+    manifest = {'code_sha256': core.code_hashes(), 'files': {}, 'models': {
+        name: {'studies': 58, 'overflow_studies': int(name == overflow_model)}
+        for name in ['medgemma', 'qwen']}}
+    path = tmp_path / 'preflight_manifest.json'
+    path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match='context overflow'):
+        verify_preflight(tmp_path)
+    manifest['models'][overflow_model]['overflow_studies'] = 0
+    path.write_text(json.dumps(manifest))
+    assert verify_preflight(tmp_path)['models'][overflow_model]['overflow_studies'] == 0
+
+
+def test_medgemma_preserves_processor_inputs_without_bare_tokenization():
+    from model_runtime import Tokenizer
+    class FakeProcessor:
+        def apply_chat_template(self, messages, **kwargs):
+            assert messages == [{'role': 'user', 'content': [{'type': 'text', 'text': 'synthetic'}]}]
+            assert kwargs['add_generation_prompt'] is True
+            if not kwargs['tokenize']:
+                return 'official rendered synthetic'
+            assert kwargs['return_dict'] and kwargs['return_tensors'] == 'pt'
+            assert kwargs['truncation'] is False
+            return {'input_ids': [[1, 2]], 'attention_mask': [[1, 1]], 'token_type_ids': [[0, 0]]}
+    encoder = Tokenizer.__new__(Tokenizer)
+    encoder.name, encoder.processor = 'medgemma', FakeProcessor()
+    # No underlying tokenizer is attached: dropping to it would fail this test.
+    assert encoder.render('synthetic') == 'official rendered synthetic'
+    assert encoder.encode('synthetic')['token_type_ids'] == [[0, 0]]
+
+
+def test_qwen_preserves_non_thinking_template_and_no_truncation():
+    from model_runtime import Tokenizer
+    class FakeTokenizer:
+        def apply_chat_template(self, messages, **kwargs):
+            assert messages == [{'role': 'user', 'content': 'synthetic'}]
+            assert kwargs == {'tokenize': False, 'add_generation_prompt': True, 'enable_thinking': False}
+            return 'rendered synthetic'
+        def __call__(self, text, **kwargs):
+            assert text == 'rendered synthetic'
+            assert kwargs == {'add_special_tokens': False, 'return_tensors': 'pt', 'truncation': False}
+            return {'input_ids': [[1, 2]]}
+    encoder = Tokenizer.__new__(Tokenizer)
+    encoder.name = 'qwen'
+    encoder.processor = encoder.tokenizer = FakeTokenizer()
+    assert encoder.encode('synthetic')['input_ids'] == [[1, 2]]

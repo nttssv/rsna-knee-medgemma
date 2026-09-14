@@ -15,8 +15,9 @@ def check(state, prepared, output, allow_download=False):
         encoder = Tokenizer(name, state / 'cache/huggingface', allow_download)
         rendered = []
         for row in rows:
-            text = encoder.render(prompt_for(name, row['Report']))
-            length = encoder.encode(text)['input_ids'].shape[-1]
+            prompt = prompt_for(name, row['Report'])
+            text = encoder.render(prompt)
+            length = encoder.encode(prompt)['input_ids'].shape[-1]
             rendered.append({'StudyInstanceUID': row['StudyInstanceUID'], 'split': row['split'],
                              'rendered_prompt': text, 'rendered_prompt_sha256': text_sha(text),
                              'input_tokens': length, 'within_input_limit': length <= config(name)['max_input_tokens']})
@@ -37,6 +38,8 @@ def verify_preflight(path):
     for model in m['models'].values():
         if model['studies'] != 58:
             raise ValueError('Tokenizer preflight must cover all 58 studies')
+        if model['overflow_studies'] != 0:
+            raise ValueError('Tokenizer preflight found context overflow; inference is blocked')
     for name, digest in m['files'].items():
         if Path(name).name != name or sha(path / name) != digest:
             raise ValueError('Tokenizer preflight fingerprint changed')
@@ -53,3 +56,4 @@ if __name__ == '__main__':
     else:
         m = check(state_dir(a.state_dir), a.prepared, a.output, a.allow_download)
         print(json.dumps(m['models'], indent=2))
+        verify_preflight(a.output)

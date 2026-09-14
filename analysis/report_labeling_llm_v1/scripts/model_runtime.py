@@ -14,14 +14,23 @@ class Tokenizer:
         self.processor = (AutoProcessor if name == 'medgemma' else AutoTokenizer).from_pretrained(self.cfg['model_id'], **kwargs)
         self.tokenizer = self.processor.tokenizer if name == 'medgemma' else self.processor
 
-    def render(self, prompt):
+    def messages(self, prompt):
         content = [{'type': 'text', 'text': prompt}] if self.name == 'medgemma' else prompt
+        return [{'role': 'user', 'content': content}]
+
+    def render(self, prompt):
         kwargs = {'enable_thinking': False} if self.name == 'qwen' else {}
-        return self.processor.apply_chat_template([{'role': 'user', 'content': content}],
+        return self.processor.apply_chat_template(self.messages(prompt),
                    tokenize=False, add_generation_prompt=True, **kwargs)
 
-    def encode(self, rendered):
-        return self.tokenizer(rendered, add_special_tokens=False, return_tensors='pt', truncation=False)
+    def encode(self, prompt):
+        """Use the same official input construction in preflight and inference."""
+        if self.name == 'medgemma':
+            return self.processor.apply_chat_template(self.messages(prompt),
+                add_generation_prompt=True, tokenize=True, return_dict=True,
+                return_tensors='pt', truncation=False)
+        return self.tokenizer(self.render(prompt), add_special_tokens=False,
+                              return_tensors='pt', truncation=False)
 
     def metadata(self):
         return {'model_id': self.cfg['model_id'], 'tokenizer_revision': self.cfg['revision'],
@@ -56,7 +65,7 @@ class HFGenerator:
 
     def __call__(self, prompt):
         rendered = self.encoder.render(prompt)
-        inputs = self.encoder.encode(rendered)
+        inputs = self.encoder.encode(prompt)
         length = inputs['input_ids'].shape[-1]
         base = {'text': '', 'rendered_prompt': rendered, 'rendered_prompt_sha256': text_sha(rendered),
                 'input_tokens': length, 'output_tokens': 0, 'runtime_seconds': 0.0,

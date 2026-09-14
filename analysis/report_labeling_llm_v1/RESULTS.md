@@ -6,6 +6,10 @@
 
 The existing source and original split fingerprints were checked. Local preparation produced report-only inputs for exactly **40 development and 18 validation studies**, with no organizer-label fields in inference files. Both model commands passed dry-run checks. The frozen rule source and existing split were preserved. Tests exercise synthetic outputs, including the complete prepare/freeze/evaluate path; synthetic metrics are not research results and are not published as model performance.
 
+Implementation commit `0ec86743265dc9b9355985844835a1ddb306dadf` passed **80 local tests** (including 34 new benchmark tests). Its [GitHub checks](https://github.com/nttssv/rsna-knee-medgemma/actions/runs/34796780938) also passed the full test suite and environment doctor. The pre-commit review checked the diff, frozen baseline, split fingerprints, Markdown links, credential patterns and accidental inclusion of actual study identifiers/report text. These checks validate implementation safeguards; they do not establish GPU compatibility or extraction quality.
+
+The subsequent [code review](REVIEW.md) led to an overflow preflight gate and MedGemma processor-input correction. The full local suite then passed **84 tests**, including four additional regression cases. No model was downloaded or run to obtain these test results.
+
 | Extractor | Evaluation evidence | Binary decisions | Correct | Incorrect | Abstentions/failures | Correct yield over all checks |
 |---|---|---:|---:|---:|---:|---:|
 | Frozen rule v1 | Previously completed, 18 studies / 216 checks | 92 | 87 | 5 | 124 semantic abstentions | 40.3% |
