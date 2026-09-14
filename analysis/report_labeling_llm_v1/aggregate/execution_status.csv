@@ -1,4 +1,4 @@
-extractor,status,llm_reports_processed,real_validation_metrics_available
-rule_v1,previously_completed_reference,0,True
-medgemma,not_run,0,False
-qwen,not_run,0,False
+extractor,status,distinct_smoke_studies,repeat_runs,first_pass_report_generations,validation_inference_studies
+rule_v1,previously_completed_reference,5,0,0,18
+medgemma,smoke_completed_gate_failed,5,2,10,0
+qwen,smoke_completed_gate_failed,5,2,10,0

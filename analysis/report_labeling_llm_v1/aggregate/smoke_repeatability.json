@@ -1,0 +1,18 @@
+{
+  "medgemma": {
+    "identical_including_failures": 60,
+    "valid_and_identical": 0,
+    "cells": 60,
+    "identical_raw_first_responses": 5,
+    "reports": 5,
+    "passed": false
+  },
+  "qwen": {
+    "identical_including_failures": 60,
+    "valid_and_identical": 58,
+    "cells": 60,
+    "identical_raw_first_responses": 5,
+    "reports": 5,
+    "passed": false
+  }
+}

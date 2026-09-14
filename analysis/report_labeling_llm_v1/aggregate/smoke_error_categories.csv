@@ -1,0 +1,8 @@
+issue,tentative_category,count
+evidence_error,verbatim_evidence,2
+organizer_mismatch,anatomy_compartment,2
+organizer_mismatch,contradictory_report_timing,1
+organizer_mismatch,report_reference_disagreement,4
+organizer_mismatch,severity_unspecified,1
+organizer_mismatch,threshold_reference_disagreement,1
+uncertain_review,anatomy_compartment,1

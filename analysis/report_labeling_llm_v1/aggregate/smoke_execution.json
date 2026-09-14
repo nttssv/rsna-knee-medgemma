@@ -1,0 +1,39 @@
+{
+  "status": "five_development_study_smoke_completed_gates_failed",
+  "executed_commit": "f33495873f85d7b83480c7a65776c9cbea664fb5",
+  "distinct_development_studies": 5,
+  "repeats_per_model": 2,
+  "first_pass_generations": 20,
+  "secondary_generations": 6,
+  "prepared_studies": 58,
+  "partition_counts": {
+    "development": 40,
+    "validation": 18
+  },
+  "tokenizer_preflight": {
+    "medgemma": {
+      "studies": 58,
+      "overflow_studies": 0,
+      "max_input_tokens_observed": 1781
+    },
+    "qwen": {
+      "studies": 58,
+      "overflow_studies": 0,
+      "max_input_tokens_observed": 2600
+    }
+  },
+  "validation_inference_studies": 0,
+  "bulk_reports_processed": 0,
+  "mri_training": false,
+  "source_sha256": "8ca2203c0e9d61c080c7a314c7cdb51c1b03a1d9eb4770819f7f34af53ef4e33",
+  "split_sha256": "0900a46a7d47c47451ce14c4f18237b31b72cd90b19d3af535d744ad07ef1133",
+  "copied_result_files_verified": 54,
+  "transfer_archive_sha256": "045ceb1ff2f6dc1cd0f946e31c9ac356c381cf76e4e2290c208a6a3064d7ed67",
+  "start_attempt_utc": "2026-09-14T10:41:35Z",
+  "stop_confirmed_utc": "2026-09-14T11:16:37Z",
+  "compute_status_at_stop": "not_running",
+  "displayed_rate_usd_hour": 1.59,
+  "approximate_compute_cost_usd": 0.93,
+  "cost_note": "Estimate from about35min start attempt to stop confirmation; not final billing; excludes storage",
+  "original_inference_protocol_unchanged": true
+}

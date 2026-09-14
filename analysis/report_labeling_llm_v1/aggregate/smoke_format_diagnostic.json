@@ -1,0 +1,10 @@
+{
+  "category_counts_per_repeat": {
+    "json_in_outer_fence_only": 2,
+    "complete_condition_object_with_extra_text": 2,
+    "truncated_incomplete_condition_object": 1
+  },
+  "outer_fence_only_reports_per_repeat": 2,
+  "fence_only_all_schema_and_evidence_valid_reports_per_repeat": 1,
+  "note": "Post hoc syntax diagnostic only. No original smoke prediction or metric changed."
+}

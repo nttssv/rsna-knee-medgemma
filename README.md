@@ -6,7 +6,7 @@ This repository contains the code, configuration, experiment record, and instruc
 
 ## Current experiment
 
-The new [MedGemma / Qwen report-extraction benchmark](analysis/report_labeling_llm_v1/README.md) is implemented and locally tested, with draft prompts, pinned checkpoints and a resource proposal. Real LLM inference has **not run**; its [results page](analysis/report_labeling_llm_v1/RESULTS.md) separates existing baseline evidence from pending comparisons.
+The [MedGemma / Qwen report-extraction benchmark](analysis/report_labeling_llm_v1/README.md) completed a five-development-report smoke, twice per model. MedGemma accepted 0/60 first-pass condition outputs; Qwen accepted 58/60, but both strict repeatability gates failed. [Measured results and visualizations](analysis/report_labeling_llm_v1/RESULTS.md) document the technical and semantic issues. RunPod is stopped; full development, LLM validation, bulk labeling and MRI training remain paused.
 
 The dataset label audit and report-labeling analysis are now preserved under [analysis/](analysis/README.md). The report-only baseline used 40 development / 18 validation studies and remains frozen. Its current recommendation is **more validation/manual annotation before scaling**; MRI training and bulk report labeling remain paused. Full study-level analysis snapshots are in ignored `state/runs/`, with aggregate findings and reproducible code in Git.
 
@@ -103,7 +103,7 @@ The restored pilot viewer is ready without the full DICOM dataset or a GPU:
 rsna-knee review --run-dir "$RSNA_STATE_DIR/runs/20260913T135620Z"
 ```
 
-Open [localhost:7862](http://127.0.0.1:7862). For a new run, generate its viewer using `rsna-knee export-cases --run-dir /path/to/run` first. The viewer currently supports this six-image, 448px recipe. Ground truth covers the whole study; the input covers only sampled slices. Predictions are uncalibrated Yes/No ranking scores.
+After starting the review server above, open [localhost:7862](http://127.0.0.1:7862). This local link is available only while that server is running. For a new run, generate its viewer using `rsna-knee export-cases --run-dir /path/to/run` first. The viewer currently supports this six-image, 448px recipe. Ground truth covers the whole study; the input covers only sampled slices. Predictions are uncalibrated Yes/No ranking scores.
 
 Training always writes `metrics.jsonl` and `training_history.csv`. To import a completed run into a local Trackio dashboard:
 

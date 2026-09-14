@@ -1,0 +1,9 @@
+members,variant,studies,total_checks,all_members_binary,binary_conflicts,accepted,correct,incorrect,coverage,correct_yield,conditional_accuracy
+medgemma+qwen,first_pass,5,60,0,0,0,0,0,0.0,0.0,
+rule_v1+qwen,first_pass,5,60,26,1,25,20,5,0.4166666666666667,0.3333333333333333,0.8
+rule_v1+medgemma,first_pass,5,60,0,0,0,0,0,0.0,0.0,
+rule_v1+medgemma+qwen,first_pass,5,60,0,0,0,0,0,0.0,0.0,
+medgemma+qwen,repair_assisted,5,60,0,0,0,0,0,0.0,0.0,
+rule_v1+qwen,repair_assisted,5,60,26,1,25,20,5,0.4166666666666667,0.3333333333333333,0.8
+rule_v1+medgemma,repair_assisted,5,60,0,0,0,0,0,0.0,0.0,
+rule_v1+medgemma+qwen,repair_assisted,5,60,0,0,0,0,0,0.0,0.0,

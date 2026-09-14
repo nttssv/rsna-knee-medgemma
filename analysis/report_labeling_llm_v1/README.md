@@ -1,6 +1,8 @@
 # MedGemma / Qwen report-extraction benchmark
 
-**Status: implemented locally; real LLM inference NOT RUN.** Model downloads, tokenizer preflight, development inference, prompt finalization, repeatability and validation remain pending execution approval. See [RESULTS.md](RESULTS.md), [PROTOCOL.md](PROTOCOL.md) and the [resource proposal](RESOURCES.md).
+**Status: five-development-report smoke completed on 2026-09-14; both all-valid repeatability gates failed.** The same five reports were run twice per model. MedGemma accepted 0/60 first-pass condition cells; Qwen accepted 58/60. Full 40-study development inference, LLM validation, MRI training and bulk labeling were not performed. RunPod was stopped after the bounded stage. See [measured results and dashboard](RESULTS.md), [actual resources](RESOURCES.md) and [offline review](REVIEW.md).
+
+The [PROTOCOL.md](PROTOCOL.md), prompts and configs retain their original pre-execution wording because their bytes are fingerprinted in the saved runs. Their “not run”/draft status describes the execution recipe at commit `f334958`; this README and RESULTS provide the current status. No validation freeze has been created.
 
 The question is whether text-only LLM extraction can improve **correct binary-label yield across all condition checks** while retaining reliability. Compare pinned MedGemma 1.5 4B and Qwen3 14B with the existing frozen rule baseline. This is a practical, unequal-model-size comparison, not an experiment isolating medical specialization.
 
@@ -26,10 +28,11 @@ scripts/evaluate_llm.py                Verified primary and secondary comparison
 scripts/agreement_analysis.py          Same unified evaluation entry point
 scripts/language_analysis.py           Same unified evaluation entry point
 scripts/analysis_metrics.py            Abstention accounting and paired bootstrap
-aggregate/                            Verified baseline reference + execution status only
+aggregate/                            Matched smoke metrics, dashboard and historical baseline
+smoke_review_tools/                   Local summaries, case viewer and diagnostic tools
 ```
 
-Per-study state belongs in `$RSNA_STATE_DIR/runs/report-labeling-llm-v1/`. The current local preparation contains `inputs/development.jsonl` and `inputs/validation.jsonl` plus their manifest, with no organizer label fields. Source metadata and original split/language artifacts must be restored from the private migration backup. Cloning the public repository alone is sufficient for synthetic tests, but insufficient for reproducing the real study analysis.
+Prepared inputs belong in `$RSNA_STATE_DIR/runs/report-labeling-llm-v1/`; the completed stage is preserved under `$RSNA_STATE_DIR/runs/report-labeling-llm-smoke-20260914/`. The current local preparation contains `inputs/development.jsonl` and `inputs/validation.jsonl` plus their manifest, with no organizer label fields. Source metadata and original split/language artifacts must be restored from the private migration backup. Cloning the public repository alone is sufficient for synthetic tests, but insufficient for reproducing the real study analysis.
 
 ## Public-safe CPU verification
 
@@ -60,9 +63,9 @@ python "$LLM_SCRIPTS/run_qwen.py" --prepared "$LLM_RUNS/inputs" \
 
 Only the report string enters the model prompt. Join IDs and organizer labels are excluded. Both models use identical extraction instructions and their own official chat template. Technical failures remain separate from the four medical states. A strict exact-source quotation is necessary for a binary decision, but its presence does not prove semantic correctness.
 
-## Execution sequence after user resource approval
+## Recorded execution recipe and future gates
 
-These steps are documented for the next approved stage, **not executed in this release**. Use a separate Linux/CUDA environment; do not upgrade the saved MRI pilot environment in place:
+The preflight and five-report repeat steps below were executed during the approved bounded stage. Full development and validation commands remain unexecuted; the failed smoke gates block advancing this recipe. Use a separate Linux/CUDA environment; do not upgrade the saved MRI pilot environment in place:
 
 ```bash
 python3.12 -m venv /private-environments/rsna-report-llm
@@ -88,7 +91,7 @@ python "$LLM_SCRIPTS/run_medgemma.py" --prepared "$LLM_RUNS/inputs" \
 
 Repeat with `run_qwen.py` and Qwen output names. Check repeatability with `repeatability_check.py --prepared ... --medgemma-first ... --medgemma-repeat ... --qwen-first ... --qwen-repeat ... --output "$LLM_RUNS/repeatability.json"`. The check rejects repeated technical failures. Review smoke outputs before allocating a larger inference window.
 
-When the development recipe is finalized, run each model on all 40 development studies by omitting `--limit`. Then freeze and run the complete validation partition:
+The following full-development/validation pathway is documentation only. Do not run it for the current failed recipe. A separately versioned candidate, reviewed technical/semantic gates and appropriate resource authorization are needed before full development; a validation freeze would then require the complete 40-study runs:
 
 ```bash
 python "$LLM_SCRIPTS/freeze_benchmark.py" --prepared "$LLM_RUNS/inputs" \

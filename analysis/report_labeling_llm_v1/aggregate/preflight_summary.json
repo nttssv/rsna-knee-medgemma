@@ -16,5 +16,6 @@
   "source_sha256": "8ca2203c0e9d61c080c7a314c7cdb51c1b03a1d9eb4770819f7f34af53ef4e33",
   "split_sha256": "0900a46a7d47c47451ce14c4f18237b31b72cd90b19d3af535d744ad07ef1133",
   "frozen_baseline_hashes_verified": 10,
-  "model_metadata_checked_utc_date": "2026-09-14"
+  "model_metadata_checked_utc_date": "2026-09-14",
+  "historical_snapshot": "Pre-execution CPU status; current measured status is smoke_execution.json"
 }
