@@ -39,4 +39,4 @@ The later report-labeling experiment is recorded in [analysis/report_labeling/RE
 2. Inspect `state/runs/20260913T135620Z` and the case viewer before proposing further training.
 3. Keep the current MedGemma focus; do not resume YOLO work without user direction.
 4. Preserve the validation split and compare any new recipe against the existing saved results.
-5. When moving to a new GPU provider, clone the private repository and restore private state before downloading anything large.
+5. When moving to a new GPU provider, clone the repository and restore private state before downloading anything large.

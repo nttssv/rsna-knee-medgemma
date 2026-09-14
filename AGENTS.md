@@ -1,6 +1,6 @@
 # Project continuity
 
-- Keep this GitHub repository private. Do not change visibility.
+- This GitHub repository is public by user request on 2026-09-14. Keep private data, credentials and model artifacts excluded from Git.
 - Read README.md, docs/EXPERIMENT.md, and docs/MIGRATION.md before starting work.
 - Current focus: MedGemma input/output review and teacher improvement. YOLO work is paused.
 - Read analysis/README.md and analysis/report_labeling/RESULTS.md before further label or model work. MRI training and bulk extraction on the 4,349 reports remain paused.

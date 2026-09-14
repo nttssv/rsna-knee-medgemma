@@ -1,6 +1,6 @@
 # RSNA Knee · MedGemma
 
-Private research project for the RSNA Knee Abnormality Detection competition. The current focus is **MedGemma evaluation and improvement**. Further YOLO work is paused.
+Research code and aggregate findings for the RSNA Knee Abnormality Detection competition. The current focus is **MedGemma evaluation and improvement**. Further YOLO work is paused.
 
 This repository contains the code, configuration, experiment record, and instructions. The separate `state/` directory holds data and trained models. Set `RSNA_STATE_DIR` to any persistent disk on any provider; no RunPod account or SDK is required.
 
@@ -37,7 +37,7 @@ backups/                          PRIVATE migration archives; ignored by Git
 Use Linux, Python 3.12, and a CUDA GPU with native BF16 support. The original pilot ran on an A100 80 GB. The conservative memory guard is 37 GiB; smaller GPUs have not been validated. The NVIDIA driver must support the installed CUDA runtime.
 
 ```bash
-git clone git@github.com:nttssv/rsna-knee-medgemma.git
+git clone https://github.com/nttssv/rsna-knee-medgemma.git
 cd rsna-knee-medgemma
 export RSNA_STATE_DIR=/mnt/persistent/rsna-knee-state
 bash scripts/bootstrap.sh gpu
@@ -133,4 +133,4 @@ The optional Dockerfile uses an official PyTorch CUDA base. The image tag was ch
 
 ## Access and licenses
 
-Keep this repository **private**. Do not publish competition images, case identifiers, reports, tokens, or model checkpoints through GitHub. The code repository is not a substitute for a private artifact backup. Model access and upstream licenses remain applicable on a new provider; the PEFT adapter still requires the original base model. See the [MedGemma model card](https://huggingface.co/google/medgemma-1.5-4b-it), [PEFT checkpoint guide](https://huggingface.co/docs/peft/developer_guides/checkpoint), and [competition rules](https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules).
+This repository is **public** and contains source code and aggregate findings. Do not publish competition images, case identifiers, reports, tokens, or model checkpoints through GitHub. The code repository is not a substitute for a private artifact backup. Model access and upstream licenses remain applicable on a new provider; the PEFT adapter still requires the original base model. See the [MedGemma model card](https://huggingface.co/google/medgemma-1.5-4b-it), [PEFT checkpoint guide](https://huggingface.co/docs/peft/developer_guides/checkpoint), and [competition rules](https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules).

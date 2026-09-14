@@ -2,7 +2,7 @@
 
 There are two independent things to preserve:
 
-1. **Code and experiment record:** clone this private GitHub repository.
+1. **Code and experiment record:** clone this public GitHub repository.
 2. **Private state:** transfer a verified backup of `state/`. GitHub intentionally excludes it.
 
 ## Current recovery point
@@ -61,7 +61,7 @@ For a future checkpoint, restore its **whole run directory**, including `develop
 
 | Item | Where preserved | Recovery |
 |---|---|---|
-| Code, pinned model revision, core dependency versions | Private GitHub | Clone and install |
+| Code, pinned model revision, core dependency versions | Public GitHub | Clone and install |
 | Trained adapter + processor | Private state/backup | Restore and load with base model |
 | Split, predictions, labels, viewer inputs | Private state/backup | Restore |
 | Future optimizer and RNG state | Private checkpoint | Restore with matching code/config/input fingerprint |

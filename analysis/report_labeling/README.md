@@ -31,7 +31,7 @@ $RSNA_STATE_DIR/
     TERMINOLOGY.md             Inspection notes and de-identified report examples
 ```
 
-The private snapshot additionally preserves the original full outputs and development iterations. Study IDs, report excerpts, gold/extracted rows and review notes are not committed, even though this repository is private. The tracked summaries contain aggregate measurements only.
+The private snapshot additionally preserves the original full outputs and development iterations. Study IDs, report excerpts, gold/extracted rows and review notes are excluded from this public repository. The tracked summaries contain aggregate measurements only.
 
 ## Reproduce locally or after migration
 
