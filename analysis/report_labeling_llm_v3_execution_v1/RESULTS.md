@@ -6,7 +6,7 @@
 
 Input was the same five original-language development reports (four English, one Spanish), with frozen definitions and one of two fixed prompts. No MRI images, organizer answers or study identifiers entered the prompts. The intended output was one JSON object containing twelve condition objects, each with `label`, `evidence_text` and `confidence`. Labels remain **positive / negative / uncertain / not_mentioned**; missing mentions are never converted to negative.
 
-The objective was to test whether an evidence-first prompt reduced semantic contradictions while retaining usable structured output. This attempt establishes technical failure of this candidate recipe on these inputs. It cannot establish semantic improvement, a paired winner or clinical accuracy.
+The objective was to test whether an evidence-first prompt reduced semantic contradictions while retaining usable structured output. The candidate arm failed the technical completion gate on the four attempted reports; its fifth report and second repeat were not run. It cannot establish semantic improvement, a paired winner or clinical accuracy.
 
 ## Recorded execution
 
@@ -66,6 +66,6 @@ Using start-request-to-stop time, the replacement cost estimate is **about $0.34
 
 ## Recommendation
 
-**Do not scale or treat this candidate as an improvement.** Preserve this failed attempt and investigate its schema regression and truncation locally. Any revised prompt/output contract needs a separately versioned prospective experiment; do not loosen this run's parser, select favorable responses, or automatically extend the token budget. Qualified review is still required for the control's technically accepted labels. No full-40 development inference, 18-study validation run, bulk extraction, MRI training or YOLO work is authorized by these results.
+**Do not scale or treat this candidate as an improvement.** Preserve this failed attempt. The next local investigation should reconstruct saved input/output tokens with pinned tokenizer assets, audit the failed candidate child receipt, and separate the short schema failures from the long truncated response. These additional forensic checks have not yet been performed; the current diagnostic verifies inventory bytes, prepared-plan binding and raw-response reparse, plus the completed control verifier. Any revised prompt/output contract needs a separately versioned prospective experiment; do not loosen this run's parser, select favorable responses, or automatically extend the token budget. Qualified review is still required for the control's technically accepted labels. No full-40 development inference, 18-study validation run, bulk extraction, MRI training or YOLO work is authorized by these results.
 
 The [local dashboard](diagnostics/README.md) visualizes the exact original-language input, raw output, evidence checks and unrun cells. It is a technical operator view with visible arms, not blinded adjudication. The public [aggregate execution record](aggregate/execution_outcome.json) contains no report text, study IDs, credentials or weights. The earlier [setup-only failure](SETUP_ATTEMPT.md) and [control preflight](CONTROL_PREFLIGHT.md) remain separate historical records.

@@ -19,5 +19,11 @@
   "staged_files_checked": 15,
   "real_study_ids_screened": 58,
   "relative_markdown_links_checked": 51,
-  "exact_control_and_hf_token_scan_before_disposal_passed": true
+  "exact_control_and_hf_token_scan_before_disposal_passed": true,
+  "github_ci_run": 34951383688,
+  "github_ci": "success",
+  "tested_code_commit": "7e8c75acff204ee1f2d3a6c7831d25e14f3f6c38",
+  "chatgpt_final_review": "No substantive provenance problem; narrow four-attempt wording adopted; additional failed-child/token audit recommended locally",
+  "full_failed_child_offline_audit_performed": false,
+  "token_roundtrip_reconstruction_performed": false
 }
