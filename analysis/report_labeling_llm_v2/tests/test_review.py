@@ -46,6 +46,10 @@ def test_future_run_contract_checks_hashes_cases_and_saved_parser(tmp_path):
         (folder/'run_manifest.json').write_text(json.dumps(m))
     _,metrics,_=v.load(prepared,runs)
     assert all(r['valid']==60 and r['decided']==5 and r['correct']==5 for r in metrics)
+    path=runs/'medgemma-1/run_manifest.json';manifest=json.loads(path.read_text())
+    manifest['synthetic']=True;path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError,match='Synthetic'):v.load(prepared,runs)
+    manifest['synthetic']=False;path.write_text(json.dumps(manifest))
     (runs/'qwen-2/predictions.jsonl').write_text('tampered')
     with pytest.raises(ValueError,match='hash mismatch'):v.load(prepared,runs)
 

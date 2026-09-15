@@ -1,6 +1,6 @@
 # Proposed bounded GPU smoke — not authorized or executed
 
-The present step is local CPU work. No GPU server was contacted or started. This candidate includes no inference adapter; it cannot download or run models. Prepare and review an adapter with exact official-template handling and fresh five-report tokenizer preflight before executing any future paid stage.
+The present step is local CPU work. No GPU server was contacted or started. The [local adapter](RUNTIME.md) is implemented, with execution locked and offline-only loaders. Its fake-backend tests do not establish real tokenizer or CUDA compatibility. Complete a reviewed offline five-report tokenizer preflight and runtime check before considering a paid stage.
 
 Keep the v1 checkpoint IDs/revisions, BF16, batch size one, greedy decoding, one beam, SDPA, seed 20260914, 8,192 input-token limit and 2,048 new-token cap. See [MedGemma config](configs/medgemma.json) and [Qwen config](configs/qwen.json). No adapters, quantization or images are planned. No v2 weights or tokens have been downloaded. These are inherited recipes, not new measurements.
 

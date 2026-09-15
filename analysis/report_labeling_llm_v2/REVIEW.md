@@ -10,7 +10,7 @@ Implemented design decisions:
 - Keep the semantic review cases as reviewer expectations. The parser does not pretend to diagnose or enforce medical entailment; tests explicitly demonstrate that lexical validity can coexist with an incorrect label.
 - Keep all 12 inherited development review candidates unresolved. No qualified adjudicator was available in this task, and no organizer label changed.
 
-Questions before paid execution:
+Questions recorded at the first candidate publication (see the adapter follow-up below for implementation status):
 
 1. Verify the MedGemma official template's supported response controls and EOS behavior. The v1 flag named enable_thinking was not passed to its MedGemma template. V2 makes no claim of disabled reasoning and does not silently change the decoding recipe.
 2. Implement a bounded inference adapter that actually uses the v2 contract, logs rendered prompts and revisions, and permits only the exact five studies. This local package deliberately has no model execution entry point; a model/config file alone is not a working CUDA integration.
@@ -26,3 +26,9 @@ The experimental-design guidance is used to preserve study-level denominators an
 ChatGPT reviewed the aggregate local implementation description. It recommended exact-first evidence matching, a human semantic-review artifact with identity/time/output provenance, and testing JavaScript highlighting against Python code-point offsets. The first two suggestions were adopted prospectively before any v2 generation. The viewer already uses `Array.from(report)` for code-point slicing; a non-BMP synthetic check is included in verification. It agreed that an absent GPU adapter does not prevent publishing a NOT RUN local candidate, but adapter implementation, fake-backend tests, dry run and separate review remain prerequisites before requesting paid compute. No raw reports or identifiers were shared in this review.
 
 A second advisory review found no substantive blocker to NOT RUN publication after repository checks. It requested binding human review to the complete experiment fingerprints in addition to each row, and making repeat mismatch block advancement explicitly. Both are implemented and tested; no human review is claimed. Browser verification confirmed all 12 rows/48 pending model cells and exact highlighting after a synthetic non-BMP character. Advisory review was of the implementation description, not an independent code execution or clinical assessment.
+
+## Local adapter follow-up
+
+The user authorized the next local implementation step after publication. The adapter, fixed-five dry plan, offline-only loaders, durable raw output recording, process deadlines and fake-backend tests are now implemented; see [RUNTIME.md](RUNTIME.md). The original prompt/ontology/acceptance code remains unchanged. Real tokenizer/model execution is NOT RUN and GPU flags remain false. MedGemma PAD 0 is now preserved using a None check; the v1 PAD fallback is documented as a runtime difference.
+
+ChatGPT reviewed the adapter design description and requested explicit offline environment/cache isolation, an exact parser-decoding rule, process-tree timeout tests and full plan-hash coverage. These were implemented: missing cache snapshots fail before Transformers import; only a terminal verified EOS ID is removed before decoding; workers own process groups; actual CPU watchdog tests cover a descendant; all executable scripts, runtime/package/token limits, model configs and prompt/ontology files participate in candidate/plan fingerprints. Its review distinguishes this local publication milestone from unperformed real-cache and CUDA checks.

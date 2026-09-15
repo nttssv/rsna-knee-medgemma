@@ -1,6 +1,6 @@
 # LLM report extraction v2 — local candidate
 
-**STATUS: NOT RUN.** This directory implements a prospective CPU-only output contract and prepares a five-study development review package. No v2 model call, model/tokenizer download, GPU start, MRI training, validation inference or bulk labeling has occurred.
+**STATUS: NOT RUN.** This directory implements a prospective output contract, a locked inference adapter and a five-study development review package. Local verification uses synthetic CPU backends. No v2 model call, model/tokenizer download, GPU start, MRI training, validation inference or bulk labeling has occurred.
 
 The aim is to address general format, evidence and semantic failure modes from the [v1 smoke](../report_labeling_llm_v1/RESULTS.md). MedGemma remains the intended teacher candidate and Qwen the comparator; both face the same quality gate. A report extractor is not yet a trained MRI classifier or a source of validated training labels.
 
@@ -38,6 +38,7 @@ Outputs: five label-free input records, two sets of unrendered model prompts, a 
 ## Files
 
 - [PROTOCOL.md](PROTOCOL.md): exact normalization, states, repeatability and advancement criteria.
+- [RUNTIME.md](RUNTIME.md): adapter, fake-backend tests, template/stop-token review and locked execution command.
 - [RESULTS.md](RESULTS.md): CPU verification and explicit NOT RUN status.
 - [REVIEW.md](REVIEW.md): external advisory context and unresolved questions.
 - [RESOURCES.md](RESOURCES.md): historical measurements and proposed bounded smoke.
@@ -47,4 +48,4 @@ Outputs: five label-free input records, two sets of unrendered model prompts, a 
 - [Review viewer and dashboard](smoke_review_tools/README.md): private NOT RUN preview now; measured results only after future inference.
 - [synthetic review cases](tests/semantic_cases.json): intended protocol behavior for human/model review, not measured model answers.
 
-The checker verifies syntax and lexical grounding, **not medical entailment**. A wrong label attached to an exact quotation may pass its technical checks. Every accepted row retains `semantic_review_required=true`; synthetic fixture tests do not prove that either LLM follows the instructions. A GPU inference adapter and tokenizer preflight for the new prompt remain future work; this local candidate cannot start inference.
+The checker verifies syntax and lexical grounding, **not medical entailment**. A wrong label attached to an exact quotation may pass its technical checks. Every accepted row retains `semantic_review_required=true`; synthetic fixture tests do not prove that either LLM follows the instructions. The [local inference adapter](RUNTIME.md) is implemented and tested without models. Real offline tokenizer/CUDA checks remain pending, and all execution flags remain locked.

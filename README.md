@@ -6,6 +6,8 @@ This repository contains the code, configuration, experiment record, and instruc
 
 ## Current experiment
 
+The [v2 local report-extraction adapter](analysis/report_labeling_llm_v2/RUNTIME.md) is implemented with CPU fake-backend tests and a private five-study dry plan. V2 model execution is **NOT RUN**; execution remains locked pending a separately reviewed runtime/resource stage.
+
 The [MedGemma / Qwen report-extraction benchmark](analysis/report_labeling_llm_v1/README.md) completed a five-development-report smoke, twice per model. MedGemma accepted 0/60 first-pass condition outputs; Qwen accepted 58/60, but both strict repeatability gates failed. [Measured results and visualizations](analysis/report_labeling_llm_v1/RESULTS.md) document the technical and semantic issues. RunPod is stopped; full development, LLM validation, bulk labeling and MRI training remain paused.
 
 The dataset label audit and report-labeling analysis are now preserved under [analysis/](analysis/README.md). The report-only baseline used 40 development / 18 validation studies and remains frozen. Its current recommendation is **more validation/manual annotation before scaling**; MRI training and bulk report labeling remain paused. Full study-level analysis snapshots are in ignored `state/runs/`, with aggregate findings and reproducible code in Git.

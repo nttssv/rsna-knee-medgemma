@@ -38,6 +38,12 @@ def load(prepared,run_root=None):
     for key in KEYS:
         model=key.rsplit('-',1)[0];directory=run_root/key
         m=json.loads((directory/'run_manifest.json').read_text())
+        if m.get('synthetic'):
+            raise ValueError('Synthetic backend artifacts are not model results')
+        if m.get('runtime_adapter_version') == 1:
+            for name,digest in m['artifact_sha256'].items():
+                if Path(name).name != name or sha(directory/name) != digest:
+                    raise ValueError('Runtime artifact hash mismatch')
         if (m['status']!='completed' or m['model_key']!=model or m['model_revision']!=config(model)['revision']
             or m['prepared_manifest_sha256']!=sha(prepared/'manifest.json') or m['candidate_code_sha256']!=code_hashes()):
             raise ValueError('Future v2 run provenance does not match reviewed candidate')
@@ -47,6 +53,8 @@ def load(prepared,run_root=None):
         counts=collections.Counter(dict(checks=0,valid=0,positive=0,negative=0,uncertain=0,not_mentioned=0,technical_failure=0,decided=0,correct=0,incorrect=0,syntax_normalized_reports=0))
         seconds=inputs_tokens=outputs_tokens=0
         for c,r in zip(cases,records):
+            if r.get('synthetic'):
+                raise ValueError('Synthetic backend artifacts are not model results')
             if r['generation_status'] not in ('completed','generation_truncated','timeout','oom','context_overflow','runtime_error'):
                 raise ValueError('Unknown generation completion status')
             response=validate_response(r['raw_output'],c['report'],r['generation_status'])

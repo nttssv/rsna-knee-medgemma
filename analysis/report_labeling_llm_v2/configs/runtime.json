@@ -1,0 +1,48 @@
+{
+  "adapter_version": 1,
+  "gpu_execution_enabled": false,
+  "offline_cache_only": true,
+  "run_count": 4,
+  "studies_per_run": 5,
+  "maximum_primary_generations": 20,
+  "hard_process_timeout_seconds": 1800,
+  "real_runtime_verified": false,
+  "fixed_inputs_sha256": "0a4b05ccca46ff85fd1befc077155b40837dd4787603a91b579500f04cbe5ce8",
+  "required_versions": {
+    "torch": "2.8.0",
+    "transformers": "5.12.0",
+    "huggingface-hub": "1.19.0",
+    "accelerate": "1.15.0",
+    "jinja2": "3.1.6",
+    "numpy": "2.5.3",
+    "pillow": "11.0.0",
+    "safetensors": "0.8.0",
+    "sentencepiece": "0.2.2",
+    "tokenizers": "0.22.2"
+  },
+  "models": {
+    "medgemma": {
+      "chat_template_sha256": "7de1c58e208eda46e9c7f86397df37ec49883aeece39fb961e0a6b24088dd3c4",
+      "tokenizer_eos_token_id": 1,
+      "tokenizer_pad_token_id": 0,
+      "generation_eos_token_ids": [
+        1,
+        106
+      ],
+      "generation_pad_token_id": 0,
+      "template_verification": "preserved pinned v1 metadata; fresh processor check pending"
+    },
+    "qwen": {
+      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+      "tokenizer_eos_token_id": 151645,
+      "tokenizer_pad_token_id": 151643,
+      "generation_eos_token_ids": [
+        151645,
+        151643
+      ],
+      "generation_pad_token_id": 151643,
+      "template_verification": "official pinned tokenizer_config.json matches preserved v1 metadata"
+    }
+  },
+  "decoding_policy": "remove_one_terminal_verified_EOS_ID_only; preserve_all_other_special_tokens; no_text_cleanup"
+}
