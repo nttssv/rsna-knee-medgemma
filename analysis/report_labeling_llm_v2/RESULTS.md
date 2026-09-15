@@ -1,6 +1,6 @@
 # V2 results
 
-**STATUS: NOT RUN.** No v2 LLM outputs, validation metrics, agreement scores, measured GPU time or measured VRAM exist.
+**INFERENCE STATUS: NOT RUN.** No v2 LLM outputs, validation metrics or agreement scores exist. GPU load-only time and memory are now measured separately below; they are not generation results.
 
 The local implementation provides strict JSON/outer-fence handling, narrowly defined whitespace matching with original source offsets, no generated primary repair, label-preserving technical failures, unchanged model revisions, paired prompt instructions, a fail-closed engineering review gate and private five-development-study preparation.
 
@@ -26,4 +26,8 @@ Real CPU tokenization of the same five development reports passed prompt/token p
 
 ## Pinned MedGemma follow-up
 
-Authenticated checksum verification and offline tokenization now close the MedGemma export-revision gap. All ten downloaded processor/tokenizer/config assets match the pinned revision. The same five rendered prompts and input token IDs exactly match the saved-export run: 1,618–1,945 input tokens, total 8,504. The verified config context is 131,072; maximum input plus 2,048 output allowance is 3,993. Two exported tokenizer JSON files differ in image-token special flags and padding-side metadata, as documented in [the preflight report](TOKENIZER_PREFLIGHT.md); equivalence is limited to the tested inputs. The initial aggregate remains historical; [the new pinned aggregate](aggregate/medgemma_pinned_preflight.json) records this follow-up. Inference, training and GPU execution remain NOT RUN.
+Authenticated checksum verification and offline tokenization now close the MedGemma export-revision gap. All ten downloaded processor/tokenizer/config assets match the pinned revision. The same five rendered prompts and input token IDs exactly match the saved-export run: 1,618–1,945 input tokens, total 8,504. The verified config context is 131,072; maximum input plus 2,048 output allowance is 3,993. Two exported tokenizer JSON files differ in image-token special flags and padding-side metadata, as documented in [the preflight report](TOKENIZER_PREFLIGHT.md); equivalence is limited to the tested inputs. The initial aggregate remains historical; [the new pinned aggregate](aggregate/medgemma_pinned_preflight.json) records this follow-up. At that tokenizer-only stage, inference, training and GPU execution were NOT RUN; the later load-only result is recorded below.
+
+## GPU load-only preflight
+
+Both pinned models passed full-cache checksum verification and offline CUDA/BF16 loading on A100 80GB. MedGemma used 8.010 GiB peak allocated memory with 45.13 seconds for its complete check; Qwen used 27.508 GiB with 91.54 seconds. The parent session completed in 140.61 seconds, with zero forward/generation calls. Context and input budgets passed for the exact five development reports. [The load report](LOAD_PREFLIGHT.md) distinguishes allocation from total GPU use and load checks from generation. RunPod was stopped after verified local result transfer; estimated compute was about $0.22, within the approved $0.80 cap. No new predicted labels exist.

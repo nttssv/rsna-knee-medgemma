@@ -1,6 +1,6 @@
 # Proposed bounded GPU smoke — not authorized or executed
 
-The original proposal below concerns generation. A subsequent [load-only preflight proposal](LOAD_PREFLIGHT.md) is separate. RunPod status and the current start quote have now been inspected; no GPU was started. The [local adapter](RUNTIME.md) is implemented, with execution locked and offline-only loaders. Its fake-backend tests do not establish real tokenizer or CUDA compatibility. Complete a reviewed offline five-report tokenizer preflight and runtime check before considering a paid stage.
+The original proposal below concerns generation. A subsequent [load-only preflight proposal](LOAD_PREFLIGHT.md) is separate. The separately authorized load-only session has now completed and the pod is stopped again; see its measured runtime and cost in that report. The [local adapter](RUNTIME.md) is implemented, with execution locked and offline-only loaders. Its fake-backend tests do not establish real tokenizer or CUDA compatibility. Complete a reviewed offline five-report tokenizer preflight and runtime check before considering a paid stage.
 
 Keep the v1 checkpoint IDs/revisions, BF16, batch size one, greedy decoding, one beam, SDPA, seed 20260914, 8,192 input-token limit and 2,048 new-token cap. See [MedGemma config](configs/medgemma.json) and [Qwen config](configs/qwen.json). No adapters, quantization or images are planned. Pinned tokenizer/config assets have been downloaded and verified; no v2 model weights have been downloaded. These are inherited recipes, not new measurements.
 

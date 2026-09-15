@@ -1,6 +1,10 @@
 # Full cache and GPU load preflight
 
-**Status: prepared locally; GPU load NOT RUN.** Both tokenizer checks are complete. This separate stage checks exact weight/config bytes and whether each model loads on CUDA in BF16. It produces no diagnostic predictions, loss or accuracy. All generation flags remain false.
+**Status: GPU load preflight completed; inference NOT RUN.** Both models passed after explicit authorization of the existing A100 for up to 30 minutes and $0.80 compute. Results are below.
+
+## Reviewed plan (preserved context)
+
+The plan was prepared locally before starting the pod. Both tokenizer checks are complete. This separate stage checks exact weight/config bytes and whether each model loads on CUDA in BF16. It produces no diagnostic predictions, loss or accuracy. All generation flags remain false.
 
 ## Scope
 
@@ -44,7 +48,7 @@ Use the exact ten runtime package pins in [runtime.json](configs/runtime.json), 
 
 ## Bounds and current resource proposal
 
-On 2026-09-15, the RunPod console showed the preserved A100 PCIe pod stopped, with a **$1.59/hour** start quote. No pod was started during local preparation. Provider identifiers and connection details remain private.
+On 2026-09-15, the RunPod console showed the preserved A100 PCIe pod stopped, with a **$1.59/hour** start quote. No pod was started during local preparation; the subsequent authorized execution is recorded below. Provider identifiers and connection details remain private.
 
 Proposed paid window: **at most 30 minutes from pod start**, approximately **$0.80 compute**, excluding existing storage. This includes connection/setup, cache checks and both model loads. If the original cache/environment is unavailable, stop and report the missing items; do not start downloading tens of GB or migrate/deploy another pod implicitly.
 
@@ -56,4 +60,32 @@ Starting paid compute requires acceptance of this concrete cost/window. Local pr
 
 Synthetic CPU tests cover missing/corrupt shards, an incorrect weight index, Git-blob checksums, standalone-worker refusal, pipe/nonce handling, explicit execution guarding, absence of forward/generation calls, and parent success/fail-fast handling. Existing watchdog tests exercise actual process-group termination. These tests do not establish real CUDA compatibility or VRAM use. Frozen v1, the 40/18 split, prompts, ontology and acceptance gates remain unchanged.
 
-The full local suite passed **226 tests**. The local audit verified 10 of 13 required MedGemma files and 4 of 13 required Qwen files; missing items are weight shards and their indices. All 70 frozen v1 files and 483 pre-existing private files remained unchanged. No real GPU load has occurred.
+The full local suite passed **226 tests**. The local audit verified 10 of 13 required MedGemma files and 4 of 13 required Qwen files; missing items are weight shards and their indices. All 70 frozen v1 files and 483 pre-existing private files remained unchanged. Those were preparation checks; real GPU loading was subsequently completed as recorded below.
+
+## Measured execution — 2026-09-15
+
+Executed source commit: `91bdbbd9e91c559449a356b895b0b29f40953c22`. Both child results and the completed parent receipt match the reviewed plan and code/input fingerprints. All 13 required cached files per model passed streamed checksums, including all weight shards and the exact index coverage. No files were automatically downloaded or repaired on the GPU host.
+
+| Measurement | MedGemma | Qwen |
+|---|---:|---:|
+| Cache + tokenize + load + transfer check | 45.13 s | 91.54 s |
+| Peak allocated GPU memory | 8.010 GiB | 27.508 GiB |
+| Peak reserved GPU memory | 8.012 GiB | 27.512 GiB |
+| Device free memory after checks | 70.752 GiB | 51.324 GiB |
+| Loaded context limit | 131,072 | 40,960 |
+| Largest input + 2,048 reserve | 3,993 | 4,072 |
+| All parameters CUDA/BF16 | Pass | Pass |
+| Native BF16 / configured SDPA | Pass | Pass |
+| Model forward calls / generations | 0 / 0 | 0 / 0 |
+
+The parent session took **140.61 seconds** including subprocess overhead. Per-model elapsed times include cache hashing and processor setup; they are not pure weight-loading or inference latency. Hardware was NVIDIA A100 80GB PCIe, CUDA 12.8, driver 595.91.07. All ten package pins matched, with the CUDA build `torch 2.8.0+cu128`. Each model ran in its own process; memory numbers are not summed. PyTorch allocation is not total device usage.
+
+The saved environment and model cache were reused. Startup regenerated the container SSH host key; its fingerprint was independently matched against the authenticated RunPod container log before accepting the new endpoint. Strict host-key checking stayed enabled. The transfer reported unsupported ownership restoration on the network volume; all source, preparation and plan byte hashes were then verified successfully before execution. No old experiment files were overwritten.
+
+An outer deadline alarm began from the approved provider start window and reserved one minute for stopping the pod. It would interrupt the parent so its existing supervisor could kill/reap the active worker. The checks completed well before that deadline. Results were copied locally and verified against the parent-recorded child hashes before shutdown.
+
+RunPod was then stopped and visibly showed **Not running / $0.00 per hour**. A conservative start-request to stop-verification observation interval was about **8 minutes 11 seconds**, corresponding to approximately **$0.22 compute** at $1.59/hour, below the $0.80 cap. This is an estimate, not an invoice, and excludes storage. The original worker-session receipt still says `provider_stopped: false` because it was written before shutdown; a separate private provider receipt records the later verified stop rather than rewriting history.
+
+[Public aggregate results](aggregate/load_preflight_results.json) contain runtime/config details and measurements. Full receipts, cache audits, logs, preparation, provider timing and the deadline wrapper are preserved privately. No weights, credentials, host addresses, study IDs or report text are published.
+
+**Recommendation:** cache provenance and CUDA/BF16 loading are now verified for both models. Review these results before deciding on a separately bounded five-report, two-repeat-per-model generation smoke. This stage does not establish generation success, SDPA kernel execution, KV-cache requirements, repeatability, diagnostic correctness or accuracy. No training, validation inference, 20-generation smoke or bulk labeling occurred, and all generation flags remain false.
