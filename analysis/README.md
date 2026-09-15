@@ -19,3 +19,5 @@ Current decision: **C — more validation/manual annotation before scaling repor
 The separate [candidate failure diagnostic](candidate_failure_diagnostic_v1/README.md) closes the local token/failed-child receipt audit. All nine roundtrips matched; the candidate omitted nested fields in short outputs and repeated an array in the truncated output. Historical results remain frozen; no model generation occurred.
 
 Current user-directed focus: [Qwen saved-output audit and prospective preparation](qwen_report_extraction_v1/README.md). Both historical repeats verified; parser sensitivity does not improve the aggregate technical count. New inference is NOT RUN; MedGemma development is paused.
+
+The [Qwen local runtime/review integration](qwen_runtime_v1/README.md) is implemented with real execution hard-disabled. Synthetic tests/demo do not represent Qwen output.

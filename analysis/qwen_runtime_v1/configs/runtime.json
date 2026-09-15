@@ -1,0 +1,11 @@
+{
+  "execution_enabled": false,
+  "resource_authorization": null,
+  "session_timeout_seconds": 3600,
+  "worker_timeout_seconds": 1800,
+  "automatic_downloads": false,
+  "automatic_retries": false,
+  "audit_receipt_sha256": "96bec11b5e71a262c7a77110b27e8fa0ec02f35be1b91cb3dbd1925a83851ae6",
+  "provider_shutdown": "Process termination does not stop provider billing; a later authorized execution stage must verify provider shutdown.",
+  "real_inputs_digest": "eaf4ffa370a7b33a96b32a797182f7783860b44e680dd024763ef94b105bf1d4"
+}

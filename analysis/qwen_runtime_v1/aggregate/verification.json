@@ -1,0 +1,21 @@
+{
+  "status": "LOCAL_SOFTWARE_INTEGRATION_NO_MODEL_INFERENCE",
+  "cpu_tests_passed": 546,
+  "new_runtime_tests": 62,
+  "protected_history_files": 203,
+  "real_prepared_plan_sha256": "c4586bb0c65163244dac80344ea96f691493a1b89a5911eefcba54f2384c74fc",
+  "real_generations": 0,
+  "model_weights_loaded": false,
+  "gpu_used": false,
+  "synthetic_demonstration": {
+    "outputs": 20,
+    "condition_cells": 240,
+    "unreviewed_cells": 240,
+    "primary_gate_pass_is_fabricated": true
+  },
+  "private_backup_files": 46,
+  "private_backup_sha256": "4b6aa6c1e48a2b66e49d9f8feef7f8e2119f55e848a00231a4d42ef4b4e18170",
+  "restored_real_plan_and_demo_review_verified": true,
+  "blinded_browser_checked": true,
+  "clinical_adjudications": 0
+}
