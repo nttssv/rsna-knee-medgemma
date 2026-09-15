@@ -1,17 +1,20 @@
-# MedGemma v3 · gated GPU execution proposal
+# MedGemma v3 · measured execution attempt
 
-**Setup attempted after user approval; stopped before model loading because the provider shutdown preflight failed.** See [the setup outcome](SETUP_ATTEMPT.md). This revision makes the completed local runner executable only with a fresh, explicit private authorization and a live self-stop watchdog. The prior runtime remains hard-disabled and unchanged.
+**Measured attempt finished; the planned comparison is incomplete.** Control 1 completed five reports with 48/60 technical passes. Candidate 1 returned three schema-invalid responses, then truncated on its fourth report; remaining repeats were not run. The GPU is stopped and the temporary control key disabled. Read [RESULTS.md](RESULTS.md), [the execution record](EXECUTION.md) and [the input/output dashboard](diagnostics/README.md).
 
-| Item | Proposal |
+The frozen source below describes the reviewed execution mechanism. This completed attempt does not authorize a restart or another run.
+
+| Item | Fixed design |
 |---|---|
 | Objective | Compare the frozen control and evidence-first prompts |
 | Input | Same five original-language development reports; no MRI images or organizer answers in prompts |
 | Output | Twelve four-state proposals plus evidence/confidence, raw responses/tokens and execution receipts |
 | Design | Two arms × two repeats, ABBA order, maximum 20 generations |
-| GPU | One RTX 6000 Ada 48 GB, existing stopped pod |
+| GPU | One RTX 6000 Ada 48 GB, explicitly approved replacement |
 | Cost | $0.84/hour compute + approximately $0.011/hour temporary disk |
 | Proposed limit | $2 experiment budget, at most 90 minutes including setup and transfer |
 | Validation/training | None |
+| Outcome | 9/20 calls recorded; 8 complete, 1 truncated; remaining 11 not run |
 
 Read [PROTOCOL.md](PROTOCOL.md), [RESULTS.md](RESULTS.md), [source review](REVIEW.md), and the [resource proposal](configs/resource_proposal.json). No credentials, model weights or private data are published.
 

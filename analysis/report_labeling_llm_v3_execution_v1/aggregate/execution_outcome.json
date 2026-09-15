@@ -1,0 +1,677 @@
+{
+  "status": "failed",
+  "synthetic": false,
+  "independent_studies": 5,
+  "observed_studies": 5,
+  "planned_generations": 20,
+  "recorded_generations": 9,
+  "attempted_generations_lower_bound": 9,
+  "completed_generations": 8,
+  "planned_cells": 240,
+  "recorded_cells": 108,
+  "counts_note": "Counts reflect durable response records; a killed worker may have an additional unrecorded in-flight call.",
+  "runs": [
+    {
+      "run": "control-1",
+      "planned_generations": 5,
+      "attempted": 5,
+      "completed": 5,
+      "planned_cells": 60,
+      "attempted_cells": 60,
+      "technical_statuses": {
+        "valid": 48,
+        "ambiguous_evidence_error": 3,
+        "evidence_error": 9
+      },
+      "valid": 48,
+      "states": {
+        "negative": 20,
+        "positive": 14,
+        "not_mentioned": 14
+      },
+      "binary_decisions": 34,
+      "generation_seconds": 524.4568132422864,
+      "output_tokens": 10662
+    },
+    {
+      "run": "candidate-1",
+      "planned_generations": 5,
+      "attempted": 4,
+      "completed": 3,
+      "planned_cells": 60,
+      "attempted_cells": 48,
+      "technical_statuses": {
+        "schema_error": 36,
+        "generation_truncated": 12
+      },
+      "valid": 0,
+      "states": {},
+      "binary_decisions": 0,
+      "generation_seconds": 233.63323131203651,
+      "output_tokens": 4502
+    },
+    {
+      "run": "candidate-2",
+      "planned_generations": 5,
+      "attempted": 0,
+      "completed": 0,
+      "planned_cells": 60,
+      "attempted_cells": 0,
+      "technical_statuses": {},
+      "valid": 0,
+      "states": {},
+      "binary_decisions": 0,
+      "generation_seconds": 0,
+      "output_tokens": 0
+    },
+    {
+      "run": "control-2",
+      "planned_generations": 5,
+      "attempted": 0,
+      "completed": 0,
+      "planned_cells": 60,
+      "attempted_cells": 0,
+      "technical_statuses": {},
+      "valid": 0,
+      "states": {},
+      "binary_decisions": 0,
+      "generation_seconds": 0,
+      "output_tokens": 0
+    }
+  ],
+  "per_condition": [
+    {
+      "run": "control-1",
+      "condition": "ACL",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "valid": 4,
+        "evidence_error": 1
+      },
+      "states": {
+        "negative": 2,
+        "positive": 2
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "MCL",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "valid": 4,
+        "evidence_error": 1
+      },
+      "states": {
+        "negative": 3,
+        "positive": 1
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "Medial Meniscus",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "valid": 5
+      },
+      "states": {
+        "negative": 4,
+        "positive": 1
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "Lateral Meniscus",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "ambiguous_evidence_error": 1,
+        "valid": 4
+      },
+      "states": {
+        "positive": 2,
+        "negative": 1,
+        "not_mentioned": 1
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "Medial OA",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "valid": 5
+      },
+      "states": {
+        "negative": 1,
+        "not_mentioned": 3,
+        "positive": 1
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "Lateral OA",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "valid": 4,
+        "evidence_error": 1
+      },
+      "states": {
+        "negative": 1,
+        "not_mentioned": 3
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "PF OA",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "valid": 4,
+        "evidence_error": 1
+      },
+      "states": {
+        "negative": 1,
+        "positive": 1,
+        "not_mentioned": 2
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "Effusion",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "ambiguous_evidence_error": 1,
+        "valid": 3,
+        "evidence_error": 1
+      },
+      "states": {
+        "positive": 3
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "Synovitis",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "ambiguous_evidence_error": 1,
+        "valid": 2,
+        "evidence_error": 2
+      },
+      "states": {
+        "positive": 2
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "Baker's",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "valid": 4,
+        "evidence_error": 1
+      },
+      "states": {
+        "negative": 2,
+        "not_mentioned": 2
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "Contusion",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "valid": 4,
+        "evidence_error": 1
+      },
+      "states": {
+        "negative": 1,
+        "not_mentioned": 2,
+        "positive": 1
+      }
+    },
+    {
+      "run": "control-1",
+      "condition": "Fracture",
+      "planned": 5,
+      "attempted": 5,
+      "statuses": {
+        "valid": 5
+      },
+      "states": {
+        "negative": 4,
+        "not_mentioned": 1
+      }
+    },
+    {
+      "run": "candidate-1",
+      "condition": "ACL",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "MCL",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "Medial Meniscus",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "Lateral Meniscus",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "Medial OA",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "Lateral OA",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "PF OA",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "Effusion",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "Synovitis",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "Baker's",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "Contusion",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-1",
+      "condition": "Fracture",
+      "planned": 5,
+      "attempted": 4,
+      "statuses": {
+        "schema_error": 3,
+        "generation_truncated": 1
+      },
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "ACL",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "MCL",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "Medial Meniscus",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "Lateral Meniscus",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "Medial OA",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "Lateral OA",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "PF OA",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "Effusion",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "Synovitis",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "Baker's",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "Contusion",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "candidate-2",
+      "condition": "Fracture",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "ACL",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "MCL",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "Medial Meniscus",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "Lateral Meniscus",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "Medial OA",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "Lateral OA",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "PF OA",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "Effusion",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "Synovitis",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "Baker's",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "Contusion",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    },
+    {
+      "run": "control-2",
+      "condition": "Fracture",
+      "planned": 5,
+      "attempted": 0,
+      "statuses": {},
+      "states": {}
+    }
+  ],
+  "languages": [
+    {
+      "run": "control-1",
+      "language": "English",
+      "attempted_cells": 48,
+      "valid": 39
+    },
+    {
+      "run": "control-1",
+      "language": "Spanish",
+      "attempted_cells": 12,
+      "valid": 9
+    },
+    {
+      "run": "candidate-1",
+      "language": "English",
+      "attempted_cells": 36,
+      "valid": 0
+    },
+    {
+      "run": "candidate-1",
+      "language": "Spanish",
+      "attempted_cells": 12,
+      "valid": 0
+    },
+    {
+      "run": "candidate-2",
+      "language": "English",
+      "attempted_cells": 0,
+      "valid": 0
+    },
+    {
+      "run": "candidate-2",
+      "language": "Spanish",
+      "attempted_cells": 0,
+      "valid": 0
+    },
+    {
+      "run": "control-2",
+      "language": "English",
+      "attempted_cells": 0,
+      "valid": 0
+    },
+    {
+      "run": "control-2",
+      "language": "Spanish",
+      "attempted_cells": 0,
+      "valid": 0
+    }
+  ],
+  "semantic_accuracy": null,
+  "semantically_reviewed_cells": 0,
+  "organizer_comparison": "NOT_PERFORMED_BEFORE_BLINDED_REVIEW",
+  "expansion_allowed": false,
+  "model_id": "google/medgemma-1.5-4b-it",
+  "revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "execution_source_commit": "9c311be8312e37aa5e2ed5545fb5c9ee708468e8",
+  "reviewed_source_commit": "43d2a6396b2e7e691473f6b52c70716809d190ce",
+  "runtime_plan_sha256": "6bcbee08e0bdb30f148f6a7a84c75afdcd327dc45c94b03b82724f0b625f1ee1",
+  "remote_inventory_sha256": "19f31b50f361f911cc3f139f8a96dddadd0cfd377a3450644f1368bccbf83ea7",
+  "remote_files_hash_verified": 28,
+  "stopping_reason": "candidate-1 fourth report reached 4096-token cap",
+  "session_seconds": 785.3871910199523,
+  "provider_stopped": true,
+  "console_total_usd_per_hour": 0,
+  "temporary_control_key_state": "Disabled; local token removed",
+  "watchdog_was_armed": true,
+  "watchdog_cli_stop_exercised": false,
+  "external_graphql_stop_verified": true,
+  "provider_window_seconds_from_start_request": 1430.667421,
+  "current_attempt_cost_estimate_usd": 0.3381938820197222,
+  "earlier_setup_cost_estimate_usd": 0.1,
+  "total_cost_estimate_usd": 0.4381938820197222,
+  "cost_is_invoice": false,
+  "package_versions": {
+    "torch": "2.8.0+cu128",
+    "transformers": "5.12.0",
+    "huggingface-hub": "1.19.0",
+    "accelerate": "1.15.0",
+    "jinja2": "3.1.6",
+    "numpy": "2.5.3",
+    "pillow": "11.0.0",
+    "safetensors": "0.8.0",
+    "sentencepiece": "0.2.2",
+    "tokenizers": "0.22.2"
+  },
+  "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+  "driver": "570.124.06",
+  "cuda": "12.8",
+  "peak_allocated_gib": 8.515385150909424,
+  "split": [
+    40,
+    18
+  ],
+  "validation_inference": 0,
+  "training_steps": 0,
+  "repeatability": "NOT_EVALUABLE_NO_SECOND_REPEATS",
+  "ensemble": "NOT_EVALUABLE_NO_ACCEPTED_CANDIDATE_LABELS",
+  "qualified_semantic_review": "NOT_PERFORMED",
+  "actual_recorded_calls": 9
+}

@@ -9,3 +9,7 @@ The live result confirmed the target identity, read access, acceptance of stop o
 A subsequent attempt to resume the same approved Pod was unsuccessful. The documented GraphQL resume operation returned: “There are not enough free GPUs on the host machine to start this pod.” The Pod remained EXITED. This was a capacity failure after the local authentication issue had been resolved, not another authentication failure or a model result.
 
 The original inference plan, prompt/split fingerprints and execution guards remain unchanged. No model weights were downloaded and no inference ran. Further allocation flexibility within the existing total $2 budget and original 90-minute window has been requested; no new replacement was provisioned during this recovery step. Approximately $0.10 was spent in the earlier setup; no additional compute started here.
+
+## Later outcome
+
+The user then explicitly approved replacement-host flexibility within the original total budget/deadline. A compatible replacement ran the unchanged plan with a verified live watchdog. Its final [measured outcome](RESULTS.md) is incomplete because of candidate truncation. The provider was stopped and the temporary key disabled afterward. This historical stopped-pod preflight record is not evidence that the watchdog CLI stop itself fired.

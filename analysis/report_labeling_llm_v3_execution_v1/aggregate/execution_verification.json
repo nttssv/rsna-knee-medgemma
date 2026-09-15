@@ -1,0 +1,23 @@
+{
+  "status": "FAILED_ATTEMPT_PRESERVED",
+  "tests_passed": 450,
+  "test_command": "PYTHONPATH=src .venv/bin/python -m pytest -q",
+  "protected_analysis_files": 156,
+  "original_preparation_byte_identical": true,
+  "control_run_original_verifier_passed": true,
+  "incomplete_session_correctly_rejected": true,
+  "remote_artifacts_hash_verified": 28,
+  "remote_inventory_sha256": "19f31b50f361f911cc3f139f8a96dddadd0cfd377a3450644f1368bccbf83ea7",
+  "backup_sha256": "2c3136f2cc687665c69f08e2463ace5e8859ded9fc2d1ca9e1a19b1506741728",
+  "backup_restored_files": 45,
+  "backup_scope": "New executed package, final dashboard and secret-free private operator provenance; older backups remain separate",
+  "browser_dashboard_inspected": true,
+  "provider_stopped": true,
+  "temporary_key_disabled": true,
+  "local_temporary_secret_removed": true,
+  "semantic_review_performed": false,
+  "staged_files_checked": 15,
+  "real_study_ids_screened": 58,
+  "relative_markdown_links_checked": 51,
+  "exact_control_and_hf_token_scan_before_disposal_passed": true
+}
