@@ -1,0 +1,59 @@
+{
+  "status": "INCOMPLETE_FAILED_SMOKE",
+  "execution_source_commit": "f09a4ddc3b3a795f97766686adc05a74b75a1fcc",
+  "plan_sha256": "74d6efcacf4b13d4b99a3cc29bb1027f94a24a4dd9e87f7e836f68ff4dfd75ca",
+  "remote_inventory_sha256": "727db12ba02ed1521589b79c6e37ee573719b28af399a0292feded7c2f353253",
+  "verified_remote_files": 17,
+  "planned_studies": 5,
+  "attempted_studies": 3,
+  "planned_generations": 20,
+  "attempted_generations": 3,
+  "accepted_condition_cells": 0,
+  "attempted_condition_cells": 36,
+  "medgemma_first_run": {
+    "planned_condition_cells": 60,
+    "parse_error": 24,
+    "generation_truncated": 12,
+    "not_attempted": 24
+  },
+  "other_runs": "NOT_RUN",
+  "reference_accuracy": null,
+  "repeatability": null,
+  "qwen_comparison": null,
+  "gpu": "NVIDIA RTX 6000 Ada Generation 48GB",
+  "driver": "570.124.06",
+  "torch": "2.8.0+cu128",
+  "python": "3.12.3",
+  "native_bf16": true,
+  "peak_gpu_allocated_gib": 8.4532790184021,
+  "child_runtime_seconds": 257.606621786952,
+  "parent_runtime_seconds": 258.76650780439377,
+  "compute_rate_usd_hour": 0.84,
+  "estimated_compute_usd": 0.1397096659,
+  "temporary_disk_rate_usd_hour": 0.011,
+  "estimated_temporary_disk_usd": 0.0018295313391666664,
+  "provider_stopped_verified": true,
+  "generations": [
+    {
+      "input_tokens": 1625,
+      "output_tokens": 1666,
+      "runtime_seconds": 75.12854190915823,
+      "generation_status": "completed",
+      "parser_status": "parse_error"
+    },
+    {
+      "input_tokens": 1618,
+      "output_tokens": 1752,
+      "runtime_seconds": 78.37953648716211,
+      "generation_status": "completed",
+      "parser_status": "parse_error"
+    },
+    {
+      "input_tokens": 1945,
+      "output_tokens": 2048,
+      "runtime_seconds": 91.88381452858448,
+      "generation_status": "generation_truncated",
+      "parser_status": "not_parsed"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ This repository contains the code, configuration, experiment record, and instruc
 
 ## Current experiment
 
-The [v2 local report-extraction adapter](analysis/report_labeling_llm_v2/RUNTIME.md) is implemented with CPU fake-backend tests and a private five-study dry plan. V2 model execution is **NOT RUN**; execution remains locked pending a separately reviewed runtime/resource stage.
+The [v2 RTX 6000 Ada report-extraction smoke](analysis/report_labeling_llm_v2/RTX_SMOKE_RESULTS.md) is **incomplete**: MedGemma attempted three reports, with no accepted labels, and stopped on truncation. Qwen and remaining repeats were NOT RUN. GPU stopped; [private input/output diagnostics](analysis/report_labeling_llm_v2/diagnostics/README.md) preserve original reports and exact responses.
 
 The [MedGemma / Qwen report-extraction benchmark](analysis/report_labeling_llm_v1/README.md) completed a five-development-report smoke, twice per model. MedGemma accepted 0/60 first-pass condition outputs; Qwen accepted 58/60, but both strict repeatability gates failed. [Measured results and visualizations](analysis/report_labeling_llm_v1/RESULTS.md) document the technical and semantic issues. RunPod is stopped; full development, LLM validation, bulk labeling and MRI training remain paused.
 

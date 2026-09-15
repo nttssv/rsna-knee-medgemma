@@ -1,6 +1,6 @@
-# LLM report extraction v2 — local candidate
+# LLM report extraction v2 — incomplete smoke
 
-**INFERENCE STATUS: NOT RUN.** The next [generation candidate](GENERATION_CANDIDATE.md) is prepared locally; execution flags are enabled for its explicit reviewed command, but a paid run still needs separate authorization. This directory implements a prospective output contract, a bounded inference adapter and a five-study development review package. Real CPU tokenization is now measured separately from synthetic generation tests: see [TOKENIZER_PREFLIGHT.md](TOKENIZER_PREFLIGHT.md). Pinned tokenizer/config assets were downloaded, and the existing model-weight caches passed the authorized [GPU load-only check](LOAD_PREFLIGHT.md). No model weights were downloaded, and no generation, MRI training, validation inference or bulk labeling occurred.
+**INFERENCE STATUS: INCOMPLETE / FAILED SMOKE.** The user-authorized RTX 6000 Ada run attempted three reports on 2026-09-15, then stopped on truncation. None of the 36 attempted condition cells was accepted. MedGemma repeat 2 and both Qwen repeats were NOT RUN. The GPU was stopped after all 17 original artifacts were copied and hash-verified. Read [measured RTX results](RTX_SMOKE_RESULTS.md) and use the separate [partial diagnostic viewer](diagnostics/README.md). No MRI training, validation inference or bulk labeling occurred.
 
 The aim is to address general format, evidence and semantic failure modes from the [v1 smoke](../report_labeling_llm_v1/RESULTS.md). MedGemma remains the intended teacher candidate and Qwen the comparator; both face the same quality gate. A report extractor is not yet a trained MRI classifier or a source of validated training labels.
 
@@ -12,7 +12,7 @@ The aim is to address general format, evidence and semantic failure modes from t
 | Evidence | Exact substring | Unique exact occurrence first; space/tab/CR/LF fallback only if absent |
 | Primary output | First generation; repair separately recorded | One generation; deterministic normalization only; no repair generation planned |
 | Semantic instructions | Original common prompt | General anatomy, scope, severity, polarity and timing clarifications |
-| Predictions | Existing measured smoke | NOT RUN; no v2 accuracy claims |
+| Predictions | Existing measured smoke | Incomplete three-report smoke; no v2 accuracy claims |
 
 Both v1 directories, all saved v1 outputs and the original 40/18 split remain unchanged. [Protected hashes](configs/protected_v1.json) anchor 70 tracked files at commit `c33e50da96046b9ebd4c845361802089cfcd2483`. No v1 output has been re-scored under the v2 policy.
 
@@ -40,13 +40,13 @@ Outputs: five label-free input records, two sets of unrendered model prompts, a 
 - [PROTOCOL.md](PROTOCOL.md): exact normalization, states, repeatability and advancement criteria.
 - [LOAD_PREFLIGHT.md](LOAD_PREFLIGHT.md): separate full-cache and bounded GPU load check; no inference.
 - [RUNTIME.md](RUNTIME.md): adapter, fake-backend tests, template/stop-token review and locked execution command.
-- [RESULTS.md](RESULTS.md): CPU verification and explicit NOT RUN status.
+- [RESULTS.md](RESULTS.md): CPU verification and measured incomplete smoke status.
 - [REVIEW.md](REVIEW.md): external advisory context and unresolved questions.
 - [RESOURCES.md](RESOURCES.md): historical measurements and proposed bounded smoke.
 - [ADJUDICATION.md](ADJUDICATION.md): qualified-review workflow; no automatic reference correction.
 - [core.py](scripts/core.py): normalization, exact source offsets and strict schema validation.
 - [gates.py](scripts/gates.py): software checks plus a mandatory human review with per-cell provenance; never authorizes compute.
-- [Review viewer and dashboard](smoke_review_tools/README.md): private NOT RUN preview now; measured results only after future inference.
+- [Review viewer and dashboard](smoke_review_tools/README.md): historical preview and completed-session gate; partial diagnostics remain separate.
 - [synthetic review cases](tests/semantic_cases.json): intended protocol behavior for human/model review, not measured model answers.
 
-The checker verifies syntax and lexical grounding, **not medical entailment**. A wrong label attached to an exact quotation may pass its technical checks. Every accepted row retains `semantic_review_required=true`; synthetic fixture tests do not prove that either LLM follows the instructions. The [local inference adapter](RUNTIME.md) has synthetic generation tests and real model load-only checks. CPU tokenization passed for both pinned snapshots; the historical MedGemma export comparison is preserved separately. Full weight-cache and CUDA/BF16 load checks also passed. Generation is callable only through the explicit reviewed command; its behavior and memory requirements remain unmeasured.
+The checker verifies syntax and lexical grounding, **not medical entailment**. A wrong label attached to an exact quotation may pass its technical checks. Every accepted row retains `semantic_review_required=true`; synthetic fixture tests do not prove that either LLM follows the instructions. The [local inference adapter](RUNTIME.md) has synthetic generation tests and real model load-only checks. CPU tokenization passed for both pinned snapshots; the historical MedGemma export comparison is preserved separately. Full weight-cache and CUDA/BF16 load checks also passed. MedGemma generation was measured on three reports; the output contract failed. Qwen generation and repeat consistency remain unmeasured for v2.

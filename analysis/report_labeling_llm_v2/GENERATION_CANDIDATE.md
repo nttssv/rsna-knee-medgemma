@@ -1,5 +1,7 @@
 # Five-report generation candidate — prepared locally, NOT RUN
 
+**Execution update, 2026-09-15:** the authorized RTX 6000 Ada smoke stopped after three MedGemma reports with no accepted labels. GPU stopped; Qwen and remaining repeats NOT RUN. See [RTX_SMOKE_RESULTS.md](RTX_SMOKE_RESULTS.md). The preparation/proposal below is historical, not permission to restart.
+
 This candidate follows the successful [load-only preflight](LOAD_PREFLIGHT.md), executed at `91bdbbd`, with results published at `d769e7e`. The user authorized local preparation of the next prediction experiment. No additional GPU start or inference is authorized by this document or by external review.
 
 ## Objective, input and output

@@ -1,5 +1,7 @@
 # Proposed bounded GPU smoke — not authorized or executed
 
+**Execution update, 2026-09-15:** the authorized RTX 6000 Ada smoke stopped after three MedGemma reports with no accepted labels. GPU stopped; Qwen and remaining repeats NOT RUN. See [RTX_SMOKE_RESULTS.md](RTX_SMOKE_RESULTS.md). The preparation/proposal below is historical, not permission to restart.
+
 The current [generation candidate proposal](GENERATION_CANDIDATE.md) supersedes the historical price and prerequisite status below. Its fresh quoted rate is $1.59/hour, with a proposed 60-minute / $1.60 compute ceiling. No GPU was started during candidate preparation.
 
 The original proposal below concerns generation. A subsequent [load-only preflight proposal](LOAD_PREFLIGHT.md) is separate. The separately authorized load-only session has now completed and the pod is stopped again; see its measured runtime and cost in that report. The [local adapter](RUNTIME.md) is implemented, with execution locked and offline-only loaders. Its fake-backend tests do not establish real tokenizer or CUDA compatibility. Complete a reviewed offline five-report tokenizer preflight and runtime check before considering a paid stage.

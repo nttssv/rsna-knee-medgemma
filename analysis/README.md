@@ -7,7 +7,7 @@ This folder preserves dataset/report analyses and aggregate findings. Audits and
 | [Dataset label audit](label_audit/README.md) | Counts, missingness and aggregate join checks | `runs/label-audit-20260913/` |
 | [Report-labeling baseline](report_labeling/README.md) | Frozen source/rules/tests, protocol, aggregate results and reproduction command | `runs/report-labeling-20260913-v1/` |
 | [MedGemma / Qwen benchmark](report_labeling_llm_v1/README.md) | Pinned execution recipe, five-study smoke results, dashboard and offline error review | `runs/report-labeling-llm-v1/` inputs; `runs/report-labeling-llm-smoke-20260914/` results |
-| [LLM v2 local candidate](report_labeling_llm_v2/README.md) | Prospective contract, prompts, synthetic tests and review tools; NOT RUN | `runs/report-labeling-llm-v2-local-*/` |
+| [LLM v2 incomplete smoke](report_labeling_llm_v2/README.md) | Pinned contract, runtime, partial RTX results and diagnostic tools | `runs/report-labeling-llm-v2-ada-executed-20260915/` |
 
 Private paths are relative to `RSNA_STATE_DIR` (default: repository `state/`). They contain study identifiers, reports, splits, predictions and detailed error evidence. They are excluded from Git and included in the separate private state backup. The public GitHub repository contains code and aggregate findings only.
 

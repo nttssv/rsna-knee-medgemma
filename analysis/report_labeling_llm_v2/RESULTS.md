@@ -1,6 +1,8 @@
 # V2 results
 
-**INFERENCE STATUS: NOT RUN.** No v2 LLM outputs, validation metrics or agreement scores exist. GPU load-only time and memory are now measured separately below; they are not generation results.
+**INFERENCE STATUS: INCOMPLETE / FAILED SMOKE.** The RTX 6000 Ada run attempted three of 20 planned generations, all in MedGemma repeat 1. There were 24 parse-error cells and 12 truncated cells, with zero accepted labels. Other repeats and Qwen were NOT RUN. Accuracy, repeatability and ensemble comparison are undefined. [Measured results, runtime and recommendation](RTX_SMOKE_RESULTS.md) · [aggregate JSON](aggregate/rtx_smoke.json) · [private diagnostic viewer instructions](diagnostics/README.md).
+
+The GPU is stopped. No training, validation inference or bulk extraction occurred. The sections below preserve the historical preparation and load-only milestones; their NOT RUN descriptions apply to those earlier stages.
 
 The local implementation provides strict JSON/outer-fence handling, narrowly defined whitespace matching with original source offsets, no generated primary repair, label-preserving technical failures, unchanged model revisions, paired prompt instructions, a fail-closed engineering review gate and private five-development-study preparation.
 
