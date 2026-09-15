@@ -20,3 +20,5 @@
 - Do not overwrite an existing run. Preserve split and input fingerprints when comparing experiments.
 - The scientific claims are limited to a small feasibility pilot. Scores are uncalibrated Yes/No rankings; case labels describe full studies, not the sampled slices alone.
 - For print requests, default to duplex and black-and-white unless the user specifies otherwise.
+
+- The approved v3 replacement setup on 2026-09-15 stopped before model loading: the provider pod-scoped key failed required read access (legacy Unauthorized, modern CLI and GraphQL HTTP 403). Read analysis/report_labeling_llm_v3_execution_v1/SETUP_ATTEMPT.md. No model download or generation occurred; the replacement is stopped with zero idle disk charge. Validate a supported read/self-stop authorization path locally before any further paid start. Read denial does not establish stop denial. Preserve the existing plan and do not bypass its watchdog gate.

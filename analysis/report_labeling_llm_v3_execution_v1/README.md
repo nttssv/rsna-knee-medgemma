@@ -1,6 +1,6 @@
 # MedGemma v3 · gated GPU execution proposal
 
-**Prepared for review; no paid run authorized or started.** This revision makes the completed local runner executable only with a fresh, explicit private authorization and a live self-stop watchdog. The prior runtime remains hard-disabled and unchanged.
+**Setup attempted after user approval; stopped before model loading because the provider shutdown preflight failed.** See [the setup outcome](SETUP_ATTEMPT.md). This revision makes the completed local runner executable only with a fresh, explicit private authorization and a live self-stop watchdog. The prior runtime remains hard-disabled and unchanged.
 
 | Item | Proposal |
 |---|---|

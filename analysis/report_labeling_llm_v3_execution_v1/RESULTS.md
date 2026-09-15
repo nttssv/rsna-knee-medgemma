@@ -1,11 +1,13 @@
-# Execution proposal status
+# Execution status
 
-**NOT RUN. No paid compute, model loading, inference, training or new labels.** The console showed the existing RTX 6000 Ada pod stopped, with a $0.84/hour restart offer and 80 GB temporary disk. Allocation availability is untested.
+**SETUP FAILED BEFORE MODEL LOADING.** The user approved the original $2 / 90-minute proposal and subsequently approved a replacement RTX 6000 Ada when RunPod reported the original GPU unavailable. The replacement allocated successfully, but its existing pod-scoped API key failed the mandatory watchdog read-access check. The operator copied setup diagnostics and stopped the pod. RunPod confirmed compute and container storage not running, total $0.00/hour.
 
-This source revision adds an explicit private approval gate, budget/deadline validation, a self-stop watchdog, hardware matching and immutable authorization evidence. The previously completed local runtime, frozen v3 candidate, original report-labeling baseline and all historical outputs remain unchanged.
+No model weights were downloaded, no model was loaded, and **zero generations, training runs or new labels** were produced. There is no v3 model accuracy, semantic improvement, repeatability or prompt-comparison result to report. This is an infrastructure preflight failure, not a model failure or 0% accuracy.
 
-CPU tests use fabricated grant, clock, CLI and model fixtures. They verify software contracts only; they do not prove remote stop capability, actual GPU performance or medical accuracy. Real CLI capability/access and watchdog liveness remain mandatory boot checks before inference. No approval record is supplied or inferred from this publication.
+Read [SETUP_ATTEMPT.md](SETUP_ATTEMPT.md) for hardware, timing, authentication evidence and the next prerequisite. The resource window lasted approximately seven minutes; estimated compute plus temporary disk cost was **about $0.10**, not an invoice. Other existing storage charges are separate.
 
-The proposed 90-minute resource window costs approximately $1.28 at the recorded compute and estimated disk rates, within a proposed $2 budget. Existing storage charges are separate. These are planning estimates, not an invoice or provider-enforced dollar cap. Actual MedGemma completion, runtime, memory and semantic quality at the 4096-token setting remain unmeasured.
+The previously completed local runtime, frozen v3 candidate, original report-labeling baseline and all historical outputs remain unchanged. The exact existing five-report runtime plan was retained. No guard was weakened to start inference without a verified watchdog.
 
-Local validation details are in [verification.json](aggregate/verification.json). The next action after source review is user approval of the specific paid proposal. No full development/validation run, bulk extraction or training is included.
+CPU tests exercise fabricated grant, clock, CLI and model fixtures. The 437 passing tests establish software contracts, not real provider permissions or clinical accuracy. The failure demonstrates why remote permission verification remains necessary. Original local validation is in [verification.json](aggregate/verification.json); setup checks are in [setup_attempt.json](aggregate/setup_attempt.json).
+
+Before any further paid start, establish and verify a supported read/self-stop authorization path locally. Do not infer that read failure proves the key cannot stop a pod: its stop permission was not tested. No larger development/validation run, bulk extraction or training is authorized.
