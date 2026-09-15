@@ -28,3 +28,5 @@ The full CPU suite passed **546 tests**, including62 new runtime/review checks. 
 The next separate milestone is a concrete Qwen GPU execution proposal with an approved resource cap, pinned full-cache verification, tested provider shutdown controls and external stop verification. The real adapter has not run on CUDA in this version. No forecast cost/throughput is measured here, and the earlier MedGemma resource grant is not reused. Keep full development/validation, bulk extraction and MRI work paused.
 
 [Protocol](PROTOCOL.md) · [Reproduction](README.md) · [Software verification](aggregate/verification.json) · [Review record](REVIEW.md)
+
+ChatGPT reviewed the tested implementation and found no required local corrections. The [review record](REVIEW.md) preserves the remaining CUDA-validation and independent output-token decoding checks for a separate execution stage. GitHub CI passed for code commit b9ceb21.

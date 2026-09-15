@@ -17,5 +17,10 @@
   "private_backup_sha256": "4b6aa6c1e48a2b66e49d9f8feef7f8e2119f55e848a00231a4d42ef4b4e18170",
   "restored_real_plan_and_demo_review_verified": true,
   "blinded_browser_checked": true,
-  "clinical_adjudications": 0
+  "clinical_adjudications": 0,
+  "tested_code_commit": "b9ceb21d1b76262582b8b844b302f64f2006dbea",
+  "github_ci_run": 34969351390,
+  "github_ci_conclusion": "success",
+  "advisory_review_required_corrections": 0,
+  "output_ids_independently_decoded_by_offline_verifier": false
 }
