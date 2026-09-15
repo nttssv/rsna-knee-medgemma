@@ -238,10 +238,10 @@ def test_real_cpu_watchdog_reaps_worker(tmp_path):
     with pytest.raises(ProcessLookupError):os.kill(int(marker.read_text()),0)
 
 
-def test_locked_cli_fails_before_transformers_or_any_cache_access(tmp_path):
+def test_cli_requires_explicit_execute_before_transformers_or_cache_access(tmp_path):
     result=subprocess.run([sys.executable,str(SCRIPTS/'run_smoke.py'),'run','--prepared',str(tmp_path),
-        '--plan',str(tmp_path/'plan.json'),'--execute'],capture_output=True,text=True)
-    assert result.returncode!=0 and 'GPU execution is locked' in result.stderr
+        '--plan',str(tmp_path/'plan.json')],capture_output=True,text=True)
+    assert result.returncode!=0 and 'Explicit --execute is required' in result.stderr
     assert not list(tmp_path.iterdir())
     assert 'transformers' not in sys.modules
 
@@ -404,3 +404,22 @@ def test_parent_dispatch_order_receipts_and_fail_fast(tmp_path,monkeypatch,fail_
         assert dispatched==runner.ORDER and final['status']=='completed'
         from session_contract import verify_session
         assert verify_session(prepared,prepared/'adapter_runs')['reviewed_plan_sha256']==plan_sha
+
+
+@pytest.mark.parametrize('disabled', ['runtime', 'policy', 'medgemma', 'qwen'])
+def test_each_configuration_gate_can_refuse_execution(monkeypatch, disabled):
+    original = runner.config
+    def configured(name):
+        value = copy.deepcopy(original(name))
+        if name == disabled:
+            value['gpu_execution_enabled' if name in ('runtime', 'policy') else 'execution_enabled'] = False
+        return value
+    monkeypatch.setattr(runner, 'config', configured)
+    with pytest.raises(PermissionError, match='locked'):
+        runner.execution_guard(True)
+
+
+def test_candidate_flags_allow_guard_only_with_explicit_execute():
+    with pytest.raises(PermissionError, match='Explicit'):
+        runner.execution_guard(False)
+    runner.execution_guard(True)  # Checks configuration only; no model import or call.

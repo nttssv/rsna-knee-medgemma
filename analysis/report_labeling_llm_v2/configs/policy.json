@@ -13,6 +13,6 @@
   "repeats_per_model": 2,
   "development_total": 40,
   "validation_total": 18,
-  "gpu_execution_enabled": false,
+  "gpu_execution_enabled": true,
   "bulk_labeling_allowed": false
 }

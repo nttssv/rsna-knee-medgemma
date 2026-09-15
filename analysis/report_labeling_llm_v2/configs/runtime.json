@@ -1,6 +1,6 @@
 {
   "adapter_version": 1,
-  "gpu_execution_enabled": false,
+  "gpu_execution_enabled": true,
   "offline_cache_only": true,
   "run_count": 4,
   "studies_per_run": 5,
@@ -30,7 +30,7 @@
         106
       ],
       "generation_pad_token_id": 0,
-      "template_verification": "preserved pinned v1 metadata; fresh processor check pending"
+      "template_verification": "authenticated pinned processor verified; exact five-input token parity passed 2026-09-15"
     },
     "qwen": {
       "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",

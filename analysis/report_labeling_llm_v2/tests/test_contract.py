@@ -147,10 +147,12 @@ def test_repeatability_and_manual_gate_fail_closed():
     assert not g.assess_smoke(records,records,ids[::-1],review)['engineering_gate_passed']
 
 
-def test_protected_v1_and_execution_disabled():
+def test_protected_v1_and_scope_remains_bounded():
     assert c.verify_protected()>0
-    assert not c.config('policy')['gpu_execution_enabled']
-    assert not any(c.config(m)['execution_enabled'] for m in ['medgemma','qwen'])
+    policy = c.config('policy')
+    assert policy['bulk_labeling_allowed'] is False
+    assert policy['secondary_generation'] is False
+    assert (policy['smoke_studies'], policy['repeats_per_model']) == (5, 2)
 
 
 @pytest.mark.parametrize('fixture',json.loads((Path(__file__).parent/'semantic_cases.json').read_text()),ids=lambda f:f['name'])

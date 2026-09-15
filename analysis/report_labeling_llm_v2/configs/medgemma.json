@@ -25,7 +25,7 @@
   "gated": true,
   "trust_remote_code": false,
   "status": "NOT_RUN",
-  "execution_enabled": false,
+  "execution_enabled": true,
   "num_beams": 1,
   "thinking_control": "not_verified; do_not_claim_disabled"
 }

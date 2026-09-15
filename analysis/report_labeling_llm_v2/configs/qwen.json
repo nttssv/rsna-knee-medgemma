@@ -26,6 +26,6 @@
   "gated": false,
   "trust_remote_code": false,
   "status": "NOT_RUN",
-  "execution_enabled": false,
+  "execution_enabled": true,
   "num_beams": 1
 }

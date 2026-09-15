@@ -1,5 +1,7 @@
 # Local inference adapter — generation NOT RUN
 
+The subsequent [generation candidate](GENERATION_CANDIDATE.md) enables the four configuration gates for a fresh reviewed plan. Descriptions of locked flags below record the original adapter stage; they are superseded only for that candidate. Explicit execution, parent attestation and plan checks remain required.
+
 The generation adapter is implemented and tested with synthetic backends on CPU. A subsequent [CPU tokenizer preflight](TOKENIZER_PREFLIGHT.md) measured the current five prompts using real Transformers tokenizers, without calling the backend. Pinned Qwen and MedGemma tokenizer/config assets were downloaded and checksum-verified; a separate historical MedGemma export comparison is preserved. The subsequent [authorized load-only check](LOAD_PREFLIGHT.md) verified complete cached weight bytes, offline model loading, native CUDA/BF16 parameters, configured SDPA and prompt transfers for both models. No weights were downloaded and no forward or generation call occurred. SDPA kernel execution, KV-cache memory and generation behavior remain unverified.
 
 The earlier local candidate is preserved at commit `68149d994e16a03802e1c4261a738f94a133661b`. This subsequent implementation changes runtime tooling, not condition definitions, prompts, acceptance rules, the 40/18 split or v1 results. Old prepared packages stay intact but become stale under the new code fingerprints.
