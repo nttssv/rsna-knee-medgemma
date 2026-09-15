@@ -1,7 +1,7 @@
 {
   "scope": "CPU software integration only; no model inference",
-  "tests_passed": 343,
-  "new_tests_passed": 47,
+  "tests_passed": 350,
+  "new_tests_passed": 54,
   "test_command": "PYTHONPATH=src .venv/bin/python -m pytest -q",
   "gpu_model_calls": 0,
   "training_steps": 0,
@@ -9,22 +9,39 @@
   "synthetic_condition_cells": 240,
   "synthetic_review_cells_unreviewed": 240,
   "protected_historical_analysis_files": 145,
-  "prior_private_files_verified_unchanged": 532,
+  "prior_private_files_verified_unchanged": 573,
   "fixed_development_validation_split": [
     40,
     18
   ],
-  "runtime_plan_sha256": "24f04d991f980aaf81e99870506f900ef8b34c84c25cac76ce5bba9f4531a575",
+  "runtime_plan_sha256": "efd4bb59070e289326edc24eff7417719c7af554a23042038eb50e6cc0d70d66",
   "frozen_candidate_plan_sha256": "feb7a4a5a6132f1d97e1fd470f0b0195f0b92f6f0bc42136a15e0a77c678b775",
-  "backup_restored_files": 571,
-  "backup_sha256": "d84b20e7aafd376d246e4eb0dc57ecdb7969574a52169aefc87021c0327c8457",
+  "backup_restored_files": 612,
+  "backup_sha256": "a1a4d7e454e7c2b17cc2e9c18e53d6ffa7d1b73f5860c2b6c4e4479dba98ecc7",
   "browser_checks": [
     "Original input and proposed output rendered",
     "Blank save refused",
     "Synthetic reviewer/category/notes saved",
-    "Reload resets in-memory edits; source template remains blank"
+    "Reload resets in-memory edits; source template remains blank",
+    "Corrected UI prohibits technical-failure disposition for technically valid cells"
   ],
   "real_cuda_branch_executed": false,
   "execution_enabled": false,
-  "qualified_clinical_review_completed": false
+  "qualified_clinical_review_completed": false,
+  "relative_markdown_links_checked": 31,
+  "real_study_ids_screened": 58,
+  "staged_files_scanned": 15,
+  "original_runtime_plan_preserved": true,
+  "software_review_correction": "Technical failures require a non-semantic unreviewable disposition; no forced semantic error",
+  "mixed_status_synthetic_test": {
+    "planned_cells": 240,
+    "technical_failure_unreviewable": 12,
+    "semantically_reviewed": 228,
+    "forced_semantic_errors": 0
+  },
+  "initial_source_commit": "401bdf71c2849444fed2669ea6dd11a530beffb5",
+  "initial_implementation_ci": {
+    "run_id": 34938328873,
+    "conclusion": "success"
+  }
 }

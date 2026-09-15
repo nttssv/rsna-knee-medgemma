@@ -258,3 +258,51 @@ def test_bundle_mapping_tamper_rejected(session,bundle):
 def test_blinded_html_changed_rejected(session,bundle):
     with (bundle/'blinded/index.html').open('a') as f:f.write('changed')
     with pytest.raises(ValueError):review.verify_bundle(session,bundle,True)
+
+
+@pytest.fixture
+def failed_bundle(session,tmp_path):
+    """Fabricated completed generation with a parse failure; never measured output."""
+    key=rt.ORDER[0];out=session/'session'/key
+    raw=rt.lines(out/'raw.jsonl');raw[0]['generation'].update(raw_output='synthetic invalid JSON',decoded_with_special_tokens='synthetic invalid JSON')
+    (out/'raw.jsonl').write_text(''.join(json.dumps(r)+'\n' for r in raw))
+    parsed=rt.lines(out/'predictions.jsonl')
+    parsed[0]=dict(case_index=0,raw_record_sha256=rt.digest(raw[0]),response=rt.candidate.validate_v3(raw[0]['generation']['raw_output'],'Synthetic software fixture 0.'))
+    (out/'predictions.jsonl').write_text(''.join(json.dumps(r)+'\n' for r in parsed))
+    refresh_run(session,key)
+    bundle=tmp_path/'failed-review';review.make_bundle(session,bundle,True)
+    return bundle
+
+
+@pytest.mark.parametrize('categories',[['no_issue_identified'],['insufficient_information'],['polarity_contradiction'],[review.TECHNICAL_DISPOSITION,'other_entailment_failure'],[]])
+def test_technical_failure_cannot_be_counted_as_semantic(session,failed_bundle,tmp_path,categories):
+    rows=review_rows(failed_bundle);cases=rt.read(failed_bundle/'blinded/cases.json')['cases']
+    code=next(c['review_id'] for c in cases if c['conditions'][0]['technical_status']!='valid')
+    for r in rows:
+        if r['review_id']==code:r.update(categories=categories,notes='Synthetic technical failure test')
+    path=tmp_path/'bad-technical-review.json';rt.write(path,rows)
+    with pytest.raises(ValueError):review.validate_review(session,failed_bundle,path,True)
+
+
+def test_valid_cell_cannot_abstain_from_semantic_review(session,bundle,tmp_path):
+    rows=review_rows(bundle);rows[0].update(categories=[review.TECHNICAL_DISPOSITION],notes='Test')
+    path=tmp_path/'invalid-disposition.json';rt.write(path,rows)
+    with pytest.raises(ValueError):review.validate_review(session,bundle,path,True)
+
+
+def test_technical_disposition_keeps_denominators_separate(session,failed_bundle,tmp_path):
+    rows=review_rows(failed_bundle);cases=rt.read(failed_bundle/'blinded/cases.json')['cases']
+    code=next(c['review_id'] for c in cases if c['conditions'][0]['technical_status']!='valid')
+    for row in rows:
+        if row['review_id']==code:row.update(categories=[review.TECHNICAL_DISPOSITION],notes='No structured proposal; fabricated parse error')
+    path=tmp_path/'complete-review.json';rt.write(path,rows)
+    review.finalize(session,failed_bundle,path,tmp_path/'final',True)
+    results=rt.read(tmp_path/'final/review_results.json')['condition_results']
+    assert sum(r['reviewed'] for r in results)==240
+    assert sum(r['semantically_reviewed'] for r in results)==228
+    assert sum(r['technical_failure_unreviewable'] for r in results)==12
+    assert sum(r.get('no_issue_identified',0) for r in results)==228
+    assert sum(r.get('insufficient_information',0) for r in results)==0
+    comparisons=rt.read(tmp_path/'final/organizer_comparison.json')['rows']
+    invalid=[r for r in comparisons if r['technical_status']!='valid']
+    assert len(invalid)==12 and all(r['entailment_categories']==[] and r['review_disposition']==review.TECHNICAL_DISPOSITION for r in invalid)

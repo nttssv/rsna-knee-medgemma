@@ -30,12 +30,14 @@ function current(){return rows.find(r=>r.review_id===$('case').value&&r.conditio
 function render(){let c=data.cases.find(c=>c.review_id===$('case').value),cell=c.conditions.find(c=>c.condition===$('condition').value),r=current();
  $('report').textContent=c.report;$('prediction').textContent=cell.proposal?JSON.stringify(cell.proposal,null,2):'No complete structured proposal is available.';
  $('status').textContent=`Technical status: ${cell.technical_status}. Lexical acceptance does not establish medical correctness.`;
- document.querySelectorAll('#categories input').forEach(x=>x.checked=r.categories.includes(x.value));$('notes').value=r.notes;
+ document.querySelectorAll('#categories input').forEach(x=>{x.checked=r.categories.includes(x.value);x.disabled=cell.technical_status==='valid'?x.value==='technical_failure_unreviewable':x.value!=='technical_failure_unreviewable'});$('notes').value=r.notes;
  $('message').textContent='';$('progress').textContent=`${rows.filter(r=>r.categories.length).length} / 240 cells saved locally`;
 }
 $('case').onchange=render;$('condition').onchange=render;
 $('save').onclick=()=>{let categories=[...document.querySelectorAll('#categories input:checked')].map(x=>x.value);
  if(!$('reviewer').value.trim()||!categories.length){$('message').textContent='Enter reviewer identity and select a category.';return}
+ let cell=data.cases.find(c=>c.review_id===$('case').value).conditions.find(c=>c.condition===$('condition').value);
+ if((cell.technical_status!=='valid'&&(categories.length!==1||categories[0]!=='technical_failure_unreviewable'))||(cell.technical_status==='valid'&&categories.includes('technical_failure_unreviewable'))){$('message').textContent='Technical failures require the unreviewable disposition; valid outputs require semantic review.';return}
  if(categories.includes('no_issue_identified')&&categories.length>1){$('message').textContent='No issue cannot be combined with other categories.';return}
  if(!categories.includes('no_issue_identified')&&!$('notes').value.trim()){$('message').textContent='Explain the issue or insufficient information in notes.';return}
  Object.assign(current(),{reviewer:$('reviewer').value.trim(),reviewed_at:new Date().toISOString(),categories,notes:$('notes').value});render();$('message').textContent='Saved in this page. Download to preserve it.';

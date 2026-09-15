@@ -9,6 +9,8 @@ import secrets
 
 import runtime_v3 as rt
 
+TECHNICAL_DISPOSITION='technical_failure_unreviewable'
+
 
 def proposal(response,condition):
     """Retain a structurally readable proposal even when its evidence failed validation."""
@@ -47,7 +49,7 @@ def make_bundle(prepared,output,allow_synthetic=False):
     rt.write(blinded/'review_template.json',rows)
     definitions=(rt.V3/'prompts/target_definitions.txt').read_text()
     payload=dict(synthetic=plan['synthetic'],cases=cases,rows=rows,definitions=definitions,
-        categories=[c for c in rt.candidate.REVIEW_CATEGORIES if c!='reference_discordance'])
+        categories=[c for c in rt.candidate.REVIEW_CATEGORIES if c!='reference_discordance']+[TECHNICAL_DISPOSITION])
     template=(rt.ROOT/'scripts/reviewer.html').read_text()
     (blinded/'index.html').write_text(template.replace('__PAYLOAD__',json.dumps(payload,ensure_ascii=False).replace('<','\\u003c')))
     (blinded/'index.html').chmod(0o600)
@@ -90,7 +92,7 @@ def validate_review(prepared,bundle,review_path,allow_synthetic=False):
     rows=rt.read(review_path)
     if not isinstance(rows,list) or len(rows)!=240:raise ValueError('Exactly 240 reviewed cells required')
     seen=set();identities=set()
-    allowed=set(rt.candidate.REVIEW_CATEGORIES)-{'reference_discordance'}
+    allowed=(set(rt.candidate.REVIEW_CATEGORIES)-{'reference_discordance'})|{TECHNICAL_DISPOSITION}
     for row in rows:
         if set(row)!={'review_id','output_sha256','condition','reviewer','reviewed_at','categories','notes'}:
             raise ValueError('Unexpected review fields')
@@ -108,8 +110,10 @@ def validate_review(prepared,bundle,review_path,allow_synthetic=False):
             raise ValueError('Invalid, repeated, or premature reference category')
         if 'no_issue_identified' in categories and len(categories)!=1:raise ValueError('No-issue is exclusive')
         status=next(c['technical_status'] for c in cases[code]['conditions'] if c['condition']==condition)
-        if status!='valid' and categories==['no_issue_identified']:
-            raise ValueError('Technically failed cells cannot be approved')
+        if status!='valid' and categories!=[TECHNICAL_DISPOSITION]:
+            raise ValueError('Technically failed cells require only the unreviewable disposition')
+        if status=='valid' and TECHNICAL_DISPOSITION in categories:
+            raise ValueError('Technically valid cells require semantic review')
         if not isinstance(row['notes'],str) or (categories!=['no_issue_identified'] and not row['notes'].strip()):
             raise ValueError('Explain each issue or insufficient-information judgment')
         identities.add(row['reviewer'].strip())
@@ -159,14 +163,19 @@ def finalize(prepared,bundle,review_path,output,allow_synthetic=False):
             gold=None if context is None else context[i]['gold'][condition]
             row=dict(review_id=code,run=key,case_index=i,condition=condition,accepted_label=label,
                 organizer=gold,agreement=None if not binary or gold is None else int(label=='positive')==gold,
-                entailment_categories=r['categories'],reference_review_categories=[],reference_review_notes='')
+                technical_status=cell['technical_status'],
+                review_disposition='semantic_review' if cell['technical_status']=='valid' else TECHNICAL_DISPOSITION,
+                entailment_categories=r['categories'] if cell['technical_status']=='valid' else [],
+                reference_review_categories=[],reference_review_notes='')
             comparisons.append(row)
             c=counts.setdefault((key,condition),Counter(planned=5))
             c.update(reviewed=1,technically_accepted=int(cell['technical_status']=='valid'),binary_decisions=int(binary),
+                semantically_reviewed=int(cell['technical_status']=='valid'),
+                technical_failure_unreviewable=int(cell['technical_status']!='valid'),
                 reviewer_no_issue_yield=int(cell['technical_status']=='valid' and r['categories']==['no_issue_identified']),
                 reviewer_no_issue_binary_yield=int(binary and r['categories']==['no_issue_identified']),
                 organizer_comparisons=int(row['agreement'] is not None),organizer_matches=int(row['agreement'] is True))
-            c.update(r['categories'])
+            if cell['technical_status']=='valid':c.update(r['categories'])
     rt.write(output/'organizer_comparison.json',dict(synthetic=data['plan']['synthetic'],review_sha256=data['review_sha256'],
         note='Stage two: numeric disagreement is not adjudication of report or organizer correctness.',rows=comparisons))
     rt.write(output/'review_results.json',dict(synthetic=data['plan']['synthetic'],review_sha256=data['review_sha256'],
