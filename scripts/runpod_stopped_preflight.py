@@ -15,7 +15,7 @@ def request(query, token):
     # RunPod's documented GraphQL authentication. Never log this URL.
     url = 'https://api.runpod.io/graphql?' + urllib.parse.urlencode({'api_key': token})
     req = urllib.request.Request(url, data=json.dumps({'query': query}).encode(),
-                                 headers={'Content-Type': 'application/json'})
+                                 headers={'Content-Type': 'application/json', 'User-Agent': 'rsna-preflight/1.0'})
     try:
         with urllib.request.urlopen(req, timeout=20) as response:
             payload = json.load(response)

@@ -25,7 +25,10 @@
   "model_loads": 0,
   "generations": 0,
   "training_runs": 0,
-  "local_preflight_unit_tests_passed": 6,
-  "temporary_control_key_created": false,
-  "control_key_approval_pending": true
+  "local_preflight_unit_tests_passed": 7,
+  "temporary_control_key_created": true,
+  "control_key_approval_pending": false,
+  "stopped_pod_control_preflight_passed": true,
+  "resume_failed_due_to_host_capacity": true,
+  "additional_compute_started": false
 }

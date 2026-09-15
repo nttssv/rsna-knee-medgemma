@@ -55,3 +55,12 @@ class PreflightTests(unittest.TestCase):
         with patch.object(m.urllib.request, 'urlopen', side_effect=OSError('SECRET')):
             with self.assertRaises(m.PreflightError) as error: m.request('query{}', 'SECRET')
         self.assertNotIn('SECRET', str(error.exception))
+
+    def test_explicit_application_user_agent(self):
+        class Response:
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def read(self): return b'{"data": {"pod": {"id": "abc123"}}}'
+        with patch.object(m.urllib.request, 'urlopen', return_value=Response()) as send:
+            m.request('query{}', 'fixture')
+        self.assertEqual(send.call_args.args[0].get_header('User-agent'), 'rsna-preflight/1.0')
