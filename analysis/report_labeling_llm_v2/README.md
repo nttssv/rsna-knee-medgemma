@@ -38,6 +38,7 @@ Outputs: five label-free input records, two sets of unrendered model prompts, a 
 ## Files
 
 - [PROTOCOL.md](PROTOCOL.md): exact normalization, states, repeatability and advancement criteria.
+- [LOAD_PREFLIGHT.md](LOAD_PREFLIGHT.md): separate full-cache and bounded GPU load check; no inference.
 - [RUNTIME.md](RUNTIME.md): adapter, fake-backend tests, template/stop-token review and locked execution command.
 - [RESULTS.md](RESULTS.md): CPU verification and explicit NOT RUN status.
 - [REVIEW.md](REVIEW.md): external advisory context and unresolved questions.
