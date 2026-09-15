@@ -1,0 +1,170 @@
+{
+  "medgemma": {
+    "status": "TOKENIZED_NO_INFERENCE",
+    "model_id": "google/medgemma-1.5-4b-it",
+    "expected_revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+    "verified_snapshot_revision": null,
+    "provenance": "historical_local_export_revision_unverified",
+    "chat_template_sha256": "7de1c58e208eda46e9c7f86397df37ec49883aeece39fb961e0a6b24088dd3c4",
+    "package_versions": {
+      "torch": "2.8.0",
+      "transformers": "5.12.0",
+      "huggingface-hub": "1.19.0",
+      "accelerate": "1.15.0",
+      "jinja2": "3.1.6",
+      "numpy": "2.5.3",
+      "pillow": "11.0.0",
+      "safetensors": "0.8.0",
+      "sentencepiece": "0.2.2",
+      "tokenizers": "0.22.2"
+    },
+    "aggregate": {
+      "studies": 5,
+      "min_input_tokens": 1618,
+      "max_input_tokens": 1945,
+      "total_input_tokens": 8504,
+      "input_cap": 8192,
+      "output_reserve": 2048,
+      "max_input_plus_output": 3993,
+      "input_budget_passed": true,
+      "config_context_limit": null,
+      "config_context_budget_passed": null,
+      "rendered_token_parity_passed": true,
+      "model_calls": 0,
+      "loaded_weight_context_verified": false
+    },
+    "weights_loaded": false,
+    "gpu_used": false,
+    "inference_ready": false,
+    "assets": [
+      {
+        "file": "tokenizer.json",
+        "bytes": 33384568,
+        "sha256": "4667f2089529e8e7657cfb6d1c19910ae71ff5f28aa7ab2ff2763330affad795",
+        "hub_blob": null
+      },
+      {
+        "file": "tokenizer.model",
+        "bytes": 4689074,
+        "sha256": "1299c11d7cf632ef3b4e11937501358ada021bbdf7c47638d13c0ee982f2e79c",
+        "hub_blob": null
+      },
+      {
+        "file": "tokenizer_config.json",
+        "bytes": 1155414,
+        "sha256": "d7b9d2b006943ec5490dfbb3ea0142d4e15481587c7085685d1e4b5afd51c592",
+        "hub_blob": null
+      },
+      {
+        "file": "special_tokens_map.json",
+        "bytes": 662,
+        "sha256": "2f7b0adf4fb469770bb1490e3e35df87b1dc578246c5e7e6fc76ecf33213a397",
+        "hub_blob": null
+      },
+      {
+        "file": "added_tokens.json",
+        "bytes": 35,
+        "sha256": "50b2f405ba56a26d4913fd772089992252d7f942123cc0a034d96424221ba946",
+        "hub_blob": null
+      },
+      {
+        "file": "processor_config.json",
+        "bytes": 70,
+        "sha256": "3ffd5f11778dc73e2b69b3c00535e4121e1badf7018136263cd17b5b34fbaa53",
+        "hub_blob": null
+      },
+      {
+        "file": "preprocessor_config.json",
+        "bytes": 570,
+        "sha256": "5b2f684b616a25f3cd4a700e5e471a07fcaabc5ec07871d2231b7e376e8648ce",
+        "hub_blob": null
+      },
+      {
+        "file": "chat_template.jinja",
+        "bytes": 1532,
+        "sha256": "7de1c58e208eda46e9c7f86397df37ec49883aeece39fb961e0a6b24088dd3c4",
+        "hub_blob": null
+      }
+    ],
+    "special_token_ids": {
+      "bos_token_id": 2,
+      "eos_token_id": 1,
+      "pad_token_id": 0,
+      "unk_token_id": 3,
+      "vocab_size": 262144,
+      "total_token_count": 262145
+    }
+  },
+  "qwen": {
+    "status": "TOKENIZED_NO_INFERENCE",
+    "model_id": "Qwen/Qwen3-14B",
+    "expected_revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+    "verified_snapshot_revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+    "provenance": "pinned_hub_snapshot_content_addressed_assets",
+    "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+    "package_versions": {
+      "torch": "2.8.0",
+      "transformers": "5.12.0",
+      "huggingface-hub": "1.19.0",
+      "accelerate": "1.15.0",
+      "jinja2": "3.1.6",
+      "numpy": "2.5.3",
+      "pillow": "11.0.0",
+      "safetensors": "0.8.0",
+      "sentencepiece": "0.2.2",
+      "tokenizers": "0.22.2"
+    },
+    "aggregate": {
+      "studies": 5,
+      "min_input_tokens": 1670,
+      "max_input_tokens": 2024,
+      "total_input_tokens": 8798,
+      "input_cap": 8192,
+      "output_reserve": 2048,
+      "max_input_plus_output": 4072,
+      "input_budget_passed": true,
+      "config_context_limit": 40960,
+      "config_context_budget_passed": true,
+      "rendered_token_parity_passed": true,
+      "model_calls": 0,
+      "loaded_weight_context_verified": false
+    },
+    "weights_loaded": false,
+    "gpu_used": false,
+    "inference_ready": false,
+    "assets": [
+      {
+        "file": "tokenizer.json",
+        "bytes": 11422654,
+        "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+        "hub_blob": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+      },
+      {
+        "file": "tokenizer_config.json",
+        "bytes": 9732,
+        "sha256": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+        "hub_blob": "417d038a63fa3de29cfde265caedae14d1a58d92"
+      },
+      {
+        "file": "config.json",
+        "bytes": 728,
+        "sha256": "e73c3664ca09b10a673fef0c22e8a6b456201d49bd4713c9691f775720e8857a",
+        "hub_blob": "37e7491082573462e8545299cdf6938e8b684e31"
+      },
+      {
+        "file": "generation_config.json",
+        "bytes": 239,
+        "sha256": "2325da0f15bb848e018c5ae071b7943332e9f871d6b60e2ed22ca97d4cb993d2",
+        "hub_blob": "20a8a9156fc8c3f25295ca067f61fdf120d517c5"
+      }
+    ],
+    "special_token_ids": {
+      "bos_token_id": null,
+      "eos_token_id": 151645,
+      "pad_token_id": 151643,
+      "unk_token_id": null,
+      "vocab_size": 151643,
+      "total_token_count": 151669
+    }
+  }
+}
