@@ -25,5 +25,9 @@
   "test_command": "PYTHONPATH=src .venv/bin/python -m pytest -q",
   "staged_files_checked": 19,
   "real_study_ids_screened": 58,
-  "relative_markdown_links_checked": 28
+  "relative_markdown_links_checked": 28,
+  "reviewed_source_commit": "43d2a6396b2e7e691473f6b52c70716809d190ce",
+  "source_review": "No concrete blocker to requesting explicit user approval for the exact $2/90-minute proposal",
+  "github_ci_run": 34942347688,
+  "github_ci": "success"
 }
