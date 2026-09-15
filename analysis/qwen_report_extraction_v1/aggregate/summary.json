@@ -1,0 +1,139 @@
+{
+  "status": "SAVED_OUTPUT_AUDIT_AND_LOCAL_PREPARATION",
+  "model": "Qwen/Qwen3-14B",
+  "revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+  "runs": [
+    {
+      "repeat": 1,
+      "studies": 5,
+      "condition_cells": 60,
+      "statuses": {
+        "valid": 58,
+        "evidence_error": 2
+      },
+      "mean_generation_seconds": 22.694638052978554,
+      "generation_tokens": 2605,
+      "parser_sensitivity_transitions": {
+        "valid -> valid": 56,
+        "evidence_error -> valid": 2,
+        "valid -> ambiguous_evidence_error": 2
+      }
+    },
+    {
+      "repeat": 2,
+      "studies": 5,
+      "condition_cells": 60,
+      "statuses": {
+        "valid": 58,
+        "evidence_error": 2
+      },
+      "mean_generation_seconds": 25.335485720052382,
+      "generation_tokens": 2605,
+      "parser_sensitivity_transitions": {
+        "valid -> valid": 56,
+        "evidence_error -> valid": 2,
+        "valid -> ambiguous_evidence_error": 2
+      }
+    }
+  ],
+  "repeatability": {
+    "raw_identical": 5,
+    "valid_identical": 58
+  },
+  "languages": {
+    "Spanish": 1,
+    "English": 4
+  },
+  "unique_evidence_failures": 2,
+  "unique_whitespace_diagnostic_matches": 2,
+  "diagnostic_matches_are_predictions": false,
+  "inherited_review_items": 12,
+  "parser_sensitivity_is_new_inference": false,
+  "inherited_review_categories": {
+    "verbatim_evidence": 2,
+    "report_reference_disagreement": 4,
+    "anatomy_compartment": 3,
+    "threshold_reference_disagreement": 1,
+    "contradictory_report_timing": 1,
+    "severity_unspecified": 1
+  },
+  "semantic_adjudications_completed": 0,
+  "new_organizer_evaluation": false,
+  "validation_reports_loaded": 0,
+  "new_generations": 0,
+  "model_weights_loaded": false,
+  "provider_calls": 0,
+  "protected_files": 189,
+  "tokenizer": {
+    "status": "TOKENIZED_OFFLINE_NO_INFERENCE",
+    "arms": {
+      "control": {
+        "studies": 5,
+        "min_input_tokens": 1277,
+        "max_input_tokens": 1631,
+        "total_input_tokens": 6833,
+        "max_input_plus_output": 3679
+      },
+      "candidate": {
+        "studies": 5,
+        "min_input_tokens": 1670,
+        "max_input_tokens": 2024,
+        "total_input_tokens": 8798,
+        "max_input_plus_output": 4072
+      }
+    },
+    "context_limit": 40960,
+    "original_rendered_prompt_and_count_matches": 10,
+    "original_token_ids_available": false,
+    "assets": [
+      {
+        "file": "tokenizer.json",
+        "bytes": 11422654,
+        "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+        "hub_blob": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+      },
+      {
+        "file": "tokenizer_config.json",
+        "bytes": 9732,
+        "sha256": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+        "hub_blob": "417d038a63fa3de29cfde265caedae14d1a58d92"
+      },
+      {
+        "file": "config.json",
+        "bytes": 728,
+        "sha256": "e73c3664ca09b10a673fef0c22e8a6b456201d49bd4713c9691f775720e8857a",
+        "hub_blob": "37e7491082573462e8545299cdf6938e8b684e31"
+      },
+      {
+        "file": "generation_config.json",
+        "bytes": 239,
+        "sha256": "2325da0f15bb848e018c5ae071b7943332e9f871d6b60e2ed22ca97d4cb993d2",
+        "hub_blob": "20a8a9156fc8c3f25295ca067f61fdf120d517c5"
+      }
+    ],
+    "versions": {
+      "torch": "2.8.0",
+      "transformers": "5.12.0",
+      "huggingface-hub": "1.19.0",
+      "accelerate": "1.15.0",
+      "jinja2": "3.1.6",
+      "numpy": "2.5.3",
+      "pillow": "11.0.0",
+      "safetensors": "0.8.0",
+      "sentencepiece": "0.2.2",
+      "tokenizers": "0.22.2"
+    },
+    "metadata": {
+      "model_id": "Qwen/Qwen3-14B",
+      "model_revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+      "tokenizer_revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+      "tokenizer_eos_token_id": 151645,
+      "tokenizer_pad_token_id": 151643,
+      "thinking_control": "enable_thinking=False"
+    }
+  },
+  "source_sha256": "c6e5b3a65f8c6c7378da933fcd87e582c5bdbb1d2be7494d6efd342a529b1186",
+  "protocol_sha256": "399b59b38092daba7499e5686c4bf87be61f94127ef9f73a6fe3f4ae94386596",
+  "proposal_sha256": "6c336fd7d97fc9add16a5ca577d1326046885ae3b4497fac98ed43193b9d6647"
+}

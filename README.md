@@ -1,10 +1,12 @@
 # RSNA Knee · MedGemma
 
-Research code and aggregate findings for the RSNA Knee Abnormality Detection competition. The current focus is **MedGemma evaluation and improvement**. Further YOLO work is paused.
+Research code and aggregate findings for the RSNA Knee Abnormality Detection competition. The current focus is **Qwen report extraction**; MedGemma development is paused. Further YOLO work is paused.
 
 This repository contains the code, configuration, experiment record, and instructions. The separate `state/` directory holds data and trained models. Set `RSNA_STATE_DIR` to any persistent disk on any provider; no RunPod account or SDK is required.
 
 ## Current experiment
+
+The [Qwen local audit and proposal](analysis/qwen_report_extraction_v1/README.md) verifies both saved Qwen repeats and prepares the exact v1 versus existing unrun v2 prompt packages. Parser-policy sensitivity retains 58/60 technical passes but changes four cells per repeat. Both prompts fit the token budget. No new model generation occurred. [Results and next steps](analysis/qwen_report_extraction_v1/RESULTS.md).
 
 The [offline candidate-failure audit](analysis/candidate_failure_diagnostic_v1/README.md) reproduced all nine saved inputs/outputs exactly and verified the failed child receipt. It found two output-contract failures: short state-only objects, and a repeated evidence array that consumed 4,096 answer tokens without a recorded thought envelope. No model was loaded or rerun. [Findings and limitations](analysis/candidate_failure_diagnostic_v1/RESULTS.md).
 
