@@ -23,3 +23,7 @@ Published-source review also led to parent/worker attestation and mandatory comp
 ## CPU tokenizer preflight — 2026-09-15
 
 Real CPU tokenization of the same five development reports passed prompt/token parity and the 8,192-token input cap. MedGemma’s saved export used 1,618–1,945 input tokens; the pinned Qwen tokenizer used 1,670–2,024. With 2,048 output tokens reserved, the maxima are 3,993 and 4,072 respectively. These are input sizing measurements, not prediction quality or throughput. MedGemma export revision remains unverified; Qwen’s config context check passed. No backend, weights, CUDA, validation inference or generation was used. See [complete provenance and commands](TOKENIZER_PREFLIGHT.md).
+
+## Pinned MedGemma follow-up
+
+Authenticated checksum verification and offline tokenization now close the MedGemma export-revision gap. All ten downloaded processor/tokenizer/config assets match the pinned revision. The same five rendered prompts and input token IDs exactly match the saved-export run: 1,618–1,945 input tokens, total 8,504. The verified config context is 131,072; maximum input plus 2,048 output allowance is 3,993. Two exported tokenizer JSON files differ in image-token special flags and padding-side metadata, as documented in [the preflight report](TOKENIZER_PREFLIGHT.md); equivalence is limited to the tested inputs. The initial aggregate remains historical; [the new pinned aggregate](aggregate/medgemma_pinned_preflight.json) records this follow-up. Inference, training and GPU execution remain NOT RUN.

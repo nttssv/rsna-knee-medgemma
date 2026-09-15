@@ -1,5 +1,9 @@
 # CPU tokenizer preflight — 2026-09-15
 
+**Latest status: both pinned tokenizers verified; inference NOT RUN.** The authenticated MedGemma follow-up below closes the earlier export-revision gap.
+
+## Initial export comparison
+
 **Tokenization measured; inference NOT RUN.** The same five original development reports were processed locally with real Transformers tokenizers. No model backend, generation, weights, GPU startup, paid compute, training or validation inference was used. The frozen v1 folders, original 40/18 split, prompts, parser and semantic acceptance gate remain unchanged.
 
 | Check | MedGemma saved export | Qwen pinned snapshot |
@@ -64,10 +68,47 @@ Private outputs are `inputs_tokenized.json` (full rendered prompts and input IDs
 
 Transformers emitted a processor-kwargs deprecation warning for MedGemma. Actual processor IDs matched untruncated retokenization for every input, so this check found no truncation discrepancy. The warning is retained as an integration observation; runtime argument changes would require separate review and retesting.
 
-## Remaining work
+## Remaining work after the initial check
 
-Verify the pinned MedGemma vocabulary and processor; then inspect complete weight caches and the prospective CUDA/BF16 environment before any paid smoke decision. All execution flags remain false. No new labels or accuracy results exist, and the twelve unresolved human-review items remain unresolved.
+The pinned MedGemma check was initially pending and is completed in the follow-up below. Complete weight caches and the prospective CUDA/BF16 environment still need inspection before any paid smoke decision. All execution flags remain false. No new labels or accuracy results exist, and the twelve unresolved human-review items remain unresolved.
 
 ## Verification
 
 The full repository suite passed **216 tests**, including eight new vocabulary/blob-integrity and context-budget checks. Both real tokenizer checks were repeated after resolving a new-script import-name collision; rendered prompts and token IDs were identical. The 70 protected v1 files and all 410 files present in private state at the start of this stage remained byte-identical. Local Markdown links and staged publication contents were checked; the local doctor confirmed CUDA unavailable.
+
+## Authenticated pinned MedGemma follow-up
+
+The local CLI authenticated successfully, and the pinned small assets were downloaded into a real Hub snapshot. Exactly ten allowlisted files (about 39.2 MB) were retrieved; no weights were downloaded. `hf cache verify` checked all ten against the exact revision and reported five other remote files missing. This verifies the downloaded processor/tokenizer/config assets, not a complete model cache. The offline script also verified their content-addressed blob hashes.
+
+After local authentication, reproduce the small-asset download and remote checksum check with:
+
+```bash
+hf download google/medgemma-1.5-4b-it \
+  added_tokens.json chat_template.jinja config.json generation_config.json \
+  preprocessor_config.json processor_config.json special_tokens_map.json \
+  tokenizer.json tokenizer.model tokenizer_config.json \
+  --revision 91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b \
+  --cache-dir state/cache/tokenizer-preflight
+hf cache verify google/medgemma-1.5-4b-it \
+  --revision 91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b \
+  --cache-dir state/cache/tokenizer-preflight
+```
+
+The unchanged CPU command was run with `--model medgemma --cache state/cache/tokenizer-preflight` against a fresh private package containing the same five original development reports. It produced:
+
+| Pinned MedGemma check | Result |
+|---|---|
+| Revision | `91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b` |
+| Input tokens | 1,618–1,945; total 8,504 |
+| Rendered prompts and input token IDs | Identical to saved-export results on all five |
+| Template / EOS / PAD | Expected hash / 1 / 0 |
+| Config context limit | 131,072 |
+| Maximum input + 2,048 output reserve | 3,993 — passes |
+| Model generation metadata | EOS `[1, 106]`; PAD absent, existing runtime falls back to tokenizer PAD 0 |
+| Weights / GPU / predictions | None |
+
+[Aggregate pinned receipt](aggregate/medgemma_pinned_preflight.json) records the asset hashes, package versions, special-token IDs and historical-export comparison. The original [export/Qwen receipt](aggregate/tokenizer_preflight.json) remains unchanged as historical evidence. Prior private receipts are also preserved; this result supersedes the missing revision/context checks, not the earlier observations.
+
+The Hub and saved-export files are **not byte-identical in every field**. `tokenizer.json` differs only in the `special` flag for added IDs 255999 (`<start_of_image>`) and 256000 (`<end_of_image>`): false in the Hub asset, true in the export. `tokenizer_config.json` has those same differences and `padding_side` left in the Hub versus right in the export. The underlying tokenizer model JSON matches; six shared files, including the SentencePiece file and template, are byte-identical. Loaded special-token metadata matches, and every rendered prompt and input ID matches on this fixed batch-one, text-only check. This does not establish equivalence for padded batches, image input or every possible text. Future execution uses the pinned Hub assets.
+
+No source code, prompt, ontology, parser, semantic gate or execution flag changed for this follow-up. No validation inference, training, model loading or provider startup occurred. The remaining technical stage is complete weight-cache and CUDA/BF16 verification; generation remains locked and the twelve human-review items remain unresolved.

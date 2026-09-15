@@ -1,0 +1,127 @@
+{
+  "status": "TOKENIZED_NO_INFERENCE",
+  "model_id": "google/medgemma-1.5-4b-it",
+  "expected_revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "verified_snapshot_revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "provenance": "pinned_hub_snapshot_content_addressed_assets",
+  "chat_template_sha256": "7de1c58e208eda46e9c7f86397df37ec49883aeece39fb961e0a6b24088dd3c4",
+  "package_versions": {
+    "torch": "2.8.0",
+    "transformers": "5.12.0",
+    "huggingface-hub": "1.19.0",
+    "accelerate": "1.15.0",
+    "jinja2": "3.1.6",
+    "numpy": "2.5.3",
+    "pillow": "11.0.0",
+    "safetensors": "0.8.0",
+    "sentencepiece": "0.2.2",
+    "tokenizers": "0.22.2"
+  },
+  "aggregate": {
+    "studies": 5,
+    "min_input_tokens": 1618,
+    "max_input_tokens": 1945,
+    "total_input_tokens": 8504,
+    "input_cap": 8192,
+    "output_reserve": 2048,
+    "max_input_plus_output": 3993,
+    "input_budget_passed": true,
+    "config_context_limit": 131072,
+    "config_context_budget_passed": true,
+    "rendered_token_parity_passed": true,
+    "model_calls": 0,
+    "loaded_weight_context_verified": false
+  },
+  "weights_loaded": false,
+  "gpu_used": false,
+  "inference_ready": false,
+  "assets": [
+    {
+      "file": "tokenizer.json",
+      "bytes": 33384570,
+      "sha256": "7d4046bf0505a327dd5a0abbb427ecd4fc82f99c2ceaa170bc61ecde12809b0c",
+      "hub_blob": "7d4046bf0505a327dd5a0abbb427ecd4fc82f99c2ceaa170bc61ecde12809b0c"
+    },
+    {
+      "file": "tokenizer.model",
+      "bytes": 4689074,
+      "sha256": "1299c11d7cf632ef3b4e11937501358ada021bbdf7c47638d13c0ee982f2e79c",
+      "hub_blob": "1299c11d7cf632ef3b4e11937501358ada021bbdf7c47638d13c0ee982f2e79c"
+    },
+    {
+      "file": "tokenizer_config.json",
+      "bytes": 1155415,
+      "sha256": "88269475414d45d3e59892d3519b0d4e28ec6416fecf6b523fb986cbe452075f",
+      "hub_blob": "ad0c34f8dd76c7138b35b3973f3b4a422d5136a9"
+    },
+    {
+      "file": "special_tokens_map.json",
+      "bytes": 662,
+      "sha256": "2f7b0adf4fb469770bb1490e3e35df87b1dc578246c5e7e6fc76ecf33213a397",
+      "hub_blob": "1a6193244714d3d78be48666cb02cdbfac62ad86"
+    },
+    {
+      "file": "added_tokens.json",
+      "bytes": 35,
+      "sha256": "50b2f405ba56a26d4913fd772089992252d7f942123cc0a034d96424221ba946",
+      "hub_blob": "e17bde03d42feda32d1abfca6d3b598b9a020df7"
+    },
+    {
+      "file": "processor_config.json",
+      "bytes": 70,
+      "sha256": "3ffd5f11778dc73e2b69b3c00535e4121e1badf7018136263cd17b5b34fbaa53",
+      "hub_blob": "453c7966d4b5d0b4a317c585989f64c58c2a6bf0"
+    },
+    {
+      "file": "preprocessor_config.json",
+      "bytes": 570,
+      "sha256": "5b2f684b616a25f3cd4a700e5e471a07fcaabc5ec07871d2231b7e376e8648ce",
+      "hub_blob": "cbd4f0cd77e39566f11921f9995bb3a4d008a83e"
+    },
+    {
+      "file": "chat_template.jinja",
+      "bytes": 1532,
+      "sha256": "7de1c58e208eda46e9c7f86397df37ec49883aeece39fb961e0a6b24088dd3c4",
+      "hub_blob": "1117055ab8e8c90e1b200be00cddb78943616d9e"
+    },
+    {
+      "file": "config.json",
+      "bytes": 2551,
+      "sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+      "hub_blob": "d3842cc948343b17846a93ec9a91d5b325dc7f64"
+    },
+    {
+      "file": "generation_config.json",
+      "bytes": 115,
+      "sha256": "921a391e0d387377b4c4a05273a68b7bc2196cf2a272ee605007853ea37f3224",
+      "hub_blob": "19b5c70598644fcc255c7be7099b1af631e956ef"
+    }
+  ],
+  "special_token_ids": {
+    "bos_token_id": 2,
+    "eos_token_id": 1,
+    "pad_token_id": 0,
+    "unk_token_id": 3,
+    "vocab_size": 262144,
+    "total_token_count": 262145
+  },
+  "hub_checksum_verification": {
+    "command": "hf cache verify google/medgemma-1.5-4b-it --revision 91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b --cache-dir state/cache/tokenizer-preflight",
+    "exit_code": 0,
+    "checked_files": 10,
+    "missing_remote_files": 5,
+    "full_weight_cache_verified": false
+  },
+  "historical_export_comparison": {
+    "all_five_rendered_prompts_and_token_ids_identical": true,
+    "tokenizer_model_json_equal": true,
+    "sentencepiece_file_identical": true,
+    "chat_template_identical": true,
+    "json_differences": {
+      "tokenizer.json": "added_tokens 255999 and 256000: special false in Hub, true in export",
+      "tokenizer_config.json": "same added token flags; padding_side left in Hub, right in export"
+    },
+    "runtime_special_token_metadata_equal": true,
+    "general_equivalence_claimed": false
+  }
+}
