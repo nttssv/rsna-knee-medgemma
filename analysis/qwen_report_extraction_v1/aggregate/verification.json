@@ -1,9 +1,10 @@
 {
-  "cpu_tests_passed": 482,
-  "new_synthetic_tests": 20,
+  "cpu_tests_passed": 484,
+  "new_synthetic_tests": 22,
   "protected_history_files": 189,
   "private_archive_files": 7,
-  "private_archive_sha256": "aa3392d0beaa8952aaa57a8ce8552b0977aa9452c4c00516f1a093d6d34f01cc",
+  "private_archive_sha256": "d2b9734b89cd0996fbeeb3cbc6559fbb0663d7c651f06db13bd8507ccc962f69",
   "private_restore_verified": true,
-  "new_generations": 0
+  "new_generations": 0,
+  "reviewed_followup_restore_verified": true
 }

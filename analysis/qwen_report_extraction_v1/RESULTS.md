@@ -60,4 +60,6 @@ The proposed smoke is NOT RUN and has no execution adapter in this package. Futu
 
 ## Verification
 
-All **482 CPU tests passed**, including 20 new synthetic audit/contract checks. They test corruption rejection, preservation of historical outputs, parser-policy differences and exact prompt reuse; they do not measure Qwen's medical performance. Public [aggregate evidence](aggregate/summary.json) records the source/protocol/config hashes and actual tokenizer versions. [README](README.md) gives reproduction instructions.
+All **484 CPU tests passed**, including 22 new synthetic audit/contract checks. They test corruption rejection, preservation of historical outputs, parser-policy differences and exact prompt reuse; they do not measure Qwen's medical performance. Public [aggregate evidence](aggregate/summary.json) records the source/protocol/config hashes and actual tokenizer versions. [README](README.md) gives reproduction instructions.
+
+The [completed-code review](REVIEW.md) led to explicit private per-cell transition records and public language/queue-overlap aggregates. These reproduce the same counts without altering historical outputs.

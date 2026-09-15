@@ -8,4 +8,10 @@ Those requirements are incorporated. The local parser sensitivity analysis addit
 
 The review suggested a looser engineering threshold of at least 58/60. This proposal instead preserves the existing strict 60/60 valid-and-identical advancement gate, so it does not relax acceptance after seeing failures. Technical validity must be followed by blinded qualified review of report entailment, then secondary organizer comparison. More abstention alone is not improvement.
 
-The review of the completed public code will be recorded after publication. No new Qwen generation or clinical benefit is claimed.
+## Completed-code review and correction
+
+ChatGPT reviewed public commit [6df209a](https://github.com/nttssv/rsna-knee-medgemma/commit/6df209ab356278d211fbe50af15b813181fba8a9) and found no model/protocol blocker. CI passed for that exact commit. It identified one bookkeeping gap: the private details recorded original failures but not every parser transition, so the language and review-queue-overlap statements were not directly persisted/aggregated by the script.
+
+The follow-up persists all 60 transitions per repeat privately and computes changed-cell language counts and inherited-review overlap from those actual parser outputs and the verified queue. It clarifies the historical-only evidence-failure field name, adds two synthetic tests for language/overlap and duplicate-cell rejection, and explicitly defines primary-parser repeat identity and isolation of future blinded review from the reference-containing historical CSV. No prompts, parser rules, predictions or numerical result counts changed. New audit output goes to a fresh private directory; prior outputs are retained.
+
+The resulting aggregates verify four changed cells per repeat (Spanish four, English zero), two evidence failures becoming diagnostic-valid, two new ambiguity flags, and both ambiguity flags overlapping inherited review items. All 12 inherited semantic-review items remain unresolved. The bounded execution adapter remains a separate, unimplemented milestone. No new Qwen generation or clinical benefit is claimed.

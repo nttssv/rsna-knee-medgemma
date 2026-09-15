@@ -73,18 +73,39 @@ def check_saved(record, source):
     return rows, failures
 
 
-def parser_sensitivity(record, report):
-    """Counts only: never overwrite historical rows or export replacement labels."""
+def sensitivity_records(record, report, case_index=0, language='synthetic'):
+    """Private status transitions only; never export replacement labels."""
     future = contract.validate_response(record['attempts'][0]['text'], report,
                                         record['attempts'][0]['status'])
-    transitions = Counter()
+    transitions = []
     for prior, diagnostic in zip(record['first_pass'], future['rows']):
         require(prior['condition'] == diagnostic['condition'], 'Parser condition order differs')
-        transitions[prior['status'] + ' -> ' + diagnostic['status']] += 1
+        transitions.append(dict(case_index=case_index,condition=prior['condition'],language=language,
+            v1_status=prior['status'],v2_status=diagnostic['status'],
+            changed=prior['status'] != diagnostic['status']))
         if diagnostic['status'] == 'valid' and diagnostic['source_span']:
             require(report[diagnostic['evidence_start']:diagnostic['evidence_end']] == diagnostic['source_span'],
                     'Diagnostic offset mismatch')
-    return dict(transitions)
+    return transitions
+
+
+def parser_sensitivity(record, report):
+    return dict(Counter(r['v1_status']+' -> '+r['v2_status'] for r in sensitivity_records(record,report)))
+
+
+def summarize_transitions(records, review_keys):
+    """Bind every private transition to the independently verified inherited queue."""
+    require(len({(r['case_index'],r['condition']) for r in records}) == len(records), 'Duplicate diagnostic cell')
+    for row in records:
+        row['review_queue_overlap'] = (row['case_index'],row['condition']) in review_keys
+    changed = [r for r in records if r['changed']]
+    ambiguity = [r for r in changed if r['v2_status']=='ambiguous_evidence_error']
+    return dict(changed_cells=len(changed),
+        changed_cells_by_language={lang:sum(r['language']==lang for r in changed)
+                                   for lang in sorted({r['language'] for r in records})},
+        evidence_failures_becoming_diagnostic_valid=sum(r['v1_status']=='evidence_error' and r['v2_status']=='valid' for r in changed),
+        new_ambiguity_flags=len(ambiguity),
+        new_ambiguity_overlap_existing_review_queue=sum(r['review_queue_overlap'] for r in ambiguity))
 
 
 def verify_inputs(state):
@@ -129,19 +150,20 @@ def audit(state, output, cache=None):
                 and manifest['code_sha256'] == old.code_hashes()
                 and manifest['output_sha256'] == {'predictions.jsonl': old.sha(folder / 'predictions.jsonl')},
                 'Historical run manifest differs')
-        counts, sensitivity, failures = Counter(), Counter(), []
+        counts, sensitivity, failures, transitions = Counter(), Counter(), [], []
         for index, (record, source) in enumerate(zip(records, inputs)):
             require(read(folder / f'case_{index:03d}.json') == record, 'Case sidecar differs')
             rows, found = check_saved(record, source)
             counts.update(r['status'] for r in rows)
             sensitivity.update(parser_sensitivity(record, source['Report']))
+            transitions.extend(sensitivity_records(record,source['Report'],index,source['language']))
             for item in found:
                 failures.append(dict(case_index=index, **item))
         runs.append(dict(repeat=repeat, studies=5, condition_cells=60, statuses=dict(counts),
             mean_generation_seconds=sum(r['attempts'][0]['runtime_seconds'] for r in records)/5,
             generation_tokens=sum(r['attempts'][0]['output_tokens'] for r in records),
             parser_sensitivity_transitions=dict(sensitivity)))
-        details.append(dict(repeat=repeat, failures=failures, records=records))
+        details.append(dict(repeat=repeat, failures=failures, records=records,parser_sensitivity=transitions))
         provenance[name] = {p.name: old.sha(p) for p in folder.iterdir() if p.is_file()}
     first, second = [d['records'] for d in details]
     repeats = dict(raw_identical=sum(a['attempts'][0]['text'] == b['attempts'][0]['text'] for a,b in zip(first,second)),
@@ -159,6 +181,9 @@ def audit(state, output, cache=None):
         require((row['qwen_accepted_label'] or None) == pred['extracted_label']
                 and row['status'] == pred['status']
                 and row['review_status'] == 'analyst_hypothesis_not_clinically_adjudicated', 'Review status differs')
+    review_keys={(int(r['case'])-1,r['condition']) for r in review}
+    for run, detail in zip(runs,details):
+        run['parser_sensitivity_details'] = summarize_transitions(detail['parser_sensitivity'],review_keys)
     prompts = {arm: [dict(case_index=i, prompt=prompt(arm,r['Report'])) for i,r in enumerate(inputs)]
                for arm in ('control','candidate')}
     require(all(p['prompt'] == old.prompt_for('qwen',r['Report']) for p,r in zip(prompts['control'],inputs)), 'Control differs')
@@ -167,7 +192,7 @@ def audit(state, output, cache=None):
     unique_failures = details[0]['failures']
     summary = dict(status='SAVED_OUTPUT_AUDIT_AND_LOCAL_PREPARATION', model=cfg['model_id'], revision=cfg['revision'],
         runs=runs, repeatability=repeats, languages=dict(Counter(r['language'] for r in inputs)),
-        unique_evidence_failures=len(unique_failures),
+        historical_v1_unique_evidence_failures=len(unique_failures),
         unique_whitespace_diagnostic_matches=sum(f['lexical_match'].get('evidence_normalization_method') == 'ascii_whitespace'
                                                 and f['lexical_match']['status'] == 'valid' for f in unique_failures),
         diagnostic_matches_are_predictions=False, inherited_review_items=len(review),

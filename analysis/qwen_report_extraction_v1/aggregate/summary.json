@@ -17,6 +17,16 @@
         "valid -> valid": 56,
         "evidence_error -> valid": 2,
         "valid -> ambiguous_evidence_error": 2
+      },
+      "parser_sensitivity_details": {
+        "changed_cells": 4,
+        "changed_cells_by_language": {
+          "English": 0,
+          "Spanish": 4
+        },
+        "evidence_failures_becoming_diagnostic_valid": 2,
+        "new_ambiguity_flags": 2,
+        "new_ambiguity_overlap_existing_review_queue": 2
       }
     },
     {
@@ -33,6 +43,16 @@
         "valid -> valid": 56,
         "evidence_error -> valid": 2,
         "valid -> ambiguous_evidence_error": 2
+      },
+      "parser_sensitivity_details": {
+        "changed_cells": 4,
+        "changed_cells_by_language": {
+          "English": 0,
+          "Spanish": 4
+        },
+        "evidence_failures_becoming_diagnostic_valid": 2,
+        "new_ambiguity_flags": 2,
+        "new_ambiguity_overlap_existing_review_queue": 2
       }
     }
   ],
@@ -44,7 +64,7 @@
     "Spanish": 1,
     "English": 4
   },
-  "unique_evidence_failures": 2,
+  "historical_v1_unique_evidence_failures": 2,
   "unique_whitespace_diagnostic_matches": 2,
   "diagnostic_matches_are_predictions": false,
   "inherited_review_items": 12,
@@ -133,7 +153,7 @@
       "thinking_control": "enable_thinking=False"
     }
   },
-  "source_sha256": "c6e5b3a65f8c6c7378da933fcd87e582c5bdbb1d2be7494d6efd342a529b1186",
-  "protocol_sha256": "399b59b38092daba7499e5686c4bf87be61f94127ef9f73a6fe3f4ae94386596",
+  "source_sha256": "9a35519f88b1ee18647a7164a9776049ad0db3ac3ef224d029a008680bf24ed9",
+  "protocol_sha256": "7936a1b9abaf142b8580179db22623e7ecb7625881b65f0b85705584ab3fe71b",
   "proposal_sha256": "6c336fd7d97fc9add16a5ca577d1326046885ae3b4497fac98ed43193b9d6647"
 }

@@ -98,3 +98,25 @@ def test_offline_plan_keeps_model_recipe_and_historical_bytes():
 def test_existing_output_refused(tmp_path):
     target=tmp_path/'runs/existing';target.mkdir(parents=True)
     with pytest.raises(ValueError,match='overwrite'):audit.audit(tmp_path,target)
+
+
+def test_transition_languages_and_queue_overlap_come_from_actual_parser():
+    s1,r1=example('same; same','same')
+    s2,r2=example()
+    s3,r3=example('one','one')
+    rows=(audit.sensitivity_records(r1,s1['Report'],0,'Spanish')
+          +audit.sensitivity_records(r2,s2['Report'],1,'Spanish')
+          +audit.sensitivity_records(r3,s3['Report'],2,'English'))
+    summary=audit.summarize_transitions(rows,{(0,'ACL')})
+    assert summary==dict(changed_cells=2,changed_cells_by_language={'English':0,'Spanish':2},
+        evidence_failures_becoming_diagnostic_valid=1,new_ambiguity_flags=1,
+        new_ambiguity_overlap_existing_review_queue=1)
+    assert len(rows)==36 and all('review_queue_overlap' in row for row in rows)
+    assert not any('label' in row for row in rows)
+    assert audit.summarize_transitions(rows,set())['new_ambiguity_overlap_existing_review_queue']==0
+
+
+def test_duplicate_transition_denominators_rejected():
+    source,record=example();rows=audit.sensitivity_records(record,source['Report'])
+    with pytest.raises(ValueError,match='Duplicate diagnostic cell'):
+        audit.summarize_transitions(rows+[rows[0]],set())
