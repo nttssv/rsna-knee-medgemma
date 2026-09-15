@@ -101,7 +101,7 @@ def execution_guard(execute):
         raise PermissionError('GPU execution is locked in this candidate; no model was loaded')
 
 
-def run_once(prepared, plan, key, output, encoder_factory, backend_factory, synthetic=False, session_context=None):
+def run_once(prepared, plan, key, output, encoder_factory, backend_factory, synthetic=False, session_context=None, cache=None):
     """Dependency-injected engine. Real CLI adds guards and a parent process deadline."""
     if key not in ORDER:
         raise ValueError('Unknown model/repeat')
@@ -123,6 +123,15 @@ def run_once(prepared, plan, key, output, encoder_factory, backend_factory, synt
     write_json(output/'start_manifest.json',manifest)
     backend = None
     try:
+        if not synthetic:
+            if cache is None:
+                raise ValueError('Explicit cache required for real generation')
+            from load_preflight import audit_cache
+            audit = audit_cache(cache, model)
+            write_json(output/'cache_audit.json', audit)
+            manifest['cache_audit_sha256'] = sha(output/'cache_audit.json')
+            if not audit['complete']:
+                raise ValueError('Pinned model cache is incomplete or corrupt')
         encoder = encoder_factory(model)
         encoded = [encoder.encode(prompt_for(model,r['Report'])) for r in rows]
         preflight = [dict(case_index=i,input_tokens=e.input_tokens,
@@ -287,7 +296,7 @@ def main():
         from v2_runtime import HFEncoder,HFBackend,check_versions
         check_versions()
         ok=run_once(prepared,plan,a.run_key,prepared/'adapter_runs'/a.run_key,
-                    lambda name:HFEncoder(name,a.cache),lambda encoder:HFBackend(encoder,a.cache),session_context=context)
+                    lambda name:HFEncoder(name,a.cache),lambda encoder:HFBackend(encoder,a.cache),session_context=context,cache=a.cache)
     raise SystemExit(0 if ok else 1)
 
 

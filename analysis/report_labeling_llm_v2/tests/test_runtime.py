@@ -423,3 +423,43 @@ def test_candidate_flags_allow_guard_only_with_explicit_execute():
     with pytest.raises(PermissionError, match='Explicit'):
         runner.execution_guard(False)
     runner.execution_guard(True)  # Checks configuration only; no model import or call.
+
+
+@pytest.mark.parametrize('corruption', ['none', 'same_size', 'missing', 'no_cache'])
+def test_real_worker_path_audits_bytes_before_factories(tmp_path, monkeypatch, corruption):
+    # Synthetic fixtures exercise the real branch; no HF model is imported/loaded.
+    from test_load_preflight import cache_fixture
+    cache = tmp_path/'cache'
+    snap, _ = cache_fixture(cache, monkeypatch)
+    if corruption == 'same_size':
+        (snap/'part.safetensors').write_bytes(b'FAKE weights')
+    elif corruption == 'missing':
+        (snap/'part.safetensors').unlink()
+    prepared = prepared_fixture(tmp_path, monkeypatch)
+    output = prepared/'fake-real-branch'
+    calls = []
+    backend = EngineBackend()
+    def encoder_factory(model):
+        audit = json.loads((output/'cache_audit.json').read_text())
+        assert audit['complete'] is True
+        calls.append('encoder')
+        return EngineEncoder()
+    def backend_factory(encoder):
+        calls.append('backend')
+        return backend
+    ok = runner.run_once(prepared, runner.make_plan(prepared), 'medgemma-1', output,
+        encoder_factory, backend_factory, session_context={'synthetic_fixture_only': True},
+        cache=None if corruption == 'no_cache' else cache)
+    assert ok is (corruption == 'none')
+    manifest = json.loads((output/'run_manifest.json').read_text())
+    if corruption == 'no_cache':
+        assert not (output/'cache_audit.json').exists()
+    else:
+        assert manifest['cache_audit_sha256'] == core.sha(output/'cache_audit.json')
+        assert manifest['artifact_sha256']['cache_audit.json'] == manifest['cache_audit_sha256']
+    if corruption == 'none':
+        assert calls == ['encoder', 'backend'] and backend.calls == 5
+    else:
+        assert calls == [] and backend.calls == 0
+        assert not (output/'raw_generations.jsonl').exists()
+        assert manifest['status'] == 'failed'

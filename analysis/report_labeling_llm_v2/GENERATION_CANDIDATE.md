@@ -26,10 +26,10 @@ Pinned IDs/revisions, template hashes, stop-token IDs and all ten environment ve
 
 ```bash
 python analysis/report_labeling_llm_v2/scripts/prepare_local.py \
-  --output state/runs/report-labeling-llm-v2-generation-20260915
+  --output state/runs/report-labeling-llm-v2-generation-20260915-cache-verified
 python analysis/report_labeling_llm_v2/scripts/run_smoke.py plan \
-  --prepared state/runs/report-labeling-llm-v2-generation-20260915 \
-  --plan state/runs/report-labeling-llm-v2-generation-20260915/execution_plan.json
+  --prepared state/runs/report-labeling-llm-v2-generation-20260915-cache-verified \
+  --plan state/runs/report-labeling-llm-v2-generation-20260915-cache-verified/execution_plan.json
 ```
 
 These commands prepare a dry plan only. The fresh plan digest and exact published candidate must be reviewed before paid execution. The plan remains private because it contains study identifiers. The explicit future `run --execute` command additionally requires this exact plan SHA, unchanged fingerprints, an explicit offline cache and active parent/worker attestation. No command in this document starts a provider or generates predictions.
@@ -52,6 +52,16 @@ Report per-model validity, four-state distribution, binary coverage and conditio
 
 ## Local verification
 
-All **231 tests passed**, including independent refusal by each of the four configuration gates and explicit-command refusal. All **70 frozen v1 files** and **478 pre-existing non-cache private files** verified unchanged. The five inputs, both prompt files, private references and unresolved adjudication queue match the completed load-stage preparation byte-for-byte. Production generation, parser and parent-session code are unchanged.
+All **235 tests passed**, including independent refusal by each of the four configuration gates and explicit-command refusal. All **70 frozen v1 files** and **478 pre-existing non-cache private files** verified unchanged. The five inputs, both prompt files, private references and unresolved adjudication queue match the completed load-stage preparation byte-for-byte. The generation algorithm, parser and parent-session code are unchanged; the worker now adds the cache audit described below.
 
-Fresh private plan SHA-256: `8d2926fd2d5ed8ee2b8a1a7ae37608f6149b2b4f24612d4013e531170f816b8e`. It contains exactly the prescribed four-run order and a 20-generation ceiling, with `DRY_PLAN_ONLY` and zero model calls.
+Fresh private plan SHA-256: `74d6efcacf4b13d4b99a3cc29bb1027f94a24a4dd9e87f7e836f68ff4dfd75ca`. It contains exactly the prescribed four-run order and a 20-generation ceiling, with `DRY_PLAN_ONLY` and zero model calls.
+
+## Source-review correction: audit immediately before each run
+
+Review of the first enabled candidate (`f8ad32d`) found that a structurally loadable cache shard changed after the earlier load preflight could otherwise evade revision/template checks. Each real generation worker now reuses `load_preflight.audit_cache` before its encoder or backend factory. Every required byte digest and shard-index mapping must pass; missing, corrupt or unspecified caches fail before any model call. This occurs separately for all four repeats, inside the existing supervised worker deadline. It does not add another GPU stage or another model load.
+
+Save `cache_audit.json` before loading, bind its SHA-256 explicitly in `run_manifest.json` and include it in the existing complete artifact-hash mapping. The parent binds the child manifest and the viewer checks artifact hashes. Incomplete-cache receipts are retained alongside a failed run; an audit exception also records a failed run without trying to load. This establishes checked bytes at audit time, not protection against a separate actor modifying an active cache concurrently; the execution procedure does not modify that cache.
+
+Four added CPU tests exercise a complete tiny synthetic cache, same-size weight corruption, a missing shard and an unspecified cache through the worker branch. Failed checks make zero encoder/backend/generation calls; successful checks are saved before factory entry and bound in the child manifest. Existing shard-index and full-cache tests remain in place. These fixtures are not measured model results.
+
+The first private plan `8d2926fd2d5ed8ee2b8a1a7ae37608f6149b2b4f24612d4013e531170f816b8e` is preserved but superseded. Only the new plan above matches this corrected candidate. No prompt, target, decoding or acceptance change was made in response to this review.
