@@ -15,3 +15,5 @@ This folder preserves dataset/report analyses and aggregate findings. Audits and
 Private paths are relative to `RSNA_STATE_DIR` (default: repository `state/`). They contain study identifiers, reports, splits, predictions and detailed error evidence. They are excluded from Git and included in the separate private state backup. The public GitHub repository contains code and aggregate findings only.
 
 Current decision: **C — more validation/manual annotation before scaling report-derived supervision**. The baseline answered 92/216 held-out condition checks, with 87 correct and 5 incorrect; 124 abstained. High conditional accuracy does not establish broad coverage or reliability. Read the report-labeling [results](report_labeling/RESULTS.md) before proposing a new experiment.
+
+The separate [candidate failure diagnostic](candidate_failure_diagnostic_v1/README.md) closes the local token/failed-child receipt audit. All nine roundtrips matched; the candidate omitted nested fields in short outputs and repeated an array in the truncated output. Historical results remain frozen; no model generation occurred.

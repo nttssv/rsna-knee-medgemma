@@ -6,6 +6,8 @@ This repository contains the code, configuration, experiment record, and instruc
 
 ## Current experiment
 
+The [offline candidate-failure audit](analysis/candidate_failure_diagnostic_v1/README.md) reproduced all nine saved inputs/outputs exactly and verified the failed child receipt. It found two output-contract failures: short state-only objects, and a repeated evidence array that consumed 4,096 answer tokens without a recorded thought envelope. No model was loaded or rerun. [Findings and limitations](analysis/candidate_failure_diagnostic_v1/RESULTS.md).
+
 The [v3 measured GPU attempt](analysis/report_labeling_llm_v3_execution_v1/README.md) stopped after the evidence-first candidate hit its 4,096-token limit: control completed five reports (48/60 technical passes); candidate completed three malformed responses and then truncated (0/48 technical passes). Remaining repeats were not run. [Results and private dashboard instructions](analysis/report_labeling_llm_v3_execution_v1/RESULTS.md) preserve the failure. GPU is stopped, temporary control access disabled, estimated total cost about $0.44. No semantic accuracy or scaling claim is supported.
 
 The [v3 local runtime and blinded review workflow](analysis/report_labeling_llm_v3_runtime_v1/README.md) implements bounded subprocess execution, exact output receipts and two-stage human review. A fabricated CPU demo exercises the workflow; GPU execution remains hard-disabled in that historical local version; real results belong only to the later execution package.

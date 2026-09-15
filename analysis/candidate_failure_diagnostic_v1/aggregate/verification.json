@@ -1,0 +1,13 @@
+{
+  "tests_passed": 462,
+  "new_counterexample_tests": 12,
+  "protected_history_files": 181,
+  "backup_sha256": "a1f15fa7ac2b6abeb5344e6a80470b4c4fbb2b7a4c7ab5c75d6f00be4db98b9a",
+  "backup_restored_files": 2,
+  "original_v3_inventory_sha256": "19f31b50f361f911cc3f139f8a96dddadd0cfd377a3450644f1368bccbf83ea7",
+  "original_v3_plan_sha256": "6bcbee08e0bdb30f148f6a7a84c75afdcd327dc45c94b03b82724f0b625f1ee1",
+  "model_generations": 0,
+  "weights_loaded": false,
+  "provider_calls": 0,
+  "test_command": "PYTHONPATH=src .venv/bin/python -m pytest -q"
+}
