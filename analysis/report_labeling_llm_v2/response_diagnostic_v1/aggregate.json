@@ -1,0 +1,153 @@
+{
+  "status": "OFFLINE_HYPOTHETICAL_DIAGNOSTIC_ONLY",
+  "model_id": "google/medgemma-1.5-4b-it",
+  "revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "source_run_commit": "f09a4ddc3b3a795f97766686adc05a74b75a1fcc",
+  "reviewed_plan_sha256": "74d6efcacf4b13d4b99a3cc29bb1027f94a24a4dd9e87f7e836f68ff4dfd75ca",
+  "model_calls": 0,
+  "weights_loaded": false,
+  "gpu_used": false,
+  "official_v2_accepted_cells": 0,
+  "official_v2_status": "INCOMPLETE_FAILED_SMOKE",
+  "markers": {
+    "<unused94>": {
+      "id": 100,
+      "is_special": false
+    },
+    "<unused95>": {
+      "id": 101,
+      "is_special": false
+    }
+  },
+  "template_variables": [
+    "add_generation_prompt",
+    "bos_token",
+    "first_user_prefix",
+    "loop_messages",
+    "messages",
+    "raise_exception",
+    "role"
+  ],
+  "unsupported_enable_thinking_true_false_unchanged_on_all_five": true,
+  "saved_prompt_parity_on_three_attempts": true,
+  "saved_raw_token_parity_on_three_attempts": true,
+  "assets_sha256": {
+    "tokenizer.json": "7d4046bf0505a327dd5a0abbb427ecd4fc82f99c2ceaa170bc61ecde12809b0c",
+    "tokenizer.model": "1299c11d7cf632ef3b4e11937501358ada021bbdf7c47638d13c0ee982f2e79c",
+    "tokenizer_config.json": "88269475414d45d3e59892d3519b0d4e28ec6416fecf6b523fb986cbe452075f",
+    "special_tokens_map.json": "2f7b0adf4fb469770bb1490e3e35df87b1dc578246c5e7e6fc76ecf33213a397",
+    "added_tokens.json": "50b2f405ba56a26d4913fd772089992252d7f942123cc0a034d96424221ba946",
+    "processor_config.json": "3ffd5f11778dc73e2b69b3c00535e4121e1badf7018136263cd17b5b34fbaa53",
+    "preprocessor_config.json": "5b2f684b616a25f3cd4a700e5e471a07fcaabc5ec07871d2231b7e376e8648ce",
+    "chat_template.jinja": "7de1c58e208eda46e9c7f86397df37ec49883aeece39fb961e0a6b24088dd3c4",
+    "config.json": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+    "generation_config.json": "921a391e0d387377b4c4a05273a68b7bc2196cf2a272ee605007853ea37f3224"
+  },
+  "package_versions": {
+    "torch": "2.8.0",
+    "transformers": "5.12.0",
+    "tokenizers": "0.22.2",
+    "jinja2": "3.1.6",
+    "huggingface-hub": "1.19.0"
+  },
+  "generation_config": {
+    "cache_implementation": "hybrid",
+    "eos_token_id": [
+      1,
+      106
+    ],
+    "transformers_version": "4.57.1"
+  },
+  "hypothetical_status_counts": {
+    "valid": 20,
+    "ambiguous_evidence_error": 3,
+    "evidence_error": 1,
+    "generation_truncated": 12
+  },
+  "cases": [
+    {
+      "case_index": 0,
+      "language": "Spanish",
+      "structure": {
+        "output_tokens": 1666,
+        "opening_positions": [
+          0
+        ],
+        "closing_positions": [
+          1080
+        ],
+        "thought_tokens": 1079,
+        "delimiter_tokens": 2,
+        "answer_tokens": 584,
+        "eos_tokens": 1,
+        "eos_positions": [
+          1665
+        ],
+        "last_token_id": 106,
+        "terminal_eos": true
+      },
+      "generation_status": "completed",
+      "hypothetical_status_counts": {
+        "valid": 9,
+        "ambiguous_evidence_error": 3
+      }
+    },
+    {
+      "case_index": 1,
+      "language": "English",
+      "structure": {
+        "output_tokens": 1752,
+        "opening_positions": [
+          0
+        ],
+        "closing_positions": [
+          1163
+        ],
+        "thought_tokens": 1162,
+        "delimiter_tokens": 2,
+        "answer_tokens": 587,
+        "eos_tokens": 1,
+        "eos_positions": [
+          1751
+        ],
+        "last_token_id": 106,
+        "terminal_eos": true
+      },
+      "generation_status": "completed",
+      "hypothetical_status_counts": {
+        "valid": 11,
+        "evidence_error": 1
+      }
+    },
+    {
+      "case_index": 2,
+      "language": "English",
+      "structure": {
+        "output_tokens": 2048,
+        "opening_positions": [
+          0
+        ],
+        "closing_positions": [
+          1560
+        ],
+        "thought_tokens": 1559,
+        "delimiter_tokens": 2,
+        "answer_tokens": 487,
+        "eos_tokens": 0,
+        "eos_positions": [],
+        "last_token_id": 128010,
+        "terminal_eos": false
+      },
+      "generation_status": "generation_truncated",
+      "hypothetical_status_counts": {
+        "generation_truncated": 12
+      }
+    }
+  ],
+  "evidence_validity_is_not_semantic_correctness": true,
+  "code_sha256": {
+    "test_diagnostic.py": "afde3e48134d49f5cf9e437fc2fee2a52ecd7ac3f5428275b7c76aecaa34281b",
+    "inspect_responses.py": "70967b9ee3cd6b4dfcd9df17b92326ef726b56e8123bca5428066ad4951be680",
+    "viewer.html": "83afb9e35f5da3af1755f0de454117ca4b10a9ff7978b48845ddf888b98f5201"
+  }
+}
