@@ -12,7 +12,7 @@ The planned session runs MedGemma repeat 1, MedGemma repeat 2, Qwen repeat 1, Qw
 
 Each future run saves:
 
-- `start_manifest.json` and final `run_manifest.json`, with version, identity, timing and completion status.
+- `start_manifest.json` and final `run_manifest.json`, with version, identity, timing, completion status, reviewed plan SHA, session ID, run-order index and hashes binding the parent start/dispatch.
 - `tokenizer_preflight.json` for exactly five inputs and `runtime_metadata.json` for the loaded configuration and GPU.
 - `raw_generations.jsonl`: exact rendered input, input/generated token IDs, output decoded with special tokens, response with only one terminal stopping token removed, status and timing. Written and flushed to disk before parsing.
 - `predictions.jsonl`: the original record plus the unchanged v2 normalization/parser result, with separate raw text, normalized text and accepted rows.
@@ -73,8 +73,14 @@ python analysis/report_labeling_llm_v2/scripts/run_smoke.py run \
 
 `--execute` alone cannot bypass the current false execution flags in both model configs, output policy and runtime policy. A separately authorized, reviewed runtime version must enable them; that changes fingerprints and requires fresh private preparation/plan creation. Before that decision, resolve cache availability, offline processor/tokenizer checks, current GPU price and the provider stop plan. No GPU compatibility or token-budget success is claimed from fake tests.
 
-After an eventual completed four-run session, use `smoke_review.py --runs PREPARED/adapter_runs` to render measured outputs. Any partial, stale, synthetic or mismatched run is rejected. All prior human approvals become stale if the experiment fingerprint changes. The same exact-repeat and qualified-human-review gates still apply before considering any expansion.
+A worker requires a one-use nonce received through an inherited anonymous pipe, matching the active parent PID and hashed dispatch; standalone `_worker` invocation is refused. The parent verifies each child before proceeding, and its completed session manifest records every child manifest hash in the prescribed order. This prevents accidental CLI bypass; it is not a security boundary against arbitrary local code. The dry plan contains no `compute_authorized` boolean: execution flags and explicit future resource authorization remain separate from a plan digest.
+
+After an eventual completed four-run session, use `smoke_review.py --runs PREPARED/adapter_runs` to render measured outputs. The viewer requires the completed parent session and reviewed plan, then verifies all four child identities/order/hashes against it. Any partial, standalone, stale, synthetic, reordered or mixed-session run is rejected. All prior human approvals become stale if the experiment fingerprint changes. The same exact-repeat and qualified-human-review gates still apply before considering any expansion.
 
 ## Local verification
 
-The full suite passed **202 tests**, including 35 new adapter/watchdog checks in addition to the earlier 167. Tests use fake encoders/models and CPU tensors; two short subprocess tests exercise actual termination/reaping, including a descendant. Empty-cache rejection and offline environment assignment are tested without a Transformers installation. They do not establish real-cache completeness, GPU compatibility, throughput or semantic correctness.
+The full suite passed **208 tests**, including 41 new adapter/watchdog checks in addition to the earlier 167. Tests use fake encoders/models and CPU tensors; two short subprocess tests exercise actual termination/reaping, including a descendant. Empty-cache rejection and offline environment assignment are tested without a Transformers installation. They do not establish real-cache completeness, GPU compatibility, throughput or semantic correctness.
+
+## Published-source review follow-up
+
+Review of the first adapter commit (`1b4fd37`) identified that direct worker invocation could bypass the parent watchdog after a future unlock, and that the viewer did not require parent-session provenance. Both are fixed locally without enabling execution. New tests cover standalone refusal, pipe/nonce verification, parent dispatch order, fail-fast receipts and mixed/reordered session rejection. Cache checks pin template/EOS/PAD metadata and requested revisions; they do not claim full vocabulary, BOS/UNK/additional-special-token or weight-file byte verification. Cache-content provenance remains a future real-cache review item.

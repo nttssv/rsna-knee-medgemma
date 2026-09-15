@@ -57,3 +57,5 @@ These fields document a human review claim; software cannot authenticate a clini
 ## Runtime implementation follow-up
 
 The locked [runtime adapter](RUNTIME.md) implements this output policy without changing it. The five-study input hash and rendered input/token parity are checked before generation. Durable raw records precede parsing. Noncompleted generation aborts its run and the remaining session; no repairs or automatic retries occur. Context preflight covers only the selected five reports. Model-process limits do not stop provider billing. The runtime version and its artifacts are included in candidate fingerprints; no v2 real inference has occurred.
+
+Every real adapter run must be dispatched through the bounded parent process using an inherited pipe/nonce. Run and session manifests bind all outputs to the same reviewed plan, prescribed order and parent session. Measured-result rendering requires a completed matching parent session; standalone worker outputs are not an alternate path to acceptance.

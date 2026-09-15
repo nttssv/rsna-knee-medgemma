@@ -9,6 +9,7 @@ import sys
 
 from core import LABELS, ROOT, code_hashes, config, sha, validate_response
 from gates import row_digest
+from session_contract import verify_session
 
 KEYS=['medgemma-1','medgemma-2','qwen-1','qwen-2']
 
@@ -34,6 +35,7 @@ def load(prepared,run_root=None):
         raise ValueError('Expected the fixed five inputs')
     for c in cases:c['runs']={}
     if run_root is None:return cases,[],[]
+    verify_session(prepared,run_root)
     metrics=[];diagnostics=[]
     for key in KEYS:
         model=key.rsplit('-',1)[0];directory=run_root/key

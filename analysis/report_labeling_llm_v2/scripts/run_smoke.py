@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 import json
 import os
 import signal
+import secrets
+import stat
 from pathlib import Path
 import subprocess
 import sys
@@ -12,7 +14,7 @@ import time
 from core import LABELS, REPO, code_hashes, config, prompt_for, sha, validate_response, verify_protected
 from v2_runtime import text_sha
 
-ORDER = ['medgemma-1', 'medgemma-2', 'qwen-1', 'qwen-2']
+from session_contract import ORDER, context_for, verify_child
 
 
 def write_json(path, value):
@@ -69,7 +71,7 @@ def make_plan(prepared):
     prepared = private_path(prepared)
     rows = checked_inputs(prepared)
     return dict(status='DRY_PLAN_ONLY', synthetic=False, model_calls=0,
-        tokenizer_preflight='NOT_RUN', compute_authorized=False,
+        tokenizer_preflight='NOT_RUN',
         prepared_manifest_sha256=sha(prepared/'manifest.json'),
         candidate_code_sha256=code_hashes(), input_sha256=sha(prepared/'inputs.jsonl'),
         unique_studies=5, maximum_primary_generations=20, run_order=ORDER,
@@ -99,10 +101,12 @@ def execution_guard(execute):
         raise PermissionError('GPU execution is locked in this candidate; no model was loaded')
 
 
-def run_once(prepared, plan, key, output, encoder_factory, backend_factory, synthetic=False):
+def run_once(prepared, plan, key, output, encoder_factory, backend_factory, synthetic=False, session_context=None):
     """Dependency-injected engine. Real CLI adds guards and a parent process deadline."""
     if key not in ORDER:
         raise ValueError('Unknown model/repeat')
+    if not synthetic and not session_context:
+        raise PermissionError('Real runs require parent worker attestation')
     prepared, output = private_path(prepared), private_path(output)
     if not output.is_relative_to(prepared):
         raise ValueError('Run artifacts must be inside the private prepared package')
@@ -114,7 +118,7 @@ def run_once(prepared, plan, key, output, encoder_factory, backend_factory, synt
     started = time.perf_counter()
     manifest = dict(status='running', synthetic=synthetic, runtime_adapter_version=1, model_key=model,
         model_id=config(model)['model_id'], model_revision=config(model)['revision'],
-        run_key=key, started_at=datetime.now(timezone.utc).isoformat(),
+        run_key=key, **(session_context or {}), started_at=datetime.now(timezone.utc).isoformat(),
         prepared_manifest_sha256=sha(prepared/'manifest.json'), candidate_code_sha256=code_hashes())
     write_json(output/'start_manifest.json',manifest)
     backend = None
@@ -161,14 +165,15 @@ def run_once(prepared, plan, key, output, encoder_factory, backend_factory, synt
     return manifest['status']=='completed'
 
 
-def supervise(command, timeout, launcher=subprocess.Popen):
+def supervise(command, timeout, launcher=subprocess.Popen, pass_fds=()):
     """Own a process group so timeout/interruption also stops child descendants."""
-    process = launcher(command, start_new_session=True)
+    process = launcher(command, start_new_session=True, pass_fds=pass_fds)
     try:
         code = process.wait(timeout=timeout)
         return code == 0, 'completed' if code == 0 else 'child_failed'
     except subprocess.TimeoutExpired:
-        os.killpg(process.pid, signal.SIGKILL)
+        try: os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError: pass
         process.wait()
         return False, 'hard_timeout'
     except BaseException:
@@ -179,30 +184,75 @@ def supervise(command, timeout, launcher=subprocess.Popen):
         raise
 
 
+def worker_context(prepared, plan_sha, key, fd):
+    if fd is None or fd < 3 or not stat.S_ISFIFO(os.fstat(fd).st_mode):
+        raise PermissionError('Worker requires an inherited parent pipe')
+    try:
+        with os.fdopen(fd) as stream:
+            message=json.loads(stream.read(8192))
+    except (ValueError,OSError) as error:
+        raise PermissionError('Invalid parent attestation') from error
+    root=Path(prepared)/'adapter_runs'
+    start_path=root/'session_start.json';start=json.loads(start_path.read_text());start_sha=sha(start_path)
+    index=ORDER.index(key);dispatch_path=root/f'dispatch-{index}.json'
+    dispatch=json.loads(dispatch_path.read_text())
+    if (os.getppid()!=start['parent_pid'] or message.get('parent_pid')!=start['parent_pid'] or
+            message.get('nonce') is None or text_sha(message['nonce'])!=dispatch['nonce_sha256'] or
+            message.get('run_key')!=key or dispatch['run_key']!=key or dispatch['run_order_index']!=index or
+            dispatch['session_id']!=start['session_id'] or dispatch['reviewed_plan_sha256']!=plan_sha or
+            start['reviewed_plan_sha256']!=plan_sha or start['run_order']!=ORDER or
+            dispatch['parent_session_start_sha256']!=start_sha or (root/'session_manifest.json').exists()):
+        raise PermissionError('Worker was not dispatched by this active reviewed parent')
+    for previous in range(index):
+        verify_child(root,ORDER[previous],previous,start,start_sha)
+    return context_for(start,start_sha,dispatch,sha(dispatch_path))
+
+
 def execute_plan(prepared, plan_path, expected_sha, cache):
     execution_guard(True)
-    plan = check_plan(prepared,plan_path,expected_sha)
+    check_plan(prepared,plan_path,expected_sha)
     from v2_runtime import check_versions
     check_versions()
-    root = private_path(prepared)/'adapter_runs'
-    root.mkdir(mode=0o700)
-    start = time.perf_counter()
-    write_json(root/'session_start.json',dict(status='running',plan_sha256=expected_sha,run_order=ORDER))
+    root=private_path(prepared)/'adapter_runs';root.mkdir(mode=0o700)
+    started=time.perf_counter()
+    session=dict(status='running',session_id=secrets.token_hex(16),parent_pid=os.getpid(),
+                 reviewed_plan_sha256=expected_sha,plan_file=Path(plan_path).name,run_order=ORDER)
+    write_json(root/'session_start.json',session);start_sha=sha(root/'session_start.json')
     results=[]
-    for key in ORDER:
-        remaining=3600-(time.perf_counter()-start)
+    for index,key in enumerate(ORDER):
+        remaining=3600-(time.perf_counter()-started)
         if remaining<=0:
-            results.append(dict(run_key=key,status='session_deadline'));break
+            results.append(dict(run_key=key,run_order_index=index,status='session_deadline'));break
+        nonce=secrets.token_hex(32)
+        dispatch=dict(session_id=session['session_id'],reviewed_plan_sha256=expected_sha,
+            parent_session_start_sha256=start_sha,run_order_index=index,run_key=key,nonce_sha256=text_sha(nonce))
+        write_json(root/f'dispatch-{index}.json',dispatch)
+        reader,writer=os.pipe()
+        try:
+            os.write(writer,json.dumps(dict(parent_pid=os.getpid(),run_key=key,nonce=nonce)).encode())
+        finally:os.close(writer)
         command=[sys.executable,str(Path(__file__).resolve()),'_worker',
                  '--prepared',str(prepared),'--plan',str(plan_path),'--plan-sha256',expected_sha,
-                 '--cache',str(cache),'--run-key',key,'--execute']
-        ok,status=supervise(command,min(config('runtime')['hard_process_timeout_seconds'],remaining))
-        results.append(dict(run_key=key,status=status))
+                 '--cache',str(cache),'--run-key',key,'--worker-fd',str(reader),'--execute']
+        try:
+            ok,status=supervise(command,min(config('runtime')['hard_process_timeout_seconds'],remaining),pass_fds=(reader,))
+        finally:os.close(reader)
+        receipt=dict(run_key=key,run_order_index=index,status=status)
+        if ok:
+            try:
+                verify_child(root,key,index,session,start_sha)
+                receipt['run_manifest_sha256']=sha(root/key/'run_manifest.json')
+            except (ValueError,KeyError,OSError):
+                ok=False;receipt['status']='invalid_child_manifest'
+        results.append(receipt)
         if not ok:break
-    write_json(root/'session_manifest.json',dict(status='completed' if len(results)==4 and all(r['status']=='completed' for r in results) else 'failed',
-        plan_sha256=expected_sha,results=results,elapsed_seconds=time.perf_counter()-start,
-        provider_stopped=False,provider_billing_stop='external operator required'))
-    return all(r['status']=='completed' for r in results) and len(results)==4
+    elapsed=time.perf_counter()-started
+    complete=len(results)==4 and all(r['status']=='completed' for r in results) and elapsed<=3600
+    write_json(root/'session_manifest.json',dict(status='completed' if complete else 'failed',
+        session_id=session['session_id'],reviewed_plan_sha256=expected_sha,parent_session_start_sha256=start_sha,
+        results=results,elapsed_seconds=elapsed,provider_stopped=False,
+        provider_billing_stop='external operator required'))
+    return complete
 
 
 def main():
@@ -214,6 +264,7 @@ def main():
     p.add_argument('--cache',type=Path)
     p.add_argument('--run-key',choices=ORDER)
     p.add_argument('--execute',action='store_true')
+    p.add_argument('--worker-fd',type=int,help=argparse.SUPPRESS)
     a=p.parse_args()
     prepared=private_path(a.prepared);plan_path=private_path(a.plan)
     if plan_path.parent!=prepared:
@@ -223,6 +274,8 @@ def main():
         print(json.dumps(dict(status='DRY_PLAN_ONLY',model_calls=0,studies=5,
                               maximum_primary_generations=20,plan_sha256=sha(plan_path))))
         return
+    if a.action=='_worker' and a.worker_fd is None:
+        raise PermissionError('Worker requires an inherited parent pipe; standalone invocation refused')
     execution_guard(a.execute)  # Must precede Transformers imports or cache access.
     if not a.plan_sha256 or not a.cache:p.error('Reviewed plan SHA and explicit cache are required')
     plan=check_plan(prepared,plan_path,a.plan_sha256)
@@ -230,10 +283,11 @@ def main():
         ok=execute_plan(prepared,plan_path,a.plan_sha256,a.cache)
     else:
         if not a.run_key:p.error('Worker requires a fixed run key')
+        context=worker_context(prepared,a.plan_sha256,a.run_key,a.worker_fd)
         from v2_runtime import HFEncoder,HFBackend,check_versions
         check_versions()
         ok=run_once(prepared,plan,a.run_key,prepared/'adapter_runs'/a.run_key,
-                    lambda name:HFEncoder(name,a.cache),lambda encoder:HFBackend(encoder,a.cache))
+                    lambda name:HFEncoder(name,a.cache),lambda encoder:HFBackend(encoder,a.cache),session_context=context)
     raise SystemExit(0 if ok else 1)
 
 

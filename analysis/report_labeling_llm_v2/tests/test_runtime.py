@@ -223,7 +223,7 @@ def test_supervisor_kills_timed_out_worker_and_does_not_claim_provider_stop(monk
             if timeout is not None:raise subprocess.TimeoutExpired('synthetic',timeout)
             return -9
     def launch(command,**kwargs):
-        assert kwargs==dict(start_new_session=True)
+        assert kwargs==dict(start_new_session=True,pass_fds=())
         return Process()
     monkeypatch.setattr(runner.os,'killpg',lambda pid,sig:signals.append((pid,sig)))
     assert runner.supervise(['synthetic'],4,launcher=launch)==(False,'hard_timeout')
@@ -342,3 +342,65 @@ def test_watchdog_stops_descendant_process(tmp_path):
         if not status or status.startswith('Z'):break  # Dead, possibly awaiting init reaping.
         assert time.monotonic()<deadline,'Descendant remained live after process-group kill'
         time.sleep(.02)
+
+
+def test_standalone_worker_refused_before_loading(tmp_path):
+    result=subprocess.run([sys.executable,str(SCRIPTS/'run_smoke.py'),'_worker','--prepared',str(tmp_path),
+        '--plan',str(tmp_path/'plan.json'),'--execute','--run-key','qwen-2'],capture_output=True,text=True)
+    assert result.returncode!=0 and 'standalone invocation refused' in result.stderr
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize('bad_nonce',[False,True])
+def test_worker_requires_parent_pipe_nonce_and_session(tmp_path,bad_nonce):
+    root=tmp_path/'adapter_runs';root.mkdir()
+    plan_sha='synthetic-plan-sha';nonce='synthetic-one-use-challenge'
+    start=dict(parent_pid=os.getppid(),session_id='synthetic-session',reviewed_plan_sha256=plan_sha,run_order=runner.ORDER)
+    runner.write_json(root/'session_start.json',start)
+    dispatch=dict(session_id=start['session_id'],reviewed_plan_sha256=plan_sha,
+        parent_session_start_sha256=core.sha(root/'session_start.json'),run_order_index=0,run_key=runner.ORDER[0],nonce_sha256=rt.text_sha(nonce))
+    runner.write_json(root/'dispatch-0.json',dispatch)
+    reader,writer=os.pipe()
+    os.write(writer,json.dumps(dict(parent_pid=os.getppid(),run_key=runner.ORDER[0],nonce='wrong' if bad_nonce else nonce)).encode());os.close(writer)
+    if bad_nonce:
+        with pytest.raises(PermissionError):runner.worker_context(tmp_path,plan_sha,runner.ORDER[0],reader)
+    else:
+        result=runner.worker_context(tmp_path,plan_sha,runner.ORDER[0],reader)
+        assert result['session_id']==start['session_id'] and result['reviewed_plan_sha256']==plan_sha
+        assert result['run_order_index']==0 and result['expected_run_key']=='medgemma-1'
+    with (root/'session_start.json').open() as regular:
+        with pytest.raises(PermissionError,match='pipe'):runner.worker_context(tmp_path,plan_sha,runner.ORDER[0],regular.fileno())
+
+
+def test_real_engine_without_session_attestation_rejected(tmp_path):
+    with pytest.raises(PermissionError,match='attestation'):
+        runner.run_once(tmp_path,{},'qwen-2',tmp_path/'result',lambda _:None,lambda _:None)
+
+
+@pytest.mark.parametrize('fail_first',[False,True])
+def test_parent_dispatch_order_receipts_and_fail_fast(tmp_path,monkeypatch,fail_first):
+    prepared=prepared_fixture(tmp_path,monkeypatch);plan_path=prepared/'plan.json'
+    runner.write_json(plan_path,runner.make_plan(prepared));plan_sha=core.sha(plan_path)
+    monkeypatch.setattr(runner,'execution_guard',lambda _:None)  # Synthetic orchestration only.
+    monkeypatch.setattr(rt,'check_versions',lambda:{'synthetic':True})
+    dispatched=[]
+    def supervise(command,timeout,pass_fds):
+        key=command[command.index('--run-key')+1];dispatched.append(key)
+        assert 0<timeout<=1800
+        # Simulate the child receiving its inherited pipe under the parent's PID.
+        with monkeypatch.context() as patch:
+            patch.setattr(runner.os,'getppid',os.getpid)
+            context=runner.worker_context(prepared,plan_sha,key,os.dup(pass_fds[0]))
+        if fail_first:return False,'hard_timeout'
+        folder=prepared/'adapter_runs'/key;folder.mkdir()
+        runner.write_json(folder/'run_manifest.json',dict(status='completed',synthetic=False,runtime_adapter_version=1,**context))
+        return True,'completed'
+    monkeypatch.setattr(runner,'supervise',supervise)
+    assert runner.execute_plan(prepared,plan_path,plan_sha,tmp_path)==(not fail_first)
+    final=json.loads((prepared/'adapter_runs/session_manifest.json').read_text())
+    if fail_first:
+        assert dispatched==['medgemma-1'] and final['status']=='failed'
+    else:
+        assert dispatched==runner.ORDER and final['status']=='completed'
+        from session_contract import verify_session
+        assert verify_session(prepared,prepared/'adapter_runs')['reviewed_plan_sha256']==plan_sha
