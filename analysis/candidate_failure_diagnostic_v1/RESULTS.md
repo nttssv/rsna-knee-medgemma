@@ -20,7 +20,7 @@ This establishes the observed shape violation. It does not establish that the st
 
 ## Failure 2: the long answer repeated a list
 
-The fourth candidate response began a Markdown-fenced JSON **array**, rather than the required object keyed by the 12 conditions. It contained **95 object-shaped lines but only 11 distinct exact lines**; the most frequent exact line appeared 11 times. These were repeated evidence objects, not one bounded entry per target condition.
+The fourth candidate response began a Markdown-fenced JSON **array**, rather than the required object keyed by the 12 conditions. After stripping surrounding whitespace, **95 lines began exactly with `{"evidence_text"`; only 11 such lines were distinct**. The most frequent exact stripped line appeared 11 times. This is the precise definition of the aggregate fields `object_shaped_lines` and `distinct_object_shaped_lines`, not a general JSON-object detector. These repeated lines do not constitute one bounded entry per target condition.
 
 All **4,096 tokens were in the recorded answer surface**: no `<unused94>` opening marker, no `<unused95>` closing marker, and no terminal EOS. An identical 16-token window appeared 94 times; repeated-window excess was 3,686 among 4,081 overlapping windows. Overlapping windows are correlated, so these are descriptive repetition measures, not independent events or an estimated probability of looping.
 
@@ -41,3 +41,5 @@ Keep the v3 failure frozen. **The next proposed correction should target a fixed
 Treat the short missing-field responses and the long repeated array as separate failure modes. Do not repair this run, promote its string values to labels, choose favorable outputs, or resume its unfinished comparison. A prospective redesign and qualified semantic review remain separate work. No paid run, full-development/validation inference, bulk extraction, MRI training or YOLO work is authorized by this audit.
 
 [Aggregate measurements](aggregate/summary.json) · [Audit protocol](PROTOCOL.md) · [Reproduction and checks](README.md)
+
+[External review and reporting clarification](REVIEW.md).
