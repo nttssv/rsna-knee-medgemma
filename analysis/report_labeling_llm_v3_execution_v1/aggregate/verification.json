@@ -1,0 +1,29 @@
+{
+  "status": "NOT_RUN_AWAITING_EXPLICIT_RESOURCE_APPROVAL",
+  "tests_passed": 437,
+  "new_tests": 87,
+  "prior_tests": 350,
+  "source_model_calls": 0,
+  "training_steps": 0,
+  "provider_starts": 0,
+  "synthetic_demo_generations": 20,
+  "protected_analysis_files": 156,
+  "prior_private_files_unchanged": 614,
+  "runtime_plan_sha256": "6bcbee08e0bdb30f148f6a7a84c75afdcd327dc45c94b03b82724f0b625f1ee1",
+  "candidate_plan_sha256": "feb7a4a5a6132f1d97e1fd470f0b0195f0b92f6f0bc42136a15e0a77c678b775",
+  "quote_sha256": "6905a3ea42345bcaa20767e2990595fe22a07fa7e79b2ce0853a5c7a451f0f01",
+  "backup_restored_files": 654,
+  "backup_sha256": "6adf6e0629b83c5f39266018a67bda2f1b9f094023ec92b98f3390bb7bc8261c",
+  "actual_approval_record_created": false,
+  "authorization_template_approved": false,
+  "real_watchdog_or_provider_api_tested": false,
+  "real_gpu_path_executed": false,
+  "split": [
+    40,
+    18
+  ],
+  "test_command": "PYTHONPATH=src .venv/bin/python -m pytest -q",
+  "staged_files_checked": 19,
+  "real_study_ids_screened": 58,
+  "relative_markdown_links_checked": 28
+}

@@ -1,0 +1,23 @@
+{
+  "provider": "RunPod",
+  "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+  "gpu_count": 1,
+  "gpu_memory_gib": 48,
+  "container_disk_gb": 80,
+  "new_persistent_volume_gb": 0,
+  "compute_usd_per_hour": 0.84,
+  "storage_usd_per_hour_estimate": 0.011,
+  "maximum_provider_seconds": 5400,
+  "proposed_budget_usd": 2.0,
+  "estimated_90_minute_cost_usd": 1.2765,
+  "quote_observed_date": "2026-09-15",
+  "quote_source": "Signed-in RunPod console; stopped RTX pod Start button",
+  "quote_url": "https://console.runpod.io/pods",
+  "storage_basis": "Historical identical 80 GB pod $0.011/hour; current official container rate $0.10/GB-month; confirm before starting",
+  "storage_source": "https://www.runpod.io/pricing",
+  "capacity_status": "Restart offered in console; successful allocation not guaranteed",
+  "scope": "One fixed five-study MedGemma ABBA session, maximum 20 generations, no training",
+  "status": "PROPOSAL_NOT_AUTHORIZED",
+  "quote_observed_at": "2026-09-15T07:26:32+00:00",
+  "quote_valid_until": "2026-09-16T07:26:32+00:00"
+}

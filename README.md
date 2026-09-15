@@ -6,6 +6,8 @@ This repository contains the code, configuration, experiment record, and instruc
 
 ## Current experiment
 
+The [v3 gated GPU execution proposal](analysis/report_labeling_llm_v3_execution_v1/README.md) prepares one bounded RTX 6000 Ada session with explicit private approval, budget/deadline checks and a self-stop watchdog. It is **NOT RUN**; no approval or paid start is inferred from code preparation.
+
 The [v3 local runtime and blinded review workflow](analysis/report_labeling_llm_v3_runtime_v1/README.md) implements bounded subprocess execution, exact output receipts and two-stage human review. A fabricated CPU demo exercises the workflow; GPU execution is hard-disabled and no v3 model results exist.
 
 The [MedGemma v3 local candidate](analysis/report_labeling_llm_v3/README.md) prepares an evidence-first prompt comparison against the old prompt under shared response handling and a 4,096-token cap. Both arms passed CPU tokenizer sizing; generation is NOT RUN and execution remains disabled.
