@@ -1,0 +1,10 @@
+{
+  "execution_enabled": false,
+  "resource_authorization": null,
+  "session_timeout_seconds": 3600,
+  "worker_timeout_seconds": 1800,
+  "automatic_downloads": false,
+  "automatic_retries": false,
+  "candidate_plan_sha256": "feb7a4a5a6132f1d97e1fd470f0b0195f0b92f6f0bc42136a15e0a77c678b775",
+  "provider_shutdown": "External operator must stop compute and verify provider state. Process termination does not stop billing."
+}

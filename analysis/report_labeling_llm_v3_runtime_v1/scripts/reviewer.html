@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MedGemma · Blinded report review</title>
+<style>
+body{margin:0;background:#f2f5f8;color:#162936;font:16px system-ui}main{max-width:1200px;margin:auto;padding:28px}
+h1{font-size:30px;margin:10px 0}p{line-height:1.5}.banner{background:#ffe7b5;padding:16px;border-radius:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.card{background:white;padding:22px;border-radius:14px;margin:18px 0;box-shadow:0 2px 12px #16293608}
+pre{white-space:pre-wrap;font:15px/1.6 system-ui;overflow-wrap:anywhere}select,input,textarea,button{font:inherit;padding:10px;border:1px solid #bac7d0;border-radius:6px;box-sizing:border-box}
+textarea{width:100%;height:100px}button{background:#163f54;color:white;cursor:pointer;margin:8px 8px 8px 0}label{display:block;margin:12px 0}.muted{color:#506673}select{max-width:100%}#categories label{margin:7px 0}details{margin:15px 0}@media(max-width:800px){.grid{grid-template-columns:1fr}}
+</style>
+<main><p class="muted">RSNA KNEE / REPORT EXTRACTION / STAGE ONE</p><h1>Does the report support the output?</h1>
+<div id="banner" class="banner"></div><p>Review the original-language report and target definition. Record entailment issues before seeing organizer answers. Prompt arms and run order are concealed; wording may still reveal differences.</p>
+<details><summary>Target definitions · unchanged</summary><pre id="definitions"></pre></details>
+<div class="card"><label>Reviewer identity <input id="reviewer" autocomplete="off"></label><label>Coded output <select id="case"></select></label>
+<label>Condition <select id="condition"></select></label><span id="progress" class="muted"></span></div>
+<div class="grid"><section class="card"><h2>Input · original report</h2><pre id="report"></pre></section>
+<section class="card"><h2>Output · proposed extraction</h2><pre id="prediction"></pre><p id="status" class="muted"></p>
+<h3>Your review</h3><div id="categories"></div><label>Notes <textarea id="notes"></textarea></label><button id="save">Save this cell</button><p id="message" role="status"></p></section></div>
+<div class="card"><h2>Export the review</h2><p>These selections are held in this page's memory. Download before closing or reloading. Nothing is sent to a server. A blank or partial review cannot unlock organizer comparison.</p>
+<button id="download">Download review JSON</button><label>Resume from your downloaded JSON <input type="file" id="import" accept="application/json"></label></div></main>
+<script>
+const data=__PAYLOAD__;
+const $=id=>document.getElementById(id);let rows=data.rows;
+$('banner').textContent=data.synthetic?'SYNTHETIC SOFTWARE DEMO — fabricated reports and outputs. No model ran. No clinical conclusions.':'BLINDED REVIEW — unreviewed model proposals, not verified training labels.';
+$('definitions').textContent=data.definitions;
+data.cases.forEach((c,i)=>{let o=document.createElement('option');o.value=c.review_id;o.textContent=`Output ${i+1} · ${c.review_id}`;$('case').append(o)});
+data.cases[0].conditions.forEach(c=>{let o=document.createElement('option');o.value=c.condition;o.textContent=c.condition;$('condition').append(o)});
+data.categories.forEach(c=>{let label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.value=c;label.append(input,document.createTextNode(' '+c.replaceAll('_',' ')));$('categories').append(label)});
+function current(){return rows.find(r=>r.review_id===$('case').value&&r.condition===$('condition').value)}
+function render(){let c=data.cases.find(c=>c.review_id===$('case').value),cell=c.conditions.find(c=>c.condition===$('condition').value),r=current();
+ $('report').textContent=c.report;$('prediction').textContent=cell.proposal?JSON.stringify(cell.proposal,null,2):'No complete structured proposal is available.';
+ $('status').textContent=`Technical status: ${cell.technical_status}. Lexical acceptance does not establish medical correctness.`;
+ document.querySelectorAll('#categories input').forEach(x=>x.checked=r.categories.includes(x.value));$('notes').value=r.notes;
+ $('message').textContent='';$('progress').textContent=`${rows.filter(r=>r.categories.length).length} / 240 cells saved locally`;
+}
+$('case').onchange=render;$('condition').onchange=render;
+$('save').onclick=()=>{let categories=[...document.querySelectorAll('#categories input:checked')].map(x=>x.value);
+ if(!$('reviewer').value.trim()||!categories.length){$('message').textContent='Enter reviewer identity and select a category.';return}
+ if(categories.includes('no_issue_identified')&&categories.length>1){$('message').textContent='No issue cannot be combined with other categories.';return}
+ if(!categories.includes('no_issue_identified')&&!$('notes').value.trim()){$('message').textContent='Explain the issue or insufficient information in notes.';return}
+ Object.assign(current(),{reviewer:$('reviewer').value.trim(),reviewed_at:new Date().toISOString(),categories,notes:$('notes').value});render();$('message').textContent='Saved in this page. Download to preserve it.';
+};
+$('download').onclick=()=>{let url=URL.createObjectURL(new Blob([JSON.stringify(rows,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=data.synthetic?'synthetic-review.json':'blinded-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+$('import').onchange=async e=>{try{let values=JSON.parse(await e.target.files[0].text()),seen=new Set();if(!Array.isArray(values)||values.length!==240)throw Error('Expected 240 cells');
+ for(let r of values){let original=data.rows.find(x=>x.review_id===r.review_id&&x.condition===r.condition),key=r.review_id+'|'+r.condition;
+ if(!original||original.output_sha256!==r.output_sha256||seen.has(key)||!Array.isArray(r.categories)||!r.categories.every(c=>data.categories.includes(c))||typeof r.notes!=='string')throw Error('Wrong or stale review file');seen.add(key)}
+ rows=values;render();$('message').textContent='Imported. Final validation still occurs in the local review tool.';
+ }catch(error){$('message').textContent=error.message}};
+render();
+</script></html>

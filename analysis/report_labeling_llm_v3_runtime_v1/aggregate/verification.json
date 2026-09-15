@@ -1,0 +1,30 @@
+{
+  "scope": "CPU software integration only; no model inference",
+  "tests_passed": 343,
+  "new_tests_passed": 47,
+  "test_command": "PYTHONPATH=src .venv/bin/python -m pytest -q",
+  "gpu_model_calls": 0,
+  "training_steps": 0,
+  "synthetic_generations": 20,
+  "synthetic_condition_cells": 240,
+  "synthetic_review_cells_unreviewed": 240,
+  "protected_historical_analysis_files": 145,
+  "prior_private_files_verified_unchanged": 532,
+  "fixed_development_validation_split": [
+    40,
+    18
+  ],
+  "runtime_plan_sha256": "24f04d991f980aaf81e99870506f900ef8b34c84c25cac76ce5bba9f4531a575",
+  "frozen_candidate_plan_sha256": "feb7a4a5a6132f1d97e1fd470f0b0195f0b92f6f0bc42136a15e0a77c678b775",
+  "backup_restored_files": 571,
+  "backup_sha256": "d84b20e7aafd376d246e4eb0dc57ecdb7969574a52169aefc87021c0327c8457",
+  "browser_checks": [
+    "Original input and proposed output rendered",
+    "Blank save refused",
+    "Synthetic reviewer/category/notes saved",
+    "Reload resets in-memory edits; source template remains blank"
+  ],
+  "real_cuda_branch_executed": false,
+  "execution_enabled": false,
+  "qualified_clinical_review_completed": false
+}

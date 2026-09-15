@@ -9,6 +9,7 @@ This folder preserves dataset/report analyses and aggregate findings. Audits and
 | [MedGemma / Qwen benchmark](report_labeling_llm_v1/README.md) | Pinned execution recipe, five-study smoke results, dashboard and offline error review | `runs/report-labeling-llm-v1/` inputs; `runs/report-labeling-llm-smoke-20260914/` results |
 | [LLM v2 incomplete smoke](report_labeling_llm_v2/README.md) | Pinned contract, runtime, partial RTX results and diagnostic tools | `runs/report-labeling-llm-v2-ada-executed-20260915/` |
 | [MedGemma v3 candidate](report_labeling_llm_v3/README.md) | Paired prompt design, shared framing, synthetic tests and CPU token sizing; NOT RUN | `runs/report-labeling-llm-v3-candidate-*/` |
+| [V3 local runtime and blinded review](report_labeling_llm_v3_runtime_v1/README.md) | Bounded adapter, coded review interface, CPU software checks; GPU disabled | `runs/report-labeling-llm-v3-runtime-*/` |
 
 Private paths are relative to `RSNA_STATE_DIR` (default: repository `state/`). They contain study identifiers, reports, splits, predictions and detailed error evidence. They are excluded from Git and included in the separate private state backup. The public GitHub repository contains code and aggregate findings only.
 

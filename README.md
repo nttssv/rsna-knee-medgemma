@@ -6,6 +6,8 @@ This repository contains the code, configuration, experiment record, and instruc
 
 ## Current experiment
 
+The [v3 local runtime and blinded review workflow](analysis/report_labeling_llm_v3_runtime_v1/README.md) implements bounded subprocess execution, exact output receipts and two-stage human review. A fabricated CPU demo exercises the workflow; GPU execution is hard-disabled and no v3 model results exist.
+
 The [MedGemma v3 local candidate](analysis/report_labeling_llm_v3/README.md) prepares an evidence-first prompt comparison against the old prompt under shared response handling and a 4,096-token cap. Both arms passed CPU tokenizer sizing; generation is NOT RUN and execution remains disabled.
 
 The [v2 RTX 6000 Ada report-extraction smoke](analysis/report_labeling_llm_v2/RTX_SMOKE_RESULTS.md) is **incomplete**: MedGemma attempted three reports, with no accepted labels, and stopped on truncation. Qwen and remaining repeats were NOT RUN. GPU stopped; [private input/output diagnostics](analysis/report_labeling_llm_v2/diagnostics/README.md) preserve original reports and exact responses. The [local response investigation](analysis/report_labeling_llm_v2/response_diagnostic_v1/RESULTS.md) shows that prefix removal alone does not resolve evidence and semantic errors.
