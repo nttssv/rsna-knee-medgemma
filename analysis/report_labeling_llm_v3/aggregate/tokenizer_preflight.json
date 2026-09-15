@@ -1,0 +1,50 @@
+{
+  "status": "TOKENIZED_NO_INFERENCE",
+  "plan_sha256": "feb7a4a5a6132f1d97e1fd470f0b0195f0b92f6f0bc42136a15e0a77c678b775",
+  "candidate_sha256": {
+    "PROTOCOL.md": "102bee53bd9ab31c618e79cde09bccdffcd3658848d5160126808a014f5f8d2d",
+    "configs/experiment.json": "f50ac4f4f7be2e421ccfa845a0494dec21d19ec8b190f78d5ef43758f4e27e22",
+    "configs/protected_history.json": "b703c4b6185a377f18ccd4fcc880577d527c66f0643f4601aa45d35cfeef808d",
+    "ontology_equivalence.csv": "3bec100465b35a022930d5e8706a49331288988fe0147dcde30677b32e10e815",
+    "prompts/control_v2.txt": "51d338eb2f48c7b00683189e9d7e319374ed1f99e536600264c208ed2d0a3734",
+    "prompts/evidence_first.txt": "669bf4330119caaf143695bb6076b48b8dcba32ba0bbc32a27882fd09411edde",
+    "prompts/target_definitions.txt": "fd96c401ba485fc155eb5a8633ca3a29d7f901444ac8e7685cef82c2606f7354",
+    "scripts/tokenize_local.py": "897993cd046c85971aaa16d1936f456f63f515881519e4313e31c93084b6928f",
+    "scripts/v3_candidate.py": "77f9814e72e99421b3edea7e87d396a0a6e84c704434aa703d44783bbe67a530",
+    "tests/semantic_cases.json": "fb67d5f1a22351b5497581a4b94b353a8c1b4955f079d14d435ea28ee77717c3",
+    "tests/test_v3_candidate.py": "fad98d2935e325ed6aeb0b302b6450431d9de14a246996b56d0ab115dfcf04af"
+  },
+  "package_versions": {
+    "torch": "2.8.0",
+    "transformers": "5.12.0",
+    "huggingface-hub": "1.19.0",
+    "accelerate": "1.15.0",
+    "jinja2": "3.1.6",
+    "numpy": "2.5.3",
+    "pillow": "11.0.0",
+    "safetensors": "0.8.0",
+    "sentencepiece": "0.2.2",
+    "tokenizers": "0.22.2"
+  },
+  "arms": {
+    "control": {
+      "reports": 5,
+      "min_input_tokens": 1618,
+      "max_input_tokens": 1945,
+      "max_input_plus_output_budget": 6041
+    },
+    "candidate": {
+      "reports": 5,
+      "min_input_tokens": 1880,
+      "max_input_tokens": 2207,
+      "max_input_plus_output_budget": 6303
+    }
+  },
+  "context_limit": 131072,
+  "model_calls": 0,
+  "weights_loaded": false,
+  "gpu_used": false,
+  "template_token_parity": true,
+  "execution_ready": false,
+  "details_sha256": "79d6829b835c7fd26fc1b4285650f0f691094c56bbae8519f5e10d8acdc7683b"
+}

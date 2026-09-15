@@ -6,6 +6,8 @@ This repository contains the code, configuration, experiment record, and instruc
 
 ## Current experiment
 
+The [MedGemma v3 local candidate](analysis/report_labeling_llm_v3/README.md) prepares an evidence-first prompt comparison against the old prompt under shared response handling and a 4,096-token cap. Both arms passed CPU tokenizer sizing; generation is NOT RUN and execution remains disabled.
+
 The [v2 RTX 6000 Ada report-extraction smoke](analysis/report_labeling_llm_v2/RTX_SMOKE_RESULTS.md) is **incomplete**: MedGemma attempted three reports, with no accepted labels, and stopped on truncation. Qwen and remaining repeats were NOT RUN. GPU stopped; [private input/output diagnostics](analysis/report_labeling_llm_v2/diagnostics/README.md) preserve original reports and exact responses. The [local response investigation](analysis/report_labeling_llm_v2/response_diagnostic_v1/RESULTS.md) shows that prefix removal alone does not resolve evidence and semantic errors.
 
 The [MedGemma / Qwen report-extraction benchmark](analysis/report_labeling_llm_v1/README.md) completed a five-development-report smoke, twice per model. MedGemma accepted 0/60 first-pass condition outputs; Qwen accepted 58/60, but both strict repeatability gates failed. [Measured results and visualizations](analysis/report_labeling_llm_v1/RESULTS.md) document the technical and semantic issues. RunPod is stopped; full development, LLM validation, bulk labeling and MRI training remain paused.

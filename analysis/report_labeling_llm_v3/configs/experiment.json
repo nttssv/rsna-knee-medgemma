@@ -1,0 +1,59 @@
+{
+  "status": "LOCAL_CANDIDATE_NOT_RUN",
+  "execution_enabled": false,
+  "gpu_adapter_implemented": false,
+  "model_id": "google/medgemma-1.5-4b-it",
+  "revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "dtype": "bfloat16",
+  "quantization": null,
+  "adapter": null,
+  "batch_size": 1,
+  "attn_implementation": "sdpa",
+  "do_sample": false,
+  "num_beams": 1,
+  "seed": 20260914,
+  "max_input_tokens": 8192,
+  "max_new_tokens": 4096,
+  "max_time_seconds": 300,
+  "generation_eos_token_ids": [
+    1,
+    106
+  ],
+  "generation_pad_token_id": 0,
+  "required_versions": {
+    "torch": "2.8.0",
+    "transformers": "5.12.0",
+    "huggingface-hub": "1.19.0",
+    "accelerate": "1.15.0",
+    "jinja2": "3.1.6",
+    "numpy": "2.5.3",
+    "pillow": "11.0.0",
+    "safetensors": "0.8.0",
+    "sentencepiece": "0.2.2",
+    "tokenizers": "0.22.2"
+  },
+  "arms": {
+    "control": {
+      "prompt": "control_v2.txt",
+      "description": "Exact v2 prompt with shared v3 engineering controls"
+    },
+    "candidate": {
+      "prompt": "evidence_first.txt",
+      "description": "Evidence-first decision ladder and synthetic contrastive examples"
+    }
+  },
+  "run_order": [
+    "control-1",
+    "candidate-1",
+    "candidate-2",
+    "control-2"
+  ],
+  "studies": 5,
+  "maximum_generations": 20,
+  "partition": "development",
+  "source_inputs_sha256": "0a4b05ccca46ff85fd1befc077155b40837dd4787603a91b579500f04cbe5ce8",
+  "shared_response_policy": "bare JSON or one exact leading nonempty thought envelope; unchanged v2 JSON/fence/evidence acceptance",
+  "comparison_status": "no outputs; no metrics",
+  "resource_status": "no quote or paid execution authorization for this candidate",
+  "source_prepared_manifest_sha256": "cefa4355978329c54abe3e0dea41c942fdcda8280069781a29b2e0475ebb2bd6"
+}

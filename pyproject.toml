@@ -29,4 +29,4 @@ where = ["src"]
 rsna_knee = ["assets/*.html"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "analysis/report_labeling/tests", "analysis/report_labeling_llm_v2/tests", "analysis/report_labeling_llm_v2/response_diagnostic_v1"]
+testpaths = ["tests", "analysis/report_labeling/tests", "analysis/report_labeling_llm_v2/tests", "analysis/report_labeling_llm_v2/response_diagnostic_v1", "analysis/report_labeling_llm_v3/tests"]
