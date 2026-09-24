@@ -1,6 +1,6 @@
 # Qwen GPU execution proposal
 
-**Status: source-reviewed proposal; GPU execution remains disabled.** This package turns the next Qwen step into a concrete, cost-bounded design without starting paid compute.
+**Status: source review complete; no critical blockers identified. GPU execution remains disabled.** This package defines the next Qwen step as a concrete, cost-bounded proposal without starting paid compute.
 
 | Boundary | Proposal |
 |---|---|
@@ -9,12 +9,13 @@
 | Model | `Qwen/Qwen3-14B` at revision `40c069824f4251a91eefaf281ebe4c544efd3e18` |
 | GPU | One RTX 6000 Ada, 48 GiB |
 | Provider window | At most 60 minutes, including setup and transfer |
+| Inference window | At most 30 minutes and must finish before watchdog stop time |
 | Budget | At most $1.50; current Secure Cloud compute ceiling $0.84/hour |
 | Pod storage | Secure Cloud, 80 GB container disk, no persistent or network volume |
-| Shutdown | Watchdog starts stop at T−5 min; hard provider deadline at T; external state verification |
+| Shutdown | Watchdog stops at T−5 min regardless of model state; hard provider deadline at T; external state verification |
 | Current execution | Disabled; no approval record exists |
 
-The [protocol](PROTOCOL.md) explains measured sizing evidence, required CUDA/cache checks, independent output-token decoding and failure rules. The private grant binds both the hard provider deadline and the watchdog stop time, plus Secure Cloud, exact container disk size, zero persistent volume and no network volume. [Resource settings](configs/resource_proposal.json) expire after 24 hours and must be refreshed against the signed-in console before any start. The CPU test suite exercises bad/expired grants, cost and deadline limits, exact decoding, pod targeting and bounded stop attempts without contacting RunPod.
+The [protocol](PROTOCOL.md) explains measured sizing evidence, required CUDA/cache checks, independent output-token decoding and failure rules. The private grant binds both the hard provider deadline and the watchdog stop time, plus Secure Cloud, exact container disk size, zero persistent volume and no network volume. Inference must complete before the stop time; the watchdog will stop the pod even if a model process is still running. [Resource settings](configs/resource_proposal.json) expire after 24 hours and must be refreshed against the signed-in console before any start. The CPU test suite exercises bad/expired grants, cost and deadline limits, exact decoding, pod targeting and bounded stop attempts without contacting RunPod.
 
 RunPod's public page lists $0.74/hour Community Cloud and $0.84/hour Secure Cloud for this GPU; the proposal uses the Secure rate. An 80 GB disk is budgeted at a conservative $0.023/hour based on RunPod's documented stopped-Pod storage rate. The total ceiling for one hour is about $0.863, within the $1.50 cap. Before any run, compare this proposal against the current signed-in console quote and refresh the 24-hour quote if expired. The public estimate is not a provider-enforced dollar cap.
 
