@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "stage": "qwen_live_execution_runtime_v1",
+  "prepared_plan_sha256": "c4586bb0c65163244dac80344ea96f691493a1b89a5911eefcba54f2384c74fc",
+  "resource_proposal_sha256": "61d0dfe522f4ad4e4d00fef86532bc55f50c989a2495c6e9d6637be036165b12",
+  "model_id": "Qwen/Qwen3-14B",
+  "model_revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+  "prepared_package": "state/runs/qwen-runtime-v1-20260915-prepared-final",
+  "run_order": [
+    "control-1",
+    "candidate-1",
+    "candidate-2",
+    "control-2"
+  ],
+  "reports_per_run": 5,
+  "maximum_generations": 20,
+  "training": false,
+  "validation_inference": false,
+  "full_development_inference": false,
+  "bulk_extraction": false,
+  "retry_or_repair": false,
+  "real_execution_enabled_by_default": false,
+  "runtime_policy_sha256": "b5919a49aa4eef7b92e73e6a0cf5fdeef19132c90b5badf8db68823c5f06e6ab",
+  "runtime_source_sha256": "da72bd14a8ea41eec01582cd3bebfae713f1984a0f43eec626c5bb8c6f808263",
+  "resource_gate_sha256": "559930f6392a3fd652e8423885914c5881aa8ae94667a36ac13c9fb722d4f356",
+  "watchdog_source_sha256": "92db999ea4ba713323ffd592722484e7caa2689d5628f7761f24750f33aba727"
+}
