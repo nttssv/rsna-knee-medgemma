@@ -147,10 +147,35 @@ def live_gate(plan_path, plan_sha256, authorization, watchdog_receipt, stop_pref
     observation_path = private_file(provider_observation, "Provider observation")
     grant = validate_user_approval(grant_path, plan_sha256, current=current)
     observation = read(observation_path)
-    alternate_gate.verify_observed_resource(grant, observation)
+    verify_provider_observation(grant, observation, current=current)
     resource_gate.verify_watchdog(watchdog_path, grant,
         QWEN_EXECUTION / "scripts/stop_watchdog.py", preflight_path, current=current)
     return grant
+
+
+def verify_provider_observation(grant, observed, current=None):
+    """Validate exact provider facts and the STOPPED snapshot's freshness at start time.
+
+    This records the pre-start stopped state only. After start, the stop preflight and
+    live watchdog establish the current control path; this receipt is not a live-state
+    assertion.
+    """
+    expected = alternate_gate.OBSERVED_FIELDS | {"observed_at", "provider_state"}
+    if not isinstance(observed, dict) or set(observed) != expected:
+        raise PermissionError("Provider observation has missing or unexpected fields")
+    if observed["provider_state"] != "STOPPED":
+        raise PermissionError("Provider observation must record the exact pod in STOPPED state")
+    alternate_gate.verify_observed_resource(grant,
+        {key: observed[key] for key in alternate_gate.OBSERVED_FIELDS})
+    now = current or datetime.now(timezone.utc)
+    approved = resource_gate.parse_time(grant["approved_at"])
+    observed_at = resource_gate.parse_time(observed["observed_at"])
+    start = resource_gate.parse_time(grant["provider_start_requested_at"])
+    if not approved <= observed_at <= start <= now:
+        raise PermissionError("Provider observation must follow approval and precede the start request")
+    if (start - observed_at).total_seconds() > 600:
+        raise PermissionError("Provider observation was older than 10 minutes at pod start")
+    return observed
 
 
 def validate_user_approval(path, execution_plan_sha256, current=None):

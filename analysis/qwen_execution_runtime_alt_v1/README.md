@@ -6,6 +6,8 @@ The runner binds prepared-plan SHA-256 `c4586bb0c65163244dac80344ea96f691493a1b8
 
 The approved GPU allowlist is NVIDIA A40, NVIDIA RTX A6000, NVIDIA L40, NVIDIA RTX 6000 Ada Generation, and NVIDIA L40S. Each future grant selects exactly one named GPU, exact pod, and exact region. The signed-in rates must remain within that GPU's proposal ceiling and the storage ceiling. A different allowed GPU still fails. There is no fallback to another GPU, region, pod, or host.
 
+The provider-observation receipt must match the grant, record `provider_state: "STOPPED"`, and be timestamped after approval and no more than 10 minutes before the requested start. It records pre-start state only; the stop preflight and live watchdog are the current control checks after start.
+
 Real execution remains disabled in `configs/runtime.json`; this package creates no approval record and makes no provider calls. Do not change the execution switch as part of this source milestone.
 
 See [PROTOCOL.md](PROTOCOL.md), [OPERATOR_CHECKLIST.md](OPERATOR_CHECKLIST.md), and [RESULTS.md](RESULTS.md).

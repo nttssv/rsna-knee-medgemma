@@ -90,10 +90,35 @@ def test_per_gpu_rate_ceiling_is_enforced(gpu_name, tmp_path):
 def test_provider_observation_must_match_approved_pod_gpu_and_region():
     grant = grant_for(GPU_NAMES[0])
     observed = {key: grant[key] for key in live.alternate_gate.OBSERVED_FIELDS}
-    live.alternate_gate.verify_observed_resource(grant, observed)
+    observed.update(observed_at="2026-09-24T14:04:00+00:00", provider_state="STOPPED")
+    live.verify_provider_observation(grant, observed, current=NOW)
     observed["region"] = "US-CA-1"
     with pytest.raises(PermissionError, match="region"):
-        live.alternate_gate.verify_observed_resource(grant, observed)
+        live.verify_provider_observation(grant, observed, current=NOW)
+
+
+@pytest.mark.parametrize("observed_at,state,current,match", [
+    ("2026-09-24T13:54:59+00:00", "STOPPED", NOW, "10 minutes"),
+    ("2026-09-24T13:59:00+00:00", "STOPPED", NOW, "follow approval"),
+    ("2026-09-24T14:06:00+00:00", "STOPPED", NOW, "precede the start"),
+    ("2026-09-24T14:04:00+00:00", "RUNNING", NOW, "STOPPED state"),
+    ("2026-09-24T14:04:00+00:00", "STOPPED", datetime(2026, 9, 24, 14, 3, tzinfo=timezone.utc), "precede the start"),
+])
+def test_provider_observation_rejects_stale_or_wrong_state(observed_at, state, current, match):
+    grant = grant_for(GPU_NAMES[0])
+    if match == "10 minutes":
+        grant["approved_at"] = "2026-09-24T13:40:00+00:00"
+    observed = {key: grant[key] for key in live.alternate_gate.OBSERVED_FIELDS}
+    observed.update(observed_at=observed_at, provider_state=state)
+    with pytest.raises(PermissionError, match=match):
+        live.verify_provider_observation(grant, observed, current=current)
+
+
+def test_provider_observation_requires_timestamp_and_state():
+    grant = grant_for(GPU_NAMES[0])
+    observed = {key: grant[key] for key in live.alternate_gate.OBSERVED_FIELDS}
+    with pytest.raises(PermissionError, match="missing or unexpected"):
+        live.verify_provider_observation(grant, observed, current=NOW)
 
 
 def test_new_plan_hash_is_required_and_base_plan_is_not_the_grant_binding(tmp_path):
@@ -150,7 +175,8 @@ def test_supervisor_watchdog_and_decode_protections_are_retained():
 def test_provider_observation_exact_schema_is_required():
     grant = grant_for(GPU_NAMES[0])
     observation = {key: grant[key] for key in live.alternate_gate.OBSERVED_FIELDS}
-    live.alternate_gate.verify_observed_resource(grant, observation)
+    observation.update(observed_at="2026-09-24T14:04:00+00:00", provider_state="STOPPED")
+    live.verify_provider_observation(grant, observation, current=NOW)
     observation["unexpected"] = True
     with pytest.raises(PermissionError, match="missing or unexpected"):
-        live.alternate_gate.verify_observed_resource(grant, observation)
+        live.verify_provider_observation(grant, observation, current=NOW)

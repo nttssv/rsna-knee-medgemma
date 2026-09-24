@@ -41,7 +41,7 @@ The approval JSON has exactly the following fields:
 
 The compute rate must not exceed the selected GPU's ceiling: A40 $0.49/h, RTX A6000 $0.53/h, L40 $0.82/h, RTX 6000 Ada $0.84/h, or L40S $1.09/h. Storage must be at most $0.012/h. The total maximum is $1.50, and the provider window is at most 3,600 seconds. The proposal freshness deadline is enforced.
 
-The separate provider observation JSON has exactly the resource fields below and must equal the grant field-for-field. It is captured from the signed-in provider state without changing the pod:
+The separate provider observation JSON has exactly the resource fields plus `observed_at` and `provider_state`. It must equal the grant resource fields field-for-field and record the exact pod as `STOPPED`. Capture it from the signed-in provider state without changing the pod, after the grant is approved and within 10 minutes before the recorded provider start request:
 
 ```json
 {
@@ -54,11 +54,13 @@ The separate provider observation JSON has exactly the resource fields below and
   "persistent_volume_gb": 0,
   "network_volume_id": null,
   "actual_compute_usd_per_hour": 0.49,
-  "actual_storage_usd_per_hour": 0.012
+  "actual_storage_usd_per_hour": 0.012,
+  "observed_at": "2026-09-24T14:04:00+00:00",
+  "provider_state": "STOPPED"
 }
 ```
 
-Rates in these examples are illustrative schema values only; a future record must use actual signed-in values. The authorization validator reuses the reviewed proposal gate for allowlist, per-GPU ceiling, storage, budget, quote, and deadline checks. It first strictly checks that `execution_plan_sha256` is the exact new plan SHA, then adapts only an in-memory copy of that field for the proposal gate, whose frozen proposal is keyed to the previous plan. The grant on disk is never rewritten.
+Rates and timestamps in these examples are illustrative schema values only; a future record must use the actual signed-in values. The runtime enforces `approved_at <= observed_at <= provider_start_requested_at <= now`, requires the observed state to be exactly `STOPPED`, and caps the observation-to-start interval at 600 seconds. Once start is requested, the observation is historical pre-start evidence only; it is not reused to claim that the pod is still stopped. The same-pod preflight and live watchdog establish the later control path. The authorization validator reuses the reviewed proposal gate for allowlist, per-GPU ceiling, storage, budget, quote, and deadline checks. It first strictly checks that `execution_plan_sha256` is the exact new plan SHA, then adapts only an in-memory copy of that field for the proposal gate, whose frozen proposal is keyed to the previous plan. The grant on disk is never rewritten.
 
 The watchdog is the reviewed exact-pod watchdog. It remains bound to the approved pod and timestamps; the live runtime revalidates its PID, command, environment, receipt, and preflight before every generation. The observation receipt is not a capacity guarantee; it only binds the provider facts captured for the exact selected pod. If that pod cannot start, stop without trying another resource.
 
