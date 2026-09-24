@@ -2,7 +2,7 @@ import importlib.util
 import json
 import os
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -218,3 +218,152 @@ def test_generation_is_not_started_without_330_second_stop_margin():
         live.check_time_budget(grant, time.monotonic(),
             current=datetime(2026, 9, 24, 13, 44, 30, tzinfo=timezone.utc),
             minimum_remaining_seconds=330)
+
+
+def test_watchdog_liveness_failure_blocks_next_generation(monkeypatch):
+    calls = []
+    def dead_watchdog(*args):
+        calls.append("checked")
+        raise PermissionError("watchdog process identity is unverified")
+    monkeypatch.setattr(live, "verify_live_watchdog", dead_watchdog)
+    current = datetime.now(timezone.utc)
+    with pytest.raises(PermissionError, match="watchdog process identity"):
+        live.pre_generation_gate("watch-receipt", {"watchdog_stop_at": (current.replace(microsecond=0) +
+            timedelta(seconds=600)).isoformat()}, "stop-preflight",
+            time.monotonic(), current=current)
+    assert calls == ["checked"]
+
+
+def test_supervisor_hard_timeout_kills_and_reaps_process_group():
+    import sys
+    ok, reason = live.supervise([sys.executable, "-c", "import time; time.sleep(30)"], 0.15)
+    assert ok is False
+    assert reason == "hard_timeout"
+
+
+def test_worker_requires_parent_pid_nonce_and_bound_receipts(tmp_path):
+    output = tmp_path / "run"
+    output.mkdir(mode=0o700)
+    paths = {}
+    for name in ("authorization", "watchdog", "preflight"):
+        path = tmp_path / (name + ".json")
+        path.write_text("{}")
+        paths[name] = path
+    nonce = "synthetic-nonce"
+    start = dict(parent_pid=os.getppid(), execution_plan_sha256="e" * 64,
+        prepared_plan_sha256=live.PREPARED_PLAN_SHA256,
+        authorization_sha256=live.sha(paths["authorization"]),
+        watchdog_receipt_sha256=live.sha(paths["watchdog"]),
+        stop_preflight_sha256=live.sha(paths["preflight"]))
+    live.write_new(output / "supervisor_start.json", start)
+    live.write_new(output / "supervisor_dispatch.json", dict(
+        supervisor_start_sha256=live.sha(output / "supervisor_start.json"),
+        nonce_sha256=live.digest(nonce)))
+    read_fd, write_fd = os.pipe()
+    with os.fdopen(write_fd, "w") as stream:
+        json.dump(dict(nonce=nonce, parent_pid=os.getppid(),
+            execution_plan_sha256="e" * 64,
+            prepared_plan_sha256=live.PREPARED_PLAN_SHA256), stream)
+    context = live.verify_worker_attestation(read_fd, output, "e" * 64,
+        live.PREPARED_PLAN_SHA256, paths["authorization"], paths["watchdog"], paths["preflight"])
+    assert context["parent_pid"] == os.getppid()
+
+
+def test_worker_rejects_wrong_pipe_nonce(tmp_path):
+    output = tmp_path / "run"
+    output.mkdir(mode=0o700)
+    paths = {}
+    for name in ("authorization", "watchdog", "preflight"):
+        path = tmp_path / (name + ".json")
+        path.write_text("{}")
+        paths[name] = path
+    start = dict(parent_pid=os.getppid(), execution_plan_sha256="e" * 64,
+        prepared_plan_sha256=live.PREPARED_PLAN_SHA256,
+        authorization_sha256=live.sha(paths["authorization"]),
+        watchdog_receipt_sha256=live.sha(paths["watchdog"]),
+        stop_preflight_sha256=live.sha(paths["preflight"]))
+    live.write_new(output / "supervisor_start.json", start)
+    live.write_new(output / "supervisor_dispatch.json", dict(
+        supervisor_start_sha256=live.sha(output / "supervisor_start.json"),
+        nonce_sha256=live.digest("expected")))
+    read_fd, write_fd = os.pipe()
+    with os.fdopen(write_fd, "w") as stream:
+        json.dump(dict(nonce="wrong", parent_pid=os.getppid(),
+            execution_plan_sha256="e" * 64,
+            prepared_plan_sha256=live.PREPARED_PLAN_SHA256), stream)
+    with pytest.raises(PermissionError, match="supervisor provenance"):
+        live.verify_worker_attestation(read_fd, output, "e" * 64,
+            live.PREPARED_PLAN_SHA256, paths["authorization"], paths["watchdog"], paths["preflight"])
+
+
+def test_supervisor_deadline_is_minimum_of_session_and_stop_bounds():
+    now = datetime.now(timezone.utc)
+    grant = {"watchdog_stop_at": (now + timedelta(seconds=5000)).isoformat()}
+    assert live.bounded_supervisor_timeout(grant, current=now) == 1799
+    grant["watchdog_stop_at"] = (now + timedelta(seconds=1000)).isoformat()
+    assert live.bounded_supervisor_timeout(grant, current=now) == 999
+    grant["watchdog_stop_at"] = (now + timedelta(seconds=1)).isoformat()
+    with pytest.raises(TimeoutError):
+        live.bounded_supervisor_timeout(grant, current=now)
+
+
+def test_launcher_uses_execute_flag_and_persists_supervisor_result(monkeypatch, tmp_path):
+    now = datetime.now(timezone.utc)
+    grant = {"pod_id": "synthetic-pod", "provider_deadline": (now + timedelta(seconds=3900)).isoformat(),
+        "watchdog_stop_at": (now + timedelta(seconds=3600)).isoformat()}
+    monkeypatch.setattr(live, "validate_execution_plan", lambda *args: {})
+    monkeypatch.setattr(live, "check_plan", lambda *args: (None, []))
+    monkeypatch.setattr(live, "live_gate", lambda *args, **kwargs: grant)
+    inputs = []
+    for name in ("authorization", "watchdog", "preflight"):
+        path = tmp_path / name
+        path.write_text("synthetic")
+        inputs.append(path)
+    output = tmp_path / "execution-output"
+    observed = {}
+    def fake_supervise(command, timeout, pass_fds=()):
+        observed["command"] = command
+        observed["timeout"] = timeout
+        assert len(pass_fds) == 1
+        result = dict(status="completed", execution_plan_sha256="e" * 64,
+            prepared_plan_sha256=live.PREPARED_PLAN_SHA256, generations=20,
+            run_order=live.execution_plan()["run_order"])
+        live.write_new(output / "session_result.json", result)
+        return True, "completed"
+    monkeypatch.setattr(live, "supervise", fake_supervise)
+    ok = live.launch_supervised(tmp_path / "prepared", live.PREPARED_PLAN_SHA256,
+        ROOT / "configs/execution_plan.json", "e" * 64, *inputs[:1], inputs[1], inputs[2],
+        tmp_path / "cache", output)
+    assert ok is True
+    assert "--execute" in observed["command"]
+    assert "--_worker" in observed["command"]
+    assert observed["timeout"] == 1799
+    assert json.loads((output / "supervisor_result.json").read_text())["status"] == "completed"
+
+
+def test_launcher_records_hard_timeout_and_partial_hashes(monkeypatch, tmp_path):
+    now = datetime.now(timezone.utc)
+    grant = {"pod_id": "synthetic-pod", "provider_deadline": (now + timedelta(seconds=3900)).isoformat(),
+        "watchdog_stop_at": (now + timedelta(seconds=3600)).isoformat()}
+    monkeypatch.setattr(live, "validate_execution_plan", lambda *args: {})
+    monkeypatch.setattr(live, "check_plan", lambda *args: (None, []))
+    monkeypatch.setattr(live, "live_gate", lambda *args, **kwargs: grant)
+    paths = []
+    for name in ("authorization", "watchdog", "preflight"):
+        path = tmp_path / name; path.write_text("synthetic"); paths.append(path)
+    output = tmp_path / "timed-out-output"
+    def fake_timeout(command, timeout, pass_fds=()):
+        (output / "control-1").mkdir()
+        partial = output / "control-1/raw.jsonl"
+        partial.write_text("durable partial receipt\n")
+        return False, "hard_timeout"
+    monkeypatch.setattr(live, "supervise", fake_timeout)
+    ok = live.launch_supervised(tmp_path / "prepared", live.PREPARED_PLAN_SHA256,
+        ROOT / "configs/execution_plan.json", "f" * 64, paths[0], paths[1], paths[2],
+        tmp_path / "cache", output)
+    assert ok is False
+    receipt = json.loads((output / "supervisor_result.json").read_text())
+    assert receipt["status"] == "failed"
+    assert receipt["process_status"] == "hard_timeout"
+    assert receipt["partial_artifacts_sha256"]["control-1/raw.jsonl"] == live.sha(output / "control-1/raw.jsonl")
+    assert "session_result.json" not in receipt["partial_artifacts_sha256"]

@@ -6,6 +6,7 @@ import json
 import math
 import os
 from pathlib import Path
+import secrets
 import subprocess
 import sys
 import time
@@ -31,6 +32,7 @@ def load_module(name, path):
 frozen = load_module("qwen_live_frozen_runtime", QWEN_RUNTIME / "scripts/runtime_qwen.py")
 resource_gate = load_module("qwen_live_resource_gate", QWEN_EXECUTION / "scripts/resource_gate.py")
 sys.path.insert(0, str(V2 / "scripts"))
+from run_smoke import supervise  # Frozen process-group hard timeout and kill/reap helper.
 
 
 def sha(path):
@@ -39,6 +41,11 @@ def sha(path):
         for block in iter(lambda: f.read(1024 * 1024), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                     allow_nan=False).encode()).hexdigest()
 
 
 def read(path):
@@ -161,6 +168,46 @@ def validate_user_approval(path, execution_plan_sha256, current=None):
     return grant
 
 
+def verify_live_watchdog(watchdog_receipt, grant, stop_preflight):
+    """Re-check process PID, command, environment and bound receipts between generations."""
+    return resource_gate.verify_watchdog(watchdog_receipt, grant,
+        QWEN_EXECUTION / "scripts/stop_watchdog.py", stop_preflight)
+
+
+def pre_generation_gate(watchdog_receipt, grant, stop_preflight, started, current=None):
+    check_time_budget(grant, started, current=current, minimum_remaining_seconds=330)
+    verify_live_watchdog(watchdog_receipt, grant, stop_preflight)
+    # Account for time spent validating the live process before entering CUDA generation.
+    check_time_budget(grant, started, current=current, minimum_remaining_seconds=330)
+
+
+def verify_worker_attestation(fd, output, execution_plan_sha256, prepared_plan_sha256,
+                              authorization, watchdog_receipt, stop_preflight):
+    import stat
+    if fd is None or fd < 3 or not stat.S_ISFIFO(os.fstat(fd).st_mode):
+        raise PermissionError("Supervised worker requires inherited parent pipe")
+    with os.fdopen(fd) as stream:
+        message = json.loads(stream.read(8192))
+    output = Path(output).resolve()
+    start_path, dispatch_path = output / "supervisor_start.json", output / "supervisor_dispatch.json"
+    start, dispatch = read(start_path), read(dispatch_path)
+    if (message.get("parent_pid") != os.getppid() or start.get("parent_pid") != os.getppid()
+        or message.get("execution_plan_sha256") != execution_plan_sha256
+        or message.get("prepared_plan_sha256") != prepared_plan_sha256
+        or digest(message.get("nonce")) != dispatch.get("nonce_sha256")
+        or dispatch.get("supervisor_start_sha256") != sha(start_path)
+        or start.get("execution_plan_sha256") != execution_plan_sha256
+        or start.get("prepared_plan_sha256") != prepared_plan_sha256
+        or start.get("authorization_sha256") != sha(authorization)
+        or start.get("watchdog_receipt_sha256") != sha(watchdog_receipt)
+        or start.get("stop_preflight_sha256") != sha(stop_preflight)
+        or (output / "session_result.json").exists()):
+        raise PermissionError("Worker lacks live supervisor provenance")
+    return dict(parent_pid=os.getppid(), supervisor_start_sha256=sha(start_path),
+        dispatch_sha256=sha(dispatch_path), execution_plan_sha256=execution_plan_sha256,
+        prepared_plan_sha256=prepared_plan_sha256)
+
+
 def check_plan(prepared, expected_sha256):
     if expected_sha256 != PREPARED_PLAN_SHA256:
         raise PermissionError("Prepared input plan SHA-256 differs from reviewed plan")
@@ -177,9 +224,17 @@ def remaining_before_stop(grant, current=None):
 
 
 def check_time_budget(grant, started, current=None, minimum_remaining_seconds=0):
-    if (time.monotonic() - started >= 1800 or
+    if (time.monotonic() - started >= runtime_config()["maximum_inference_seconds"] or
         remaining_before_stop(grant, current) <= minimum_remaining_seconds):
         raise TimeoutError("Inference reached its fixed limit or watchdog stop reserve")
+
+
+def bounded_supervisor_timeout(grant, current=None):
+    remaining = remaining_before_stop(grant, current) - 1.0  # one-second launch margin
+    timeout = min(runtime_config()["maximum_inference_seconds"] - 1.0, remaining)
+    if timeout <= 0:
+        raise TimeoutError("No inference time remains before watchdog stop")
+    return timeout
 
 
 def verify_reported_hardware(names, visible_count, cuda_version, torch_version, cuda_available, native_bf16, free_gib):
@@ -197,6 +252,11 @@ def verify_hardware_and_versions():
     query = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
                            capture_output=True, text=True, timeout=15, check=True)
     names = [line.strip() for line in query.stdout.splitlines() if line.strip()]
+    driver_query = subprocess.run(["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"],
+                                  capture_output=True, text=True, timeout=15, check=True)
+    driver_versions = [line.strip() for line in driver_query.stdout.splitlines() if line.strip()]
+    if len(driver_versions) != 1:
+        raise RuntimeError("Could not record the single GPU driver version")
     from v2_runtime import check_versions
     versions = check_versions()
     if versions != runtime_config()["required_versions"]:
@@ -207,9 +267,9 @@ def verify_hardware_and_versions():
     free_gib = torch.cuda.mem_get_info(0)[0] / 2**30
     verify_reported_hardware(names, torch.cuda.device_count(), torch.version.cuda, torch.__version__,
         torch.cuda.is_available(), torch.cuda.is_bf16_supported(including_emulation=False), free_gib)
-    return dict(gpu_names=names, free_gpu_gib=free_gib, cuda_version=torch.version.cuda,
-                torch_version=torch.__version__, package_versions=versions,
-                native_bf16=True)
+    return dict(gpu_names=names, gpu_driver_version=driver_versions[0],
+                cuda_version=torch.version.cuda, torch_version=torch.__version__,
+                package_versions=versions, native_bf16=True)
 
 
 def create_encoder(cache):
@@ -298,21 +358,20 @@ def durable_generation(backend, encoded, row, run_key, index, attempt_number, po
 
 
 def run_session(prepared, prepared_plan_sha256, execution_plan_path, execution_plan_sha256,
-                authorization, watchdog_receipt, stop_preflight, cache, output, current=None,
-                hooks=None):
-    """Run fixed ABBA20. Hooks exist only for isolated CPU tests; CLI never enables them."""
-    if hooks is not None:
-        raise PermissionError("Test hooks are not available from the production command")
+                authorization, watchdog_receipt, stop_preflight, cache, output,
+                supervisor_context, worker_fd, current=None):
+    """Run ABBA20 only as a parent-attested child under the process-group supervisor."""
     validate_execution_plan(execution_plan_path, execution_plan_sha256)
     plan, rows = check_plan(prepared, prepared_plan_sha256)
     grant = live_gate(execution_plan_path, execution_plan_sha256, authorization,
                       watchdog_receipt, stop_preflight, current=current)
     output = Path(output).resolve()
-    if output.exists():
-        raise FileExistsError("Refusing to overwrite an execution directory")
+    if not output.is_dir() or not supervisor_context:
+        raise PermissionError("Supervised parent must create the new private output directory")
     if output.is_relative_to(REPO) and not output.is_relative_to(REPO / "state"):
         raise ValueError("Execution outputs must be under ignored state/ or external private storage")
-    output.mkdir(parents=True, mode=0o700)
+    worker_context = verify_worker_attestation(worker_fd, output, execution_plan_sha256,
+        prepared_plan_sha256, authorization, watchdog_receipt, stop_preflight)
     started = time.monotonic()
     started_at = datetime.now(timezone.utc)
     result = dict(status="failed", prepared_plan_sha256=prepared_plan_sha256,
@@ -320,7 +379,7 @@ def run_session(prepared, prepared_plan_sha256, execution_plan_path, execution_p
         authorization_sha256=sha(authorization), watchdog_receipt_sha256=sha(watchdog_receipt),
         stop_preflight_sha256=sha(stop_preflight), pod_id=grant["pod_id"], run_order=[],
         generation_attempts=0, generations=0, training_steps=0, retries=0, replacement_hosts=0,
-        started_at=started_at.isoformat())
+        started_at=started_at.isoformat(), supervisor_context=worker_context)
     write_new(output / "session_start.json", result.copy())
     completed = False
     try:
@@ -361,10 +420,10 @@ def run_session(prepared, prepared_plan_sha256, execution_plan_path, execution_p
                 for stream in (raw_stream, parsed_stream, attempt_stream):
                     os.chmod(stream.name, 0o600)
                 for index, (row, encoded) in enumerate(zip(rows, arms[arm])):
-                    # Do not begin a <=300-second generation without extra parse/persistence margin.
-                    check_time_budget(grant, started, minimum_remaining_seconds=330)
+                    # Each call rechecks watchdog process identity and the hard time reserve.
                     if generation_index >= 20:
                         raise RuntimeError("Maximum of 20 generations reached")
+                    pre_generation_gate(watchdog_receipt, grant, stop_preflight, started)
                     generation_index += 1
                     result["generation_attempts"] = generation_index
                     durable_generation(backend, encoded, row, run_key, index, generation_index,
@@ -392,6 +451,100 @@ def run_session(prepared, prepared_plan_sha256, execution_plan_path, execution_p
     return completed
 
 
+def write_supervisor_receipt(output, receipt):
+    output = Path(output).resolve()
+    output.mkdir(parents=True, exist_ok=True, mode=0o700)
+    write_new(output / "supervisor_result.json", receipt)
+
+
+def launch_supervised(prepared, prepared_plan_sha256, execution_plan_path, execution_plan_sha256,
+                      authorization, watchdog_receipt, stop_preflight, cache, output):
+    """Launch the whole inference session in a killable child process group."""
+    validate_execution_plan(execution_plan_path, execution_plan_sha256)
+    check_plan(prepared, prepared_plan_sha256)
+    grant = live_gate(execution_plan_path, execution_plan_sha256, authorization,
+                      watchdog_receipt, stop_preflight)
+    output = Path(output).resolve()
+    if output.exists():
+        raise FileExistsError("Refusing to overwrite or resume an execution directory")
+    if output.is_relative_to(REPO) and not output.is_relative_to(REPO / "state"):
+        raise ValueError("Execution outputs must be under ignored state/ or external private storage")
+    timeout = bounded_supervisor_timeout(grant)
+    output.mkdir(parents=True, mode=0o700)
+    nonce = secrets.token_hex(32)
+    start = dict(parent_pid=os.getpid(), prepared_plan_sha256=prepared_plan_sha256,
+        execution_plan_sha256=execution_plan_sha256, authorization_sha256=sha(authorization),
+        watchdog_receipt_sha256=sha(watchdog_receipt), stop_preflight_sha256=sha(stop_preflight),
+        provider_deadline=grant["provider_deadline"], watchdog_stop_at=grant["watchdog_stop_at"],
+        maximum_supervisor_timeout_seconds=timeout, started_at=datetime.now(timezone.utc).isoformat())
+    write_new(output / "supervisor_start.json", start)
+    write_new(output / "supervisor_dispatch.json", dict(
+        supervisor_start_sha256=sha(output / "supervisor_start.json"), nonce_sha256=digest(nonce)))
+    reader, writer = os.pipe()
+    command = [sys.executable, str(Path(__file__).resolve()), "--execute", "--_worker",
+        "--prepared", str(Path(prepared).resolve()), "--prepared-plan-sha256", prepared_plan_sha256,
+        "--execution-plan", str(Path(execution_plan_path).resolve()),
+        "--execution-plan-sha256", execution_plan_sha256,
+        "--authorization", str(Path(authorization).resolve()),
+        "--watchdog-receipt", str(Path(watchdog_receipt).resolve()),
+        "--stop-preflight", str(Path(stop_preflight).resolve()),
+        "--cache", str(Path(cache).resolve()), "--output", str(output),
+        "--worker-fd", str(reader)]
+    started = time.monotonic()
+    try:
+        with os.fdopen(writer, "w") as stream:
+            json.dump(dict(nonce=nonce, parent_pid=os.getpid(),
+                execution_plan_sha256=execution_plan_sha256,
+                prepared_plan_sha256=prepared_plan_sha256), stream)
+        # Recompute after local setup so file/pipe work cannot consume the stop reserve.
+        timeout = bounded_supervisor_timeout(grant)
+        ok, process_status = supervise(command, timeout, pass_fds=(reader,))
+        ended = time.monotonic()
+    except BaseException as error:
+        try:
+            os.close(writer)
+        except OSError:
+            pass
+        failure = dict(status="failed", process_status=type(error).__name__,
+            hard_timeout_seconds=timeout, elapsed_seconds=time.monotonic()-started,
+            prepared_plan_sha256=prepared_plan_sha256, execution_plan_sha256=execution_plan_sha256,
+            proposal_sha256=PROPOSAL_SHA256, pod_id=grant["pod_id"],
+            partial_artifacts_sha256={str(p.relative_to(output)): sha(p) for p in sorted(output.rglob("*"))
+                                      if p.is_file() and p.name != "supervisor_result.json"})
+        try:
+            write_supervisor_receipt(output, failure)
+        except Exception:
+            pass
+        raise
+    finally:
+        os.close(reader)
+    result_path = output / "session_result.json"
+    child_result = None
+    if result_path.exists():
+        try:
+            child_result = read(result_path)
+        except Exception:
+            process_status = "invalid_child_result"
+    child_complete = bool(child_result and child_result.get("status") == "completed"
+        and child_result.get("execution_plan_sha256") == execution_plan_sha256
+        and child_result.get("prepared_plan_sha256") == prepared_plan_sha256
+        and child_result.get("generations") == 20
+        and child_result.get("run_order") == execution_plan()["run_order"])
+    receipt = dict(status="completed" if ok and child_complete else "failed",
+        process_status=process_status, hard_timeout_seconds=timeout,
+        elapsed_seconds=ended-started, prepared_plan_sha256=prepared_plan_sha256,
+        execution_plan_sha256=execution_plan_sha256, proposal_sha256=PROPOSAL_SHA256,
+        authorization_sha256=sha(authorization), watchdog_receipt_sha256=sha(watchdog_receipt),
+        stop_preflight_sha256=sha(stop_preflight), pod_id=grant["pod_id"],
+        child_result_sha256=sha(result_path) if result_path.exists() else None,
+        child_status=child_result.get("status") if child_result else None,
+        partial_artifacts_sha256={str(p.relative_to(output)): sha(p) for p in sorted(output.rglob("*"))
+                                  if p.is_file() and p.name != "supervisor_result.json"},
+        provider_stop_verified=False, billing_stop_verified=False)
+    write_supervisor_receipt(output, receipt)
+    return receipt["status"] == "completed"
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
@@ -405,11 +558,18 @@ def main():
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--execute", action="store_true", help="Required in addition to a deliberate config enablement")
+    parser.add_argument("--_worker", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--worker-fd", type=int, help=argparse.SUPPRESS)
     args = parser.parse_args()
     if not args.execute or not runtime_config()["execution_enabled"]:
         raise SystemExit("Real execution is disabled by default; no authorization or model access attempted")
-    print(json.dumps({"status": "starting", "execution_plan_sha256": args.execution_plan_sha256}))
-    ok = run_session(args.prepared, args.prepared_plan_sha256, args.execution_plan,
+    if args._worker:
+        context = run_session(args.prepared, args.prepared_plan_sha256, args.execution_plan,
+            args.execution_plan_sha256, args.authorization, args.watchdog_receipt,
+            args.stop_preflight, args.cache, args.output, supervisor_context=True,
+            worker_fd=args.worker_fd)
+        raise SystemExit(0 if context else 1)
+    ok = launch_supervised(args.prepared, args.prepared_plan_sha256, args.execution_plan,
         args.execution_plan_sha256, args.authorization, args.watchdog_receipt,
         args.stop_preflight, args.cache, args.output)
     raise SystemExit(0 if ok else 1)
