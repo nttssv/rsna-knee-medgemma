@@ -1,0 +1,19 @@
+{
+  "execution_enabled": false,
+  "stage": "REVIEWED_RESOURCE_PROPOSAL_ONLY",
+  "python_version": "3.12",
+  "cuda_runtime": "12.8",
+  "torch_build": "2.8.0+cu128",
+  "attention_implementation": "sdpa",
+  "native_bf16_required": true,
+  "maximum_provider_seconds": 3600,
+  "maximum_inference_seconds": 1800,
+  "reserved_copy_stop_seconds": 300,
+  "maximum_approved_usd": 1.5,
+  "automatic_downloads": false,
+  "automatic_retries": false,
+  "required_private_authorization": true,
+  "required_live_watchdog": true,
+  "required_external_stop_verification": true,
+  "required_independent_output_decode": true
+}

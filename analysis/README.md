@@ -21,3 +21,5 @@ The separate [candidate failure diagnostic](candidate_failure_diagnostic_v1/READ
 Current user-directed focus: [Qwen saved-output audit and prospective preparation](qwen_report_extraction_v1/README.md). Both historical repeats verified; parser sensitivity does not improve the aggregate technical count. New inference is NOT RUN; MedGemma development is paused.
 
 The [Qwen local runtime/review integration](qwen_runtime_v1/README.md) is implemented with real execution hard-disabled. Synthetic tests/demo do not represent Qwen output.
+
+The [Qwen execution proposal](qwen_execution_v1/README.md) sets a one-hour, $1.50 ceiling for a five-report, 20-generation comparison on one RTX 6000 Ada. It includes a private approval gate, a pod-local shutdown watchdog, external stop verification, and an independent output-token decoding requirement. It is not execution approval; all RunPod rates must be rechecked before a run.
