@@ -25,12 +25,17 @@ def authorization(tmp_path):
         "approved_at": (current - timedelta(minutes=6)).isoformat(),
         "provider_start_requested_at": (current - timedelta(minutes=5)).isoformat(),
         "provider_deadline": (current + timedelta(minutes=50)).isoformat(),
+        "watchdog_stop_at": (current + timedelta(minutes=45)).isoformat(),
         "maximum_usd": 1.5,
         "actual_compute_usd_per_hour": 0.84,
         "actual_storage_usd_per_hour": 0.023,
         "pod_id": "synthetic-pod",
         "gpu_name": "NVIDIA RTX 6000 Ada Generation",
-        "gpu_count": 1
+        "gpu_count": 1,
+        "cloud_type": "SECURE",
+        "container_disk_gb": 80,
+        "persistent_volume_gb": 0,
+        "network_volume_id": None
     }
     path = tmp_path / "authorization.json"
     path.write_text(json.dumps(grant))
@@ -49,9 +54,12 @@ def test_valid_fixture_authorization(authorization):
     ("gpu_count", True), ("pod_id", ""), ("maximum_usd", 1.51),
     ("actual_compute_usd_per_hour", 0.85), ("actual_storage_usd_per_hour", 0.024),
     ("actual_compute_usd_per_hour", -1),
+    ("cloud_type", "COMMUNITY"), ("container_disk_gb", 100),
+    ("persistent_volume_gb", 20), ("network_volume_id", "volume-123"),
     ("provider_deadline", "2026-09-17T12:00:00+00:00"),
     ("provider_deadline", "2026-09-17T10:04:00+00:00"),
-    ("provider_deadline", "2026-09-17T11:00:00")
+    ("provider_deadline", "2026-09-17T11:00:00"),
+    ("watchdog_stop_at", "2026-09-17T10:46:00+00:00")
 ])
 def test_bad_authorization_rejected(authorization, field, value):
     path, current = authorization
@@ -96,6 +104,7 @@ def test_watchdog_environment_must_match_approved_pod(authorization, tmp_path, m
     receipt = tmp_path / "watchdog.json"
     receipt.write_text(json.dumps({
         "status": "armed", "pod_id": grant["pod_id"], "deadline": grant["provider_deadline"],
+        "watchdog_stop_at": grant["watchdog_stop_at"],
         "script_sha256": gate.sha(script), "cli_syntax_and_read_access_verified": True,
         "stop_access_preflight_verified": True, "stop_access_preflight_pod_id": grant["pod_id"],
         "stop_preflight_sha256": gate.sha(preflight),
@@ -152,6 +161,19 @@ def test_watchdog_stop_attempts_are_bounded():
         raise OSError("synthetic")
     assert watch.wait_and_stop(current, ["FAKE-STOP"], clock=lambda: current, sleep=lambda _: None, run=run) is False
     assert len(calls) == 3
+
+
+def test_watchdog_uses_reserved_early_stop_boundary():
+    stop_at = datetime(2026, 9, 17, 10, 55, tzinfo=timezone.utc)
+    current = [datetime(2026, 9, 17, 10, 54, tzinfo=timezone.utc)]
+    calls = []
+    def run(command, **kwargs):
+        calls.append(command)
+        return SimpleNamespace(returncode=0)
+    def sleep(_):
+        current[0] = stop_at
+    assert watch.wait_and_stop(stop_at, ["FAKE-STOP"], clock=lambda: current[0], sleep=sleep, run=run)
+    assert calls == [["FAKE-STOP"]]
 
 
 def test_cli_preflight_does_not_issue_stop(monkeypatch):

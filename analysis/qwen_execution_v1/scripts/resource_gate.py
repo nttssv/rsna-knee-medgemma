@@ -1,5 +1,5 @@
 """CPU-verifiable gate for a future Qwen GPU run; never starts or stops a pod."""
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import math
@@ -34,9 +34,10 @@ def validate_authorization(path, plan_sha256, current=None):
     runtime = read(ROOT / "configs/runtime.json")
     required = {
         "approved", "approval_reference", "plan_sha256", "proposal_sha256",
-        "approved_at", "provider_start_requested_at", "provider_deadline",
+        "approved_at", "provider_start_requested_at", "provider_deadline", "watchdog_stop_at",
         "maximum_usd", "actual_compute_usd_per_hour",
-        "actual_storage_usd_per_hour", "pod_id", "gpu_name", "gpu_count"
+        "actual_storage_usd_per_hour", "pod_id", "gpu_name", "gpu_count",
+        "cloud_type", "container_disk_gb", "persistent_volume_gb", "network_volume_id"
     }
     if set(grant) != required or grant["approved"] is not True:
         raise PermissionError("Exact private user approval record required")
@@ -48,6 +49,14 @@ def validate_authorization(path, plan_sha256, current=None):
         raise PermissionError("Approval is for another resource proposal")
     if grant["gpu_name"] != proposal["gpu_name"] or type(grant["gpu_count"]) is not int or grant["gpu_count"] != 1:
         raise PermissionError("Approval does not cover this GPU")
+    if (grant["cloud_type"] != proposal["cloud_type"]
+            or type(grant["container_disk_gb"]) is not int
+            or grant["container_disk_gb"] != proposal["container_disk_gb"]
+            or type(grant["persistent_volume_gb"]) is not int
+            or grant["persistent_volume_gb"] != proposal["new_persistent_volume_gb"]
+            or grant["network_volume_id"] is not None
+            or proposal["network_volume_id"] is not None):
+        raise PermissionError("Approval does not cover the proposed cloud and storage configuration")
     if not str(grant["pod_id"]).strip():
         raise PermissionError("Pod identity is required")
     current = current or datetime.now(timezone.utc)
@@ -56,8 +65,12 @@ def validate_authorization(path, plan_sha256, current=None):
     approved = parse_time(grant["approved_at"])
     started = parse_time(grant["provider_start_requested_at"])
     deadline = parse_time(grant["provider_deadline"])
+    watchdog_stop_at = parse_time(grant["watchdog_stop_at"])
     seconds = (deadline - started).total_seconds()
-    if not approved <= started <= current < deadline or not 0 < seconds <= runtime["maximum_provider_seconds"]:
+    expected_stop_at = deadline - timedelta(seconds=runtime["reserved_copy_stop_seconds"])
+    if (not approved <= started <= current < watchdog_stop_at < deadline
+            or watchdog_stop_at != expected_stop_at
+            or not 0 < seconds <= runtime["maximum_provider_seconds"]):
         raise PermissionError("Approval timestamps or provider window are invalid")
     values = [grant[k] for k in ("maximum_usd", "actual_compute_usd_per_hour", "actual_storage_usd_per_hour")]
     if any(type(v) not in (int, float) or not math.isfinite(v) or v < 0 for v in values):
@@ -70,7 +83,7 @@ def validate_authorization(path, plan_sha256, current=None):
         raise PermissionError("Storage quote exceeds proposal")
     if sum(values[1:]) * seconds / 3600 > grant["maximum_usd"]:
         raise PermissionError("Window estimate exceeds approved budget")
-    if (deadline - current).total_seconds() <= runtime["reserved_copy_stop_seconds"]:
+    if current >= watchdog_stop_at:
         raise PermissionError("Copy-and-stop reserve is unavailable")
     return grant
 
@@ -86,6 +99,7 @@ def verify_watchdog(receipt_path, grant, script_path, stop_preflight_path, curre
     preflight = read(stop_preflight_path)
     current = current or datetime.now(timezone.utc)
     deadline = parse_time(grant["provider_deadline"])
+    watchdog_stop_at = parse_time(grant["watchdog_stop_at"])
     started = parse_time(grant["provider_start_requested_at"])
     armed = parse_time(receipt.get("armed_at", ""))
     command = receipt.get("command")
@@ -116,6 +130,7 @@ def verify_watchdog(receipt_path, grant, script_path, stop_preflight_path, curre
     )
     if (receipt.get("status") != "armed" or receipt.get("pod_id") != grant["pod_id"]
             or receipt.get("deadline") != grant["provider_deadline"]
+            or receipt.get("watchdog_stop_at") != grant["watchdog_stop_at"]
             or receipt.get("script_sha256") != sha(script_path)
             or receipt.get("cli_syntax_and_read_access_verified") is not True
             or receipt.get("stop_access_preflight_verified") is not True
@@ -123,7 +138,7 @@ def verify_watchdog(receipt_path, grant, script_path, stop_preflight_path, curre
             or receipt.get("stop_preflight_sha256") != sha(stop_preflight_path)
             or not valid_preflight
             or receipt.get("provider_stop_verified") is not False or not valid_command
-            or not started <= armed <= current < deadline
+            or not started <= armed <= current < watchdog_stop_at
             or os.environ.get("RUNPOD_POD_ID") != grant["pod_id"]
             or type(receipt.get("pid")) is not int or receipt["pid"] <= 1):
         raise PermissionError("Live self-stop watchdog is missing or mismatched")
@@ -131,7 +146,8 @@ def verify_watchdog(receipt_path, grant, script_path, stop_preflight_path, curre
     cmdline = Path("/proc") / str(receipt["pid"]) / "cmdline"
     environ = Path("/proc") / str(receipt["pid"]) / "environ"
     required_args = [str(Path(script_path).resolve()).encode(), b"--pod-id", grant["pod_id"].encode(),
-        b"--deadline", grant["provider_deadline"].encode(), b"--confirm-self-stop"]
+        b"--deadline", grant["provider_deadline"].encode(), b"--stop-at",
+        grant["watchdog_stop_at"].encode(), b"--confirm-self-stop"]
     if (not cmdline.exists() or not environ.exists()
             or any(arg not in cmdline.read_bytes().split(b"\0") for arg in required_args)
             or b"RUNPOD_POD_ID=" + grant["pod_id"].encode() not in environ.read_bytes().split(b"\0")):

@@ -54,8 +54,8 @@ def verify_stop_preflight(path,pod_id,style,executable,current=None):
     return receipt
 
 
-def wait_and_stop(deadline,cmd,clock=lambda:datetime.now(timezone.utc),sleep=time.sleep,run=subprocess.run):
-    while (remaining:=(deadline-clock()).total_seconds())>0:
+def wait_and_stop(stop_at,cmd,clock=lambda:datetime.now(timezone.utc),sleep=time.sleep,run=subprocess.run):
+    while (remaining:=(stop_at-clock()).total_seconds())>0:
         sleep(min(30,remaining))
     # Retry stop requests only, never inference. Provider state is verified externally.
     for _ in range(3):
@@ -69,7 +69,7 @@ def wait_and_stop(deadline,cmd,clock=lambda:datetime.now(timezone.utc),sleep=tim
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--pod-id',required=True);p.add_argument('--deadline',required=True)
+    p.add_argument('--pod-id',required=True);p.add_argument('--deadline',required=True);p.add_argument('--stop-at',required=True)
     p.add_argument('--style',choices=['modern','legacy'],required=True)
     p.add_argument('--receipt',type=Path,required=True)
     p.add_argument('--stop-preflight-receipt',type=Path,required=True)
@@ -77,8 +77,13 @@ def main():
     a=p.parse_args()
     if not a.confirm_self_stop:raise PermissionError('Explicit self-stop authorization required')
     deadline=datetime.fromisoformat(a.deadline)
-    if deadline.tzinfo is None or not 0<(deadline-datetime.now(timezone.utc)).total_seconds()<=5400:
-        raise ValueError('Use a future deadline within 90 minutes')
+    stop_at=datetime.fromisoformat(a.stop_at)
+    now=datetime.now(timezone.utc)
+    if (deadline.tzinfo is None or stop_at.tzinfo is None
+            or not now < stop_at < deadline
+            or (deadline-now).total_seconds()>3600
+            or (deadline-stop_at).total_seconds()!=300):
+        raise ValueError('Use a provider deadline within 60 minutes and stop exactly 5 minutes earlier')
     executable=shutil.which('runpodctl')
     if not executable:raise RuntimeError('Provider CLI missing; do not begin inference')
     cmd=command(a.pod_id,a.style,executable)
@@ -87,14 +92,14 @@ def main():
     a.receipt.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
     with a.receipt.open('x') as f:
         os.chmod(f.name,0o600)
-        json.dump(dict(status='armed',pid=os.getpid(),pod_id=a.pod_id,deadline=a.deadline,
+        json.dump(dict(status='armed',pid=os.getpid(),pod_id=a.pod_id,deadline=a.deadline,watchdog_stop_at=a.stop_at,
             command=cmd,script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             armed_at=datetime.now(timezone.utc).isoformat(),cli_syntax_and_read_access_verified=True,
             stop_access_preflight_verified=True,stop_access_preflight_pod_id=preflight['pod_id'],
             stop_preflight_sha256=hashlib.sha256(Path(a.stop_preflight_receipt).read_bytes()).hexdigest(),
             provider_stop_verified=False),f)
         f.flush();os.fsync(f.fileno())
-    success=wait_and_stop(deadline,cmd)
+    success=wait_and_stop(stop_at,cmd)
     raise SystemExit(0 if success else 1)
 
 

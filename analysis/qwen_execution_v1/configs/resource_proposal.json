@@ -1,11 +1,13 @@
 {
   "provider": "RunPod",
+  "cloud_type": "SECURE",
   "gpu_name": "NVIDIA RTX 6000 Ada Generation",
   "gpu_count": 1,
   "gpu_memory_gib": 48,
   "minimum_free_gpu_gib": 36,
   "container_disk_gb": 80,
   "new_persistent_volume_gb": 0,
+  "network_volume_id": null,
   "compute_usd_per_hour_ceiling": 0.84,
   "storage_usd_per_hour_ceiling": 0.023,
   "maximum_provider_seconds": 3600,
