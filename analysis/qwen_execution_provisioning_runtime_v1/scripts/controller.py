@@ -1,8 +1,8 @@
-"""Local orchestration specification; there is deliberately no live provider adapter.
+"""Bounded provisioning lifecycle with source-bound, disabled production adapters.
 
-Injected interfaces make lifecycle decisions testable without network access. Their
-timeouts are interface requirements, not a claim of hard interruption of Python calls.
-The production CLI always refuses execution, including when --execute is supplied.
+Synthetic interfaces exercise decisions without network access. Production transport
+uses an external process-group deadline; the detached guard survives allocator exit.
+All committed live switches remain false, including the unchanged inner runner.
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ FIXED = {
 MAXIMUM = Decimal("1.50")
 CEILING_PER_HOUR = Decimal("0.502")
 STOPPED = {"STOPPED", "EXITED"}
-LIVE_IMPLEMENTED = False
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 
 class SafetyFailure(RuntimeError):
@@ -221,18 +221,23 @@ def validate_outer_approval(grant: dict, now: datetime):
 
 
 class LocalController:
-    """Executable local state machine, usable only with explicitly synthetic adapters.
+    """Lifecycle core; production assembly additionally enforces disabled live gates.
 
-    No adapter ships here. Setting a policy JSON or passing --execute cannot unlock
-    live execution. State may not be reloaded to retry an interrupted create/resume.
-    The independently armed external guard must handle allocating-process death.
+    State cannot be reloaded to retry interrupted create/resume. Independent durable
+    operation claims prevent replay through a new output directory or process.
     """
     def __init__(self, output: Path, authorization: Path, provider: Provider,
                  observer: IndependentObserver, guard: ExternalGuard,
-                 inner_control: InnerControl, clock):
-        for adapter in (provider, observer, guard, inner_control):
-            if getattr(adapter, "synthetic_only", None) is not True:
-                raise SafetyFailure("Live adapters are unavailable in this milestone")
+                 inner_control: InnerControl, clock, *, _allow_live=False, handoff=None):
+        modes = [getattr(adapter, "synthetic_only", None)
+                 for adapter in (provider, observer, guard, inner_control)]
+        self.live = not all(mode is True for mode in modes)
+        if self.live:
+            if not _allow_live or not all(mode is False for mode in modes):
+                raise SafetyFailure("Live adapters require the source-bound production factory")
+            from live_policy import require_live
+            require_live("provisioning_enabled")
+            require_live("external_shutdown_enabled")
         if provider is observer:
             raise SafetyFailure("Stop verification requires an independent observer")
         self.inner = verify_frozen_bindings()
@@ -241,6 +246,14 @@ class LocalController:
         validate_outer_approval(self.grant, self.now())
         self.authorization_sha = sha(authorization)
         self.authorization_path = Path(authorization)
+        self.once_ledger = None
+        self.handoff = handoff
+        if self.live:
+            from live_policy import OnceLedger, verify_source_bundle
+            verify_source_bundle(self.grant.get("live_source_manifest_sha256", ""))
+            self.once_ledger = OnceLedger(Path(self.grant["operation_ledger_dir"]),
+                self.grant["intent_name"], {"authorization_sha256": self.authorization_sha,
+                "live_source_manifest_sha256": self.grant["live_source_manifest_sha256"]})
         self.provider, self.observer, self.guard = provider, observer, guard
         self.inner_control = inner_control
         self.output = Path(output)
@@ -263,6 +276,10 @@ class LocalController:
     def now(self):
         return time_value(self.clock().isoformat())
 
+    def claim_operation(self, operation):
+        if self.once_ledger is not None:
+            self.once_ledger.claim(operation)
+
     def event(self, kind, fields=None):
         self.events += 1
         return write_exclusive(self.output / f"{self.events:03d}-{kind}.json",
@@ -275,6 +292,9 @@ class LocalController:
         return min(float(limit), remaining)
 
     def before_start(self):
+        if self.live:
+            from live_policy import verify_source_bundle
+            verify_source_bundle(self.grant["live_source_manifest_sha256"])
         if (sha(self.output / "intent.json") != self.intent_sha
                 or private_json(self.output / "intent.json") != self.intent
                 or sha(self.authorization_path) != self.authorization_sha
@@ -298,8 +318,9 @@ class LocalController:
             self.shutdown_receipts_durable = False
             return None
 
-    def verify_guard(self):
-        receipt = self.guard.verify(dict(self.intent), self.intent_sha, current=self.now())
+    def verify_guard(self, require_create_attempt=False):
+        options = {"require_create_attempt": True} if require_create_attempt else {}
+        receipt = self.guard.verify(dict(self.intent), self.intent_sha, current=self.now(), **options)
         required = {
             "intent_sha256": self.intent_sha, "intent_name": self.intent["intent_name"],
             "outer_provider_deadline": self.intent["outer_provider_deadline"],
@@ -316,6 +337,8 @@ class LocalController:
             raise SafetyFailure("Shutdown guard must be a separate independently verified process")
         if not 0 <= (self.now() - verified).total_seconds() <= 5:
             raise SafetyFailure("Shutdown guard verification is stale")
+        if require_create_attempt and receipt.get("durable_create_attempt_verified") is not True:
+            raise SafetyFailure("Independent guard has not acknowledged durable creation ownership")
         self.event("external-guard-verified", receipt)
 
     def resource(self, observed, *, require_name=True):
@@ -381,10 +404,6 @@ class LocalController:
             raise SafetyFailure("No second creation, continuation, or replacement allocation")
         self.phase = "PROVISIONING"
         try:
-            existing = self.provider.find_by_name(self.grant["intent_name"], timeout=30)
-            self.event("intent-name-preread", {"matches": len(existing)})
-            if existing:
-                raise SafetyFailure("Intent name already exists; do not create or stop anything")
             first = self.now()
             deadline = first + timedelta(seconds=self.grant["maximum_provider_seconds"])
             self.intent = {
@@ -400,12 +419,25 @@ class LocalController:
                                "actual_storage_usd_per_hour": self.grant["actual_storage_usd_per_hour"]},
             }
             self.intent_sha = write_exclusive(self.output / "intent.json", self.intent)
+            # The initial read is inside the same conservative immutable clock.
+            # It must precede guard arming and any creation attempt.
+            existing = self.provider.find_by_name(self.grant["intent_name"], timeout=self.timeout())
+            self.event("intent-name-preread", {"matches": len(existing)})
+            if existing:
+                raise SafetyFailure("Intent name already exists; do not create or stop anything")
             self.verify_guard()
             self.before_start()
             # Recheck quote immediately before sole dispatch, including guard setup time.
             validate_outer_approval(self.grant, self.now())
+            self.claim_operation("create")
             self.event("create-attempt", {"intent_sha256": self.intent_sha, "maximum_attempts": 1})
             self._create_attempted = True
+            if self.live:
+                # Survives allocator death combined with subsequent ledger I/O loss.
+                # No request leaves until the independent worker caches ownership.
+                self.verify_guard(require_create_attempt=True)
+                self.before_start()
+                validate_outer_approval(self.grant, self.now())
             try:
                 pod = self.provider.create({**FIXED, "name": self.grant["intent_name"]}, timeout=self.timeout())
                 if not isinstance(pod, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", pod):
@@ -457,15 +489,17 @@ class LocalController:
         return self.pod_id
 
     def resume_once(self, inner_authorization: Path, stopped_observation: Path):
-        """Synthetic orchestration only; no inference entry point is provided.
-
-        This calls the frozen inner grant validator without changing its schema.
-        The outer layer contributes prior accrued cost and immutable clock binding.
-        """
+        """One later resume, with unchanged inner gates and immediate final shutdown."""
         if self.phase != "STOPPED_PREPARATION_COMPLETE" or self._resume_attempted:
             raise SafetyFailure("One later resume only after verified stopped preparation")
         self.phase = "RESUME_VALIDATING"
         try:
+            if self.live:
+                from live_policy import require_live
+                require_live("resume_enabled")
+                if self.handoff is None:
+                    raise SafetyFailure("A verified inner handoff is required before paid resume")
+                self.handoff.frozen_gate_ready()
             self.before_start()
             now = self.now()
             grant = self.inner.validate_user_approval(inner_authorization, EXECUTION_SHA, current=now)
@@ -490,6 +524,8 @@ class LocalController:
                 raise SafetyFailure("Inner maximum plus accrued provisioning upper bound exceeds outer budget")
             if not self.cost_bound_verified or not self.shutdown_receipts_durable:
                 raise SafetyFailure("Initial cost bound and durable shutdown evidence are required")
+            if self.handoff is not None:
+                self.handoff.validate_before_resume(self, grant)
             # Fresh independent live read supplements the frozen stopped snapshot.
             fresh = self.observer.read(self.pod_id, timeout=self.timeout())
             self.resource(fresh)
@@ -514,6 +550,7 @@ class LocalController:
             if ((dispatch_now - start).total_seconds() > 5
                     or (dispatch_now - at).total_seconds() > 600):
                 raise SafetyFailure("Resume-request timestamp or stopped observation expired during gates")
+            self.claim_operation("resume")
             self.event("resume-attempt", {"pod_id": self.pod_id, "machine_id": self.machine_id,
                 "inner_authorization_sha256": sha(inner_authorization),
                 "stopped_observation_sha256": sha(stopped_observation),
@@ -531,9 +568,11 @@ class LocalController:
                     raise SafetyFailure("Resume did not establish RUNNING state")
                 self.event("resume-identity-verified", {"pod_id": self.pod_id,
                     "machine_id": self.machine_id, "inference_unlocked": False})
+                if self.handoff is not None:
+                    self.handoff.run(self, grant)
             finally:
-                # This local milestone has no inference path; every simulated resume
-                # immediately stops again, even a lost response or changed host.
+                # Completion, failed/ambiguous resume, changed host and inner failure
+                # all stop immediately; no retry/repair or deadline extension.
                 self.stop_exact()
             if not self.shutdown_receipts_durable:
                 raise SafetyFailure("Stopped pod verified but shutdown receipt durability failed")
@@ -543,15 +582,53 @@ class LocalController:
             raise
 
 
+def create_live_controller(*, output=None, authorization=None, key_path=None,
+                           inner_authorization=None, stop_preflight=None,
+                           cli_style="modern", cli_executable="runpodctl", handoff=None):
+    """Production assembly. Disabled gate runs before any credential or network access.
+
+    Retain this session object for the one later resume. Process death is terminal;
+    the external worker stops the resource, never restores/retries the controller.
+    """
+    from live_policy import require_live
+    require_live("provisioning_enabled")
+    require_live("external_shutdown_enabled")
+    from provider_transport import RunPodProvider, RunPodObserver
+    from external_shutdown import ExternalGuard as WorkerGuard
+    from handoff import FrozenInnerControl
+    # Do not pay to discover a readback limitation already known from the API
+    # contract. A verified observation integration is required before enablement.
+    if not RunPodObserver.proves_actual_state_rates_and_resources:
+        raise SafetyFailure("Provider observation cannot prove actual state, split rates and VRAM")
+    holder = {}
+    def deadline():
+        return time_value(holder["session"].intent["outer_provider_deadline"])
+    provider = RunPodProvider(key_path, deadline, mutation_enabled=True)
+    observer = RunPodObserver(key_path, deadline)
+    guard = WorkerGuard(output, key_path)
+    preflight = FrozenInnerControl(stop_preflight, inner_authorization, cli_style, cli_executable)
+    session = LocalController(output, authorization, provider, observer, guard, preflight,
+                              lambda: datetime.now(timezone.utc), _allow_live=True, handoff=handoff)
+    holder["session"] = session
+    return session
+
+
 def main(argv=None):
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--execute", action="store_true", help="Unavailable: live execution is hard-disabled")
-    parser.parse_args(argv)
+    parser.add_argument("--execute", action="store_true", help="Requires separately reviewed live enablement")
+    args = parser.parse_args(argv)
+    # There is no automatic approval writer or CLI shortcut around the factory.
+    if args.execute:
+        from live_policy import require_live
+        try:
+            require_live("provisioning_enabled")
+        except PermissionError:
+            pass
     print(json.dumps({"status": "LIVE_EXECUTION_UNAVAILABLE", "execution_enabled": False,
-        "provider_calls": 0, "missing": ["reviewed live transport with hard call supervision",
-            "independently deployed and verified external shutdown worker",
-            "reviewed integration and exact operation-specific user authorization"]}))
+        "provider_calls": 0, "blocked": ["all committed live switches are false",
+            "unverified provider actual-state/billing fields",
+            "co-located inner watchdog, cache and bootstrap prerequisites"]}))
     return 2
 
 

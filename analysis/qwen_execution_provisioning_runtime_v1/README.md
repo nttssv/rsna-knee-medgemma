@@ -1,34 +1,29 @@
-# Qwen provisioning lifecycle: local runtime v1
+# Qwen provisioning runtime v1
 
-Status: **local synthetic controller; live execution unavailable**. This version tests the operational sequence proposed in [provisioning v1](../qwen_execution_provisioning_v1/README.md). It cannot provision or resume a real pod, creates no real approval, and contains no model-cache, download, training, or inference entry point.
+Status: **live components implemented; all live switches false; no provider mutations performed**.
 
-The existing inference runner requires a stopped-pod observation and control preflight. A newly created RunPod pod begins running immediately. The controller therefore separates one initial create-and-stop phase from one possible later resume, under a single clock and cumulative budget. The reviewed inner runner is imported only for its existing grant/observation and source-integrity checks; none of its files changes.
+This stage implements the transport and outer shutdown controls for the [reviewed provisioning proposal](../qwen_execution_provisioning_v1/README.md). The frozen Qwen experiment, prepared five reports, prompts, parsers, model recipe, execution plan and 40/18 split are unchanged.
 
-| Boundary | Value |
+| Component | Implementation |
 |---|---|
-| Exact allocation | Secure Cloud, CA-MTL-1, one NVIDIA A40, 48 GB |
-| Storage | 80 GB container disk, zero persistent volume, no network volume |
-| Price ceilings | Compute $0.49/hour; storage $0.012/hour |
-| Cumulative maximum | $1.50 across initial creation and any later resume |
-| Outer clock | At most 3,600 seconds from the recorded first create intent; never reset |
-| External and eventual pod stop time | Outer deadline minus exactly 300 seconds |
-| Creation / later resume | At most one request each; no automatic retries or replacement |
-| Physical machine | Bound at the first verified read; a changed machine after resume fails |
-| Initial command | `/bin/sleep infinity`, pinned image by immutable amd64 manifest digest |
+| [Lifecycle controller](scripts/controller.py) | One create, immediate stop, one possible later resume; immutable outer clock and cumulative budget |
+| [RunPod transport](scripts/provider_transport.py) | Exact REST request, independent uncached reads, no create/resume retries, private credentials, bounded sanitized responses |
+| [Hard call supervisor](scripts/network_supervisor.py) | Separate process group per call; wall-clock plus monotonic deadline; group kill and child reap |
+| [External shutdown worker](scripts/external_shutdown.py) | Detached process, OS identity and fresh challenge verification, cached creation ownership, exact-name reconciliation, bounded stop attempts |
+| [Live policy and once ledger](scripts/live_policy.py) | Disabled production gates, source manifest verification, exclusive durable operation claims across processes/output directories |
+| [Inner handoff](scripts/handoff.py) | Calls the existing frozen inner supervisor and original runpodctl preflight verifier; cannot substitute the external worker for the inner watchdog |
 
-The source records the first-create timestamp before guard readiness verification, which conservatively includes that verification delay in the outer clock. `create-attempt` must be fsynced before dispatch. A lost response triggers at most one exact-name read reconciliation; it never triggers a second create. A unique preread-absent intent name can identify a cleanup target even when its allocation is wrong, but that target never becomes valid for inference.
+The resource boundary stays Secure Cloud, one NVIDIA A40 48 GB in CA-MTL-1, 80 GB container disk, zero persistent volume and no network volume. Compute is capped at $0.49/hour and storage at $0.012/hour. Total cost remains at most $1.50, within one outer window of at most 3,600 seconds; the stop reserve begins exactly 300 seconds before its deadline. The clock includes the initial read and guard setup before the sole create request. No replacement pod, GPU, region or physical machine is allowed.
 
-Stop verification uses a separate observer interface. It requires a fresh exact-pod stopped state and $0/hour. Stop-command success alone does not establish either. Emergency stop attempts continue if local receipt writing fails; the controller records a durability failure and forbids later progress. At most three stop attempts are requested per shutdown phase.
-
-The [implementation](scripts/controller.py) and [protocol](PROTOCOL.md) are explicit about their limit: **injected synchronous adapters are local test interfaces**. No production transport, independently deployed shutdown worker, or hard network-call supervisor is implemented. A `synthetic_only` attribute is a testing contract, not a security sandbox or verified production identity. The CLI unconditionally returns `LIVE_EXECUTION_UNAVAILABLE`, even with `--execute`; changing the documentary JSON flags cannot enable it.
+Production construction rejects disabled policy before credentials or network access. There is no automatic approval writer, remote bootstrap, source-enable shortcut, fallback or controller recovery. The original session object must remain alive for its one later resume; allocator death is terminal and activates external cleanup. Durable intent-level claims prevent replay through a new output directory.
 
 ```bash
 .venv/bin/python -m pytest -q analysis/qwen_execution_provisioning_runtime_v1/tests
-.venv/bin/python analysis/qwen_execution_provisioning_runtime_v1/scripts/controller.py
+.venv/bin/python analysis/qwen_execution_provisioning_runtime_v1/scripts/controller.py --execute
 ```
 
-The second command intentionally exits with status 2 and makes no provider calls. The tests fabricate all provider responses, approvals, observations, and guard attestations. They do not demonstrate live availability, real stopping, billing, CUDA behavior, or model performance.
+The second command intentionally reports disabled execution, exits 2, and makes no provider calls. Tests use fabricated receipts, local subprocesses and loopback HTTP only. They are not GPU, billing, live-stop or model results.
 
-The exact image digest binds its inherited entrypoint too. Overriding CMD with sleep does **not** establish that inherited entrypoint/hooks perform no other work. Their inspection, an exact provider request mapping, and production failure supervision remain required before live use. Mutable provider template settings are not accepted (`template_id = null`). See [image provenance](IMAGE_PROVENANCE.md).
+The documented REST readback does not establish actual stopped state, current zero billing, separate compute/storage rates or GPU VRAM. Unknown fields remain unverified. The production factory rejects this known observation limitation **before creation**, even if its policy were later enabled. Adding a trustworthy observation source is a concrete prerequisite, not permission to infer missing values.
 
-Read [RESULTS.md](RESULTS.md) for the validation status. No scientific artifacts, inner runtime switches, resource proposals, reports, prompts, parsers, token artifacts, or 40/18 split were modified.
+The handoff is a co-located adapter for the existing inner launcher. It does not upload files, configure SSH, prepare cache or deploy the original pod-local watchdog. Those resources must be available on the exact approved pod; the frozen inner switch remains false. See the [protocol and blockers](PROTOCOL.md), [validation results](RESULTS.md), [source hashes](configs/source_manifest.json), and [pinned image provenance](IMAGE_PROVENANCE.md).

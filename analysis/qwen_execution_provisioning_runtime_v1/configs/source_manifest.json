@@ -1,0 +1,12 @@
+{
+  "files": {
+    "configs/runtime.json": "baa9ff898ba92f04d56bd56a3c83df4d3502ffc3de0344de1b3ed8c123a49c62",
+    "scripts/controller.py": "8873f3065acacd2caed965e78333eff8d4cd8fa7d35d2d52e4f81a6f975e25fc",
+    "scripts/external_shutdown.py": "f6f2275934ddbc089aad791fe7501e585d729cef731a1ea5ec41d63e8564a474",
+    "scripts/handoff.py": "79490c7d6ebdfc355074a0f3e682d1ba592988000e0c141a99ae25af6d7c528f",
+    "scripts/live_policy.py": "01dd5848d2879eadbde2ac1c80551889c5f4bfacc762a4ea6615868163122d47",
+    "scripts/network_supervisor.py": "674db9abc3bacc4c9ed2a5aa36acd9451a021b26846515891426db19938d21e3",
+    "scripts/provider_transport.py": "12310cc5fb7824f5e296553fafee5648d41bb8efc78fc527d786d1585232661a"
+  },
+  "version": 1
+}

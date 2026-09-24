@@ -1,17 +1,11 @@
-# Local controller validation
+# Implementation validation
 
-This package contains software tests and an unexecuted operational design. It has no measured GPU, model, performance, billing, or live shutdown result.
+**284 focused CPU tests passed** locally: 187 provisioning-stage tests (77 existing plus 110 new) and 97 alternate-resource/runtime/control-preflight tests. Tests used fabricated receipts, local subprocesses and loopback HTTP only. No RunPod API request, provider mutation, real credential read, GPU allocation or model execution occurred during implementation.
 
-The controller enforces the immutable outer clock, exact A40 allocation, source/image/command bindings, one-create/one-resume limits, exact physical-machine identity, and cumulative-budget integration in CPU tests with fabricated adapters. It reuses the frozen inner grant/observation validators and source-integrity checks without editing those files. Both prompts/parsers, five reports, ABBA20 recipe, prepared tokens, and the 40/18 split remain unchanged.
+New coverage includes hard call timeouts, process-group kill/reap and inherited-pipe hangs; exact REST bodies and unknown readback rejection; lost-response no-retry behavior; private-key and redirect guards; durable cross-process/concurrent operation claims; detached shutdown surviving allocator death; OS identity and fresh HMAC challenges; creation-ownership acknowledgment; cleanup after receipt/ledger loss; immutable clocks and cumulative costs; and exact forwarding to the unchanged inner supervisor.
 
-The core suite verifies creation followed by immediate independent stop verification, one later resume with the same outer deadline, exact resource/quote/approval failures, owner-only files, exclusive durable receipts, cost type checks, bounded-count shutdown retries, and the unconditional live CLI rejection. Independent adversarial tests cover ambiguous responses, identity drift, stale observations, guard failure, dispatch-time freshness, cumulative costs, and loss of receipt durability.
+The implementation [source manifest](configs/source_manifest.json) binds all six Python modules and the outer runtime policy. The proposal and frozen inner execution-plan SHA bindings remain unchanged. All live switches remain false. The production factory blocks before private inputs while disabled, and also rejects the known provider observation capability gap before creation if the policy were later enabled. The CLI remains non-executing.
 
-Local validation: **77 tests passed** (43 core tests and 34 independent adversarial cases). The fresh-observation test includes nonzero observer latency; dispatch freshness still rejects excessive delay. These are CPU/synthetic tests only. The repository CI explicitly runs the focused Qwen/provisioning suites in addition to its baseline checks.
+All changes are confined to this provisioning stage. The frozen runtime directories, model recipe, prompts, parsers, prepared five-report package, 40/18 split and budget are byte-identical to the previous commit. Secret scans and local Markdown link checks are run before commit. GitHub CI explicitly includes the focused Qwen/provisioning suite.
 
-Run the current suite:
-
-```bash
-.venv/bin/python -m pytest -q analysis/qwen_execution_provisioning_runtime_v1/tests
-```
-
-**Execution remains disabled.** No production provider adapter, external shutdown worker, hard network-call supervision or inference handoff is implemented. Passing CPU tests cannot establish live provider control or capacity. The concrete remaining work is listed in [PROTOCOL.md](PROTOCOL.md#unresolved-live-prerequisites). This source milestone creates no real approval, reads no control credential and performs no provider mutation.
+There are no new inference results or training metrics. Live prerequisites and provider observation limitations are recorded under [concrete blockers](PROTOCOL.md#concrete-blockers-before-any-live-operation). In particular, a local process test does not prove real RunPod stop/billing behavior, Linux deployment readiness, provider capacity, bootstrap behavior or model-cache readiness.

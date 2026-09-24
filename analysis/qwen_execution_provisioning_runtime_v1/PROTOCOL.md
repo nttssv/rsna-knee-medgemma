@@ -1,62 +1,53 @@
-# Protocol: local outer lifecycle controller
+# Live component protocol (disabled)
 
-This package implements and tests a local state machine. It does not implement a safe live RunPod client. Its CLI refuses live execution unconditionally. Supplied approval files in tests are synthetic fixtures, not user approvals.
+This implementation makes no change to the experiment or resource ceilings. No actual approval record is created by code preparation. All production switches in [runtime.json](configs/runtime.json), the transport mutation switch, the external-worker switch and the frozen inner execution switch remain false.
 
-## Source and experimental bindings
+## Frozen bindings
 
-- Provisioning proposal SHA-256: `0770846122bb4bb4953c7e728afa1c254ae569c8f756b3e905e6c095a2ed2842`.
-- Reviewed inner execution plan: `ab82f51cf3883e93b2c33bf750a32148297226ebd3e9ada0febb54d18d85a4f5`.
+- Provisioning proposal: `0770846122bb4bb4953c7e728afa1c254ae569c8f756b3e905e6c095a2ed2842`.
+- Inner execution plan: `ab82f51cf3883e93b2c33bf750a32148297226ebd3e9ada0febb54d18d85a4f5`.
 - Prepared plan: `c4586bb0c65163244dac80344ea96f691493a1b89a5911eefcba54f2384c74fc`.
 - Alternate resource proposal: `884dc38d2004abb44c64d2363e525969bf7f7fabd35f86eb5d03144bf34e72e2`.
 
-The new outer approval design additionally binds the exact controller source SHA, immutable image reference, exact startup command hash, high-entropy unique creation intent, fixed A40/region/storage specification, actual compute/storage rates, maximum budget, provider-window length, approval time, and fresh post-approval selected-allocation quote. The file must already exist as an owner-only 0600 regular file. Symlinks and duplicate JSON keys fail. The code never creates a user approval.
+Qwen/Qwen3-14B revision `40c069824f4251a91eefaf281ebe4c544efd3e18`, BF16, SDPA, batch size 1, five reports per block, control-1/candidate-1/candidate-2/control-2, maximum 20 generations, token caps, prompts, parsers and split remain frozen. No training, validation, full-development, bulk extraction, repair or inference retry is introduced.
 
-Qwen/Qwen3-14B, pinned revision `40c069824f4251a91eefaf281ebe4c544efd3e18`, BF16, SDPA, batch size 1, both prompts/parsers, input/output/context limits, EOS IDs, five reports, ABBA20 sequence, and 40/18 split remain in the unchanged inner plan. This controller has no path for loading that model or launching the inner inference worker.
+## Source-bound authorization and single dispatch
 
-## Before the sole create request
+The prospective private outer approval retains exact resource/rate, image/CMD, intent, timestamps, budget and frozen hash fields. It additionally binds `live_source_manifest_sha256` and an absolute private `operation_ledger_dir`. This is an authorization design; no real grant is generated. The source manifest covers every Python implementation file and the outer runtime policy. The unchanged inner approval schema is not extended.
 
-1. Validate the supplied outer approval, frozen source hashes, exact allocation and quote. At least one positive compute rate and nonnegative finite storage rate must fit their respective ceilings. The approved outer budget must conservatively cover the full allowed wall-clock window at the $0.502/hour ceiling.
-2. Create a new private output directory exclusively. Existing output directories cannot be reused to retry or recover a session.
-3. Read the provider by one exact `qwen-provision-` name with 128 random bits. Any existing match ends preparation without creating or stopping anything.
-4. Durably write an immutable intent containing the first-create timestamp, deadline no later than 3,600 seconds afterward, stop time exactly deadline minus 300 seconds, allocation, approval/source hashes and cumulative ceiling. The timestamp is recorded just before guard verification; that verification delay is conservatively inside the outer window.
-5. Verify an independent external worker against that exact intent hash/name and immutable deadlines. Its process must be separate from the allocating process, alive, stop-capable, and independently verified for command/environment/receipt identity. A parsed PID receipt alone cannot establish this; the injected `ExternalGuard.verify` contract requires an independently implemented verifier. **That live verifier/worker does not ship here.**
-6. Recheck immutable intent/authorization bytes, current quote and time window. Fsync the exclusive create-attempt receipt before dispatch. A failure to write that receipt prevents the create call.
+The ledger uses an immutable intent-level binding and separate exclusive, fsynced create/resume/handoff claims. Claims remain consumed after failure or allocator death. A new object or output directory cannot replay the same intent. No resume/recovery of an interrupted controller is implemented. The later resume belongs to the original uninterrupted controller session.
 
-## Create, reconcile, stop
+The controller writes its outer intent before the initial exact-name preread; this conservatively includes read/guard setup latency in the same at-most-60-minute clock. A nonempty preread fails without creation or stopping. It verifies the detached worker, writes a durable create-attempt receipt, and requires a fresh worker acknowledgment of cached creation ownership before dispatching exactly one create request. A lost response triggers exact-name reconciliation, never a second request. A uniquely owned mismatched allocation is bound only for cleanup and is not accepted for use.
 
-Send one request for the exact image, sleep-only CMD, region/GPU/storage specification. No mutable template is selected. A returned pod ID is bound immediately for cleanup. Read the provider's current allocation and physical machine ID. Every resource field, actual rate, image reference and command must match before accepting the allocation as valid. Unknown or unavailable fields fail; they are not inferred from the requested draft.
+The exact allocation is Secure A40/CA-MTL-1, count 1, 48 GB, disk 80 GB, zero persistent and null network volume, pinned image digest and sleep CMD. Returned unknown fields fail closed. Once bound, physical machine identity cannot change. Stop requests are permitted on failure even when local receipt writing fails. A stopped mutation response alone is never treated as independent billing confirmation.
 
-If the response is lost, issue one read-only exact-intent-name reconciliation. No match or multiple matches leave identity unresolved: no guessed ID is stopped and no creation retry occurs. The external worker/operator must resolve and safely shut down any billable resource. For exactly one match with the preread-absent high-entropy name and valid pod ID, bind that ID for cleanup before checking configuration. A configuration mismatch still stops that uniquely identified resource, but never accepts it for later use.
+## Hard transport supervision
 
-Once a pod ID is known, cleanup executes on success and failure. Up to three stop requests are allowed, each with a requested timeout no longer than 30 seconds or the remaining outer window. Read stopped state and zero hourly charge through the independent observer after each attempt. Reads must be fresh within five seconds and name the exact pod. A lost stop response may still be confirmed by the independent read. If local logging fails, emergency stop/read calls continue; lost durability blocks all subsequent progress. No stop response is treated as billing confirmation.
+Every REST call runs in a new POSIX process group. Its external bound is the smaller of the requested call limit (at most 30 seconds) and remaining outer window, with cleanup time reserved. A monotonic bound prevents clock rollback from extending the initial allowance. The supervisor kills the group and reaps the direct child on success, timeout and failure; Linux subreaping also reaps adopted descendants. On macOS the system reaps orphan descendants after group kill. There is no Python thread/signal timeout assumption for an HTTP worker.
 
-The current local adapters are synchronous. A timeout argument is an adapter contract, **not a hard bound on a stuck network call**. The future production controller must supervise each call in a killable/reaped child and keep the independently deployed external worker alive through allocating-process death. Local synthetic tests do not establish this live guarantee.
+The worker has bounded input/output, no inherited credential environment, no proxy environment, no redirects and no automatic HTTP retry. Credentials are read only from an owner-only regular 0600 file, supplied by private path rather than as a token in argv. Errors never return the token, request URL, provider error body or raw stderr. The documented REST endpoint is fixed. HTTP fixtures run on loopback only.
 
-## Cumulative accounting and later grant
+## Independent external worker
 
-For a verified allocation, accrue an upper bound at $0.502/hour from first-create timestamp to independently verified stop, including ambiguous-response time and all control latency. Compute with Decimal and round upward to one nano-dollar. If allocation/rate readback fails or is unknown, record the cost bound as `UNVERIFIED`; do not claim the $0.502/hour bound covers an unapproved price. Unknown cost or failed shutdown verification ends the attempt.
+The worker starts in a separate process group/session before the create request, with stdin detached and private configuration. Verification checks OS PID/start identity, command, environment nonce, owner and session, plus a fresh private Unix-socket HMAC challenge. Configuration binds intent/hash/deadlines, source snapshot and credential identity. A JSON PID receipt alone cannot pass.
 
-The possible later grant is validated by the **unchanged** inner `validate_user_approval` and `verify_provider_observation` functions. Then the outer layer additionally requires:
+The worker caches the verified empty preread and durable creation-attempt ownership before acknowledging it. It survives allocator exit and later ledger I/O damage. Original-source drift triggers cleanup using its pinned private transport snapshot. At T−300 seconds, or earlier allocator death, it reconciles only the exact high-entropy owned name. Zero/multiple matches never authorize guessing an ID. Read-only reconciliation can repeat for delayed visibility; create/resume cannot. The worker makes at most three bounded stop attempts and verifies stopped state/$0 through a separate read path. Unverifiable billing remains an explicit failure through the hard deadline. The independent worker does not replace the frozen pod-local watchdog.
 
-- Exact returned pod, CA-MTL-1, A40, one GPU, Secure Cloud, exact storage and signed-in rates.
-- The original outer deadline and stop time, with no reset after stop or resume.
-- `inner.maximum_usd + accrued_upper_usd <= outer.maximum_usd <= 1.50`.
-- Inner approval after genuine initial stopped verification; stopped observation after that approval; observation no older than 600 seconds at the resume request.
-- The inner resume-request timestamp no more than five seconds old at the actual dispatch boundary, rechecked after independent reads, control preflight and guard verification.
-- A new independent read of the same stopped pod at zero hourly charge, matching its first-bound physical machine and all allocation fields.
-- Successful existing exact-pod stopped control preflight, plus a still-live external guard for the original intent/deadlines. This uses a synthetic verifier interface in tests; no live verifier is claimed here.
+## Later resume and handoff
 
-Write a durable exclusive resume-attempt receipt before the one resume request. A failed or ambiguous response is terminal; do not retry or find another host/pod/GPU/region. Read the resumed pod and require the same physical machine ID. A same-pod ID with a changed physical machine fails and triggers stop. This deliberately preserves the user's no-replacement-host requirement even if the provider ordinarily reschedules pods.
+The same controller requires a new valid inner grant/observation, genuine stopped readback, original runpodctl stopped preflight, live external guard and unchanged source/ledger. It preserves the original outer deadline and T−300 stop time and requires `accrued_upper_usd + inner.maximum_usd <= outer.maximum_usd <= 1.50`. Cost uses Decimal and rounds upward at the $0.502/hour resource ceiling only when the actual allocation/rates were verified. Unknown or mismatched prices produce an unverified cost bound and prohibit progress.
 
-There is no inference handoff in this milestone. Consequently, every successful simulated resume immediately stops again after identity verification. A future reviewed integration must retain the same outer intent/budget/deadline and all unchanged inner cache, token, GPU, process-supervisor, per-generation watchdog, raw/parse ledger, and independent-decoding gates. It must not manufacture an earlier stopped receipt or reuse a stale observation.
+Freshness is rechecked immediately at dispatch after reads/preflight/guard work. One exclusive resume claim precedes the only resume call. A changed physical machine, failed/ambiguous response or incomplete inner run ends the experiment and triggers immediate stop; there is no fallback or continuation.
 
-## Unresolved live prerequisites
+`InnerRunnerHandoff` passes the exact prepared-plan/execution-plan hashes and original grant, watchdog, preflight, observation, cache and output paths to the unchanged inner `launch_supervised()`. The inner launcher still owns parent attestation, hard inference timeout, per-generation watchdog checks, cache/token/GPU checks, durable attempt/raw/parse ordering and independent decoding. The handoff refuses the frozen disabled gate before paid resume. It requires co-located pod files/control environment and never converts external-worker receipts into pod-local receipts. Remote deployment and model-cache preparation are outside this implementation.
 
-1. A provider adapter that can verify every required readback field and immutable bootstrap settings, has no retry behavior for create/resume, and independently supervises bounded requests.
-2. A separately deployed external shutdown worker and trustworthy liveness verifier that survive allocator death, reconcile lost create responses, and stop only the uniquely owned pod at the fixed outer stop time. Receipt shape checking in local tests is not that verifier.
-3. Inspection of the pinned image's inherited NVIDIA entrypoint/hooks. Sleep-only CMD alone does not prove bootstrap has no other effects.
-4. A reviewed handoff from the outer ledger to the unchanged inner live runner that prevents bypass of cumulative accounting and preserves its control preflight/pod-watchdog/supervisor guarantees.
-5. Exact operation-specific authorization after current provider facts are known, plus final independent provider stopped/$0-hour verification and temporary credential revocation when a real operation eventually completes.
-6. A complete pinned Qwen cache and the unchanged input/token artifacts, made available through separately reviewed preparation compatible with the inner runner's no-automatic-download policy. This initial create-and-stop phase does not download, inspect, or load model weights; no complete live cache is established by these tests.
+## Concrete blockers before any live operation
 
-No key is read by this module. No credentials, actual user grant, model cache or provider state are created by implementation or tests.
+1. **All switches remain false and there is no current source-bound spending approval.** Source implementation is not enablement or authorization.
+2. **Provider observation:** documented REST fields do not prove actual state/current zero billing, separate actual rates or VRAM. The factory rejects the known gap before create. A trustworthy current observation source must be integrated; unknown facts cannot be filled from the requested configuration.
+3. **Deployment:** the live external worker requires a Linux operator environment for OS attestation. The unchanged inner watchdog, exact runpodctl preflight, prepared package, complete pinned cache and handoff must be deployed on the approved pod. No remote bootstrap/SSH transfer or cache download was added.
+4. **Image startup/capacity:** inherited entrypoint/hooks and effective provider CMD behavior still need verification; sleep CMD alone does not prove the absence of other startup activity. Exact allocation/physical-host availability is not established by CPU tests.
+
+After a future authorized operation, preserve/hash/copy artifacts when possible, independently verify provider stopped/$0, and revoke the temporary control credential. This implementation does not revoke credentials or modify any provider resource.
+
+Official API references: [create](https://docs.runpod.io/api-reference/pods/POST/pods), [read](https://docs.runpod.io/api-reference/pods/GET/pods/podId), [list](https://docs.runpod.io/api-reference/pods/GET/pods), [start](https://docs.runpod.io/api-reference/pods/POST/pods/podId/start), [stop](https://docs.runpod.io/api-reference/pods/POST/pods/podId/stop).
