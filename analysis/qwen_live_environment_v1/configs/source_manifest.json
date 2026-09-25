@@ -1,0 +1,17 @@
+{
+  "base_commit": "428c493b3fc390e6dff8f9c320299223d309188b",
+  "files": {
+    "DEPLOYMENT_CHECKLIST.md": "2ca113773587200cc93ff3efd6596adaddde01574a74782733dce1c7d96c82a4",
+    "PROTOCOL.md": "393c79d6a39f9db7a3746b3779e3c0a45bd0f396ff1fbf80798c45696b7022c2",
+    "README.md": "eb99f19a85cd22110847307df4f693481a2c1d0e7c9fec3eee99f2acafa15b8d",
+    "RESULTS.md": "f1374136be5950a850ff27612d09249d581a3b3f692f11b3e6428b588d55fe29",
+    "configs/bootstrap_summary.json": "2dbdc6a0973b7a8770312f9d78045d8bf40f00e8a99225a53e091a10b9b65168",
+    "configs/deployment_inventory.json": "13b02c8ad63333869582a556bb79c1ec5ed590de82d1044abf42f5f9fa64896c",
+    "configs/preparation.json": "499b9b9d43141639804e2e921ae729531260aec4049697d4eaaf52334bb45e40",
+    "configs/protected_sources.json": "950ba85dc4c4b710db57ac21cd1e02c963170bf6481bd9a0ad6bf009a5306894",
+    "scripts/inspect_bootstrap.py": "4ba1e10980b617f7ac47dbd09686cbef364477a928f9c9f8e9db414883e67ee3",
+    "scripts/observe_provider.py": "db97d744a8ec332882ab77de2b356c24f837270c15cd7fd2e1761636bd2a09de",
+    "scripts/prepare_deployment.py": "30f6bdb12eaedaf0063a616fb7b10c732bfac0246acfaedbf11e24c58f22140b",
+    "tests/test_environment.py": "c4f91f93b6b528e1b0ac490ed54bf56c748133a9ad81944fa085bd1ee4fdbf47"
+  }
+}

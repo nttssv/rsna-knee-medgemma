@@ -1,0 +1,85 @@
+{
+  "stage": "LOCAL_ENVIRONMENT_PREPARATION_ONLY",
+  "checked_at": "2026-09-25T03:15:44.717886+00:00",
+  "prepared_plan_sha256": "c4586bb0c65163244dac80344ea96f691493a1b89a5911eefcba54f2384c74fc",
+  "execution_plan_sha256": "ab82f51cf3883e93b2c33bf750a32148297226ebd3e9ada0febb54d18d85a4f5",
+  "protected_file_count": 322,
+  "five_report_package_verified": true,
+  "prepared_files": {
+    "splits.csv": "0900a46a7d47c47451ce14c4f18237b31b72cd90b19d3af535d744ad07ef1133",
+    "candidate_prompts.jsonl": "400f596a0e453bedcb11cd4ea5b1d63849f3f8731420b9e7aa0fcfccd6693fe5",
+    "audit_receipt.json": "96bec11b5e71a262c7a77110b27e8fa0ec02f35be1b91cb3dbd1925a83851ae6",
+    "control_prompts.jsonl": "2de96d3550c645477e65f9812089cffc99bd8985356e10cba4030120b0861300",
+    "inputs.jsonl": "0a4b05ccca46ff85fd1befc077155b40837dd4787603a91b579500f04cbe5ce8",
+    "tokenized.json": "92b4b2aec1a6eb4cd04c8b034fb267022686172b81d389007865bf45c3b76448"
+  },
+  "components": {
+    "external_worker": {
+      "path": "analysis/qwen_execution_provisioning_runtime_v1/scripts/external_shutdown.py",
+      "sha256": "f6f2275934ddbc089aad791fe7501e585d729cef731a1ea5ec41d63e8564a474"
+    },
+    "external_transport": {
+      "path": "analysis/qwen_execution_provisioning_runtime_v1/scripts/provider_transport.py",
+      "sha256": "12310cc5fb7824f5e296553fafee5648d41bb8efc78fc527d786d1585232661a"
+    },
+    "external_network_supervisor": {
+      "path": "analysis/qwen_execution_provisioning_runtime_v1/scripts/network_supervisor.py",
+      "sha256": "674db9abc3bacc4c9ed2a5aa36acd9451a021b26846515891426db19938d21e3"
+    },
+    "outer_controller": {
+      "path": "analysis/qwen_execution_provisioning_runtime_v1/scripts/controller.py",
+      "sha256": "8873f3065acacd2caed965e78333eff8d4cd8fa7d35d2d52e4f81a6f975e25fc"
+    },
+    "inner_handoff": {
+      "path": "analysis/qwen_execution_provisioning_runtime_v1/scripts/handoff.py",
+      "sha256": "79490c7d6ebdfc355074a0f3e682d1ba592988000e0c141a99ae25af6d7c528f"
+    },
+    "inner_runner": {
+      "path": "analysis/qwen_execution_runtime_alt_v1/scripts/qwen_live.py",
+      "sha256": "90bd957ea45b64eb42ef709d7f2c36211de635775055ebbb4d6f71160b6fa56c"
+    },
+    "pod_watchdog": {
+      "path": "analysis/qwen_execution_v1/scripts/stop_watchdog.py",
+      "sha256": "92db999ea4ba713323ffd592722484e7caa2689d5628f7761f24750f33aba727"
+    },
+    "pod_preflight_verifier": {
+      "path": "analysis/qwen_execution_v1/scripts/stop_watchdog.py",
+      "sha256": "92db999ea4ba713323ffd592722484e7caa2689d5628f7761f24750f33aba727"
+    },
+    "cache_auditor": {
+      "path": "analysis/report_labeling_llm_v2/scripts/load_preflight.py",
+      "sha256": "917bdabf0e3b7b1b0308b78f738cdd400fac25f3880f5ecf1165cf477d4bff7c"
+    },
+    "cache_manifest": {
+      "path": "analysis/report_labeling_llm_v2/configs/weight_manifest.json",
+      "sha256": "11fa38e1b41afc9860fe08e128baad923ae441d040e09aa4278aaa8e93eb18b1"
+    }
+  },
+  "cache": {
+    "model_id": "Qwen/Qwen3-14B",
+    "revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+    "required_bytes": 29548135507,
+    "required_file_count": 13,
+    "audits": [
+      {
+        "complete": false,
+        "verified_file_count": 0,
+        "expected_file_count": 13
+      },
+      {
+        "complete": false,
+        "verified_file_count": 0,
+        "expected_file_count": 13
+      }
+    ],
+    "complete_local_copy_found": false,
+    "pod_copy_verified": false
+  },
+  "external_linux_environment_verified": false,
+  "pod_local_runpodctl_verified": false,
+  "pod_local_watchdog_deployed": false,
+  "remote_transport_verified": false,
+  "all_live_switches_false": true,
+  "deployment_performed": false,
+  "ready_for_live_use": false
+}
