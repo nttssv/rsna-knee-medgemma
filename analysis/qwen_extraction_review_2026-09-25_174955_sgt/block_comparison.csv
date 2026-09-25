@@ -1,0 +1,5 @@
+block,generations_planned,attempted,completed,generation_failures,unrun,condition_rows,technical_valid,ambiguous_evidence_error,other_technical_failures,positive,negative,uncertain,not_mentioned,binary_decisions,generation_seconds_sum,peak_gpu_allocated_gib
+control-1,5,5,5,0,0,60,58,2,0,16,19,1,22,35,147.451001,28.012012
+candidate-1,5,5,5,0,0,60,58,2,0,11,16,3,28,27,127.505907,28.129864
+candidate-2,5,5,5,0,0,60,58,2,0,11,16,3,28,27,127.087070,28.129916
+control-2,5,5,5,0,0,60,58,2,0,16,19,1,22,35,147.734501,28.129916

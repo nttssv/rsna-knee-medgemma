@@ -23,3 +23,5 @@ Current user-directed focus: [Qwen saved-output audit and prospective preparatio
 The [Qwen local runtime/review integration](qwen_runtime_v1/README.md) is implemented with real execution hard-disabled. Synthetic tests/demo do not represent Qwen output.
 
 The [Qwen execution proposal](qwen_execution_v1/README.md) sets a one-hour, $1.50 ceiling for a five-report, 20-generation comparison on one RTX 6000 Ada. It includes a private approval gate, a pod-local shutdown watchdog, external stop verification, and an independent output-token decoding requirement. It is not execution approval; all RunPod rates must be rechecked before a run.
+
+The [Qwen extraction results snapshot](qwen_extraction_review_2026-09-25_174955_sgt/README.md), dated **2026-09-25 17:49:55 Asia/Singapore**, records the completed 20-generation run's block-level totals and repeatability gate. Study-level outputs and report text remain in ignored local state.

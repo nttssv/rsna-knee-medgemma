@@ -1,0 +1,22 @@
+[
+  {
+    "prompt": "control",
+    "raw_byte_identical_reports": 5,
+    "reports": 5,
+    "protocol_field_tuples_equal": 60,
+    "condition_pairs": 60,
+    "both_repeats_technically_valid": 58,
+    "strict_protocol_gate": "FAIL",
+    "failure_reason": "2/60 cells per repeat are ambiguous_evidence_error; protocol requires all 60 valid even though every compared tuple matched."
+  },
+  {
+    "prompt": "candidate",
+    "raw_byte_identical_reports": 5,
+    "reports": 5,
+    "protocol_field_tuples_equal": 60,
+    "condition_pairs": 60,
+    "both_repeats_technically_valid": 58,
+    "strict_protocol_gate": "FAIL",
+    "failure_reason": "2/60 cells per repeat are ambiguous_evidence_error; protocol requires all 60 valid even though every compared tuple matched."
+  }
+]

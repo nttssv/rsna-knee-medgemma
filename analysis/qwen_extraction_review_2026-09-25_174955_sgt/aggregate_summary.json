@@ -1,0 +1,95 @@
+{
+  "planned_generations": 20,
+  "saved_generations": 20,
+  "blocks": {
+    "control-1": {
+      "generations": 5,
+      "seconds": 147.45100138778798,
+      "technical_status": {
+        "valid": 58,
+        "ambiguous_evidence_error": 2
+      },
+      "labels": {
+        "not_mentioned": 22,
+        "negative": 19,
+        "None": 2,
+        "positive": 16,
+        "uncertain": 1
+      },
+      "peak_gpu_gib": 28.012012481689453
+    },
+    "candidate-1": {
+      "generations": 5,
+      "seconds": 127.50590699305758,
+      "technical_status": {
+        "valid": 58,
+        "ambiguous_evidence_error": 2
+      },
+      "labels": {
+        "not_mentioned": 28,
+        "negative": 16,
+        "None": 2,
+        "positive": 11,
+        "uncertain": 3
+      },
+      "peak_gpu_gib": 28.129863739013672
+    },
+    "candidate-2": {
+      "generations": 5,
+      "seconds": 127.08707033726387,
+      "technical_status": {
+        "valid": 58,
+        "ambiguous_evidence_error": 2
+      },
+      "labels": {
+        "not_mentioned": 28,
+        "negative": 16,
+        "None": 2,
+        "positive": 11,
+        "uncertain": 3
+      },
+      "peak_gpu_gib": 28.129916191101074
+    },
+    "control-2": {
+      "generations": 5,
+      "seconds": 147.73450121632777,
+      "technical_status": {
+        "valid": 58,
+        "ambiguous_evidence_error": 2
+      },
+      "labels": {
+        "not_mentioned": 22,
+        "negative": 19,
+        "None": 2,
+        "positive": 16,
+        "uncertain": 1
+      },
+      "peak_gpu_gib": 28.129916191101074
+    }
+  },
+  "agreement": {
+    "control-1 vs candidate-1": {
+      "paired_conditions": 60,
+      "both_technically_valid": 58,
+      "equal_labels": 49,
+      "excluded_technical_errors": 2,
+      "raw_byte_exact_reports": 0
+    },
+    "control-1 vs control-2": {
+      "paired_conditions": 60,
+      "both_technically_valid": 58,
+      "equal_labels": 58,
+      "excluded_technical_errors": 2,
+      "raw_byte_exact_reports": 5
+    },
+    "candidate-1 vs candidate-2": {
+      "paired_conditions": 60,
+      "both_technically_valid": 58,
+      "equal_labels": 58,
+      "excluded_technical_errors": 2,
+      "raw_byte_exact_reports": 5
+    }
+  },
+  "medical_accuracy": "NOT EVALUATED; no organizer labels were read",
+  "confidence": "Model self-report, not calibrated probability"
+}
