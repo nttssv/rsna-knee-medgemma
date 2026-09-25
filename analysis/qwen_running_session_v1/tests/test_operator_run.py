@@ -91,3 +91,15 @@ def test_plan_is_not_the_old_stopped_state_plan_and_hardware_gate_has_a6000():
     assert policy["shutdown_at_seconds"] == 10500
     assert run.EXPECTED_GPU == "NVIDIA RTX A6000"
     assert run.EXPECTED_POD_ID_SHA256 == __import__("hashlib").sha256(b"rqnenq3mpu0i2g").hexdigest()
+
+
+def test_actual_a6000_mib_capacity_and_free_memory(monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(run, "qwen_runtime", lambda: None)
+    monkeypatch.setattr(run, "observe_hardware", lambda runtime: {"gpu_names": [run.EXPECTED_GPU]})
+    responses = iter([SimpleNamespace(stdout=""), SimpleNamespace(stdout="46068, 45489\n")])
+    monkeypatch.setattr(run.subprocess, "run", lambda *a, **kw: next(responses))
+    assert run.verify_hardware(session())["total_gpu_mib"] == 46068
+    responses = iter([SimpleNamespace(stdout=""), SimpleNamespace(stdout="46068, 35000\n")])
+    with pytest.raises(run.SessionError):
+        run.verify_hardware(session())

@@ -184,9 +184,43 @@ def require_time_for_run(session: dict, *, now: datetime | None = None) -> float
     return timeout
 
 
+def observe_hardware(runtime) -> dict:
+    # Preserve frozen package pins while accepting Torch's explicit cu128 local tag.
+    from v2_runtime import check_versions
+    import torch
+    versions = check_versions()
+    expected = runtime.runtime_config()["required_versions"]
+    normalized = dict(versions)
+    if normalized.get("torch") == "2.8.0+cu128":
+        normalized["torch"] = "2.8.0"
+    if normalized != expected:
+        raise SessionError("Pinned dependency versions differ")
+    def query(field):
+        result = subprocess.run(["nvidia-smi", "--query-gpu=" + field, "--format=csv,noheader"],
+            capture_output=True, text=True, check=True, timeout=15)
+        return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    names, drivers = query("name"), query("driver_version")
+    if len(drivers) != 1:
+        raise SessionError("Single GPU driver provenance required")
+    runtime.verify_reported_hardware(names, torch.cuda.device_count(), torch.version.cuda,
+        torch.__version__, torch.cuda.is_available(),
+        torch.cuda.is_bf16_supported(including_emulation=False),
+        torch.cuda.mem_get_info(0)[0] / 2**30, EXPECTED_GPU)
+    return dict(gpu_names=names, gpu_driver_version=drivers[0],
+        cuda_version=torch.version.cuda, torch_version=torch.__version__,
+        package_versions=versions, native_bf16=True)
+
+
 def verify_hardware(session: dict) -> dict:
+    # Check for other work BEFORE this process initializes its own CUDA context.
+    # nvidia-smi process IDs may be host PIDs rather than container PIDs.
+    process = subprocess.run(["nvidia-smi", "--query-compute-apps=pid,process_name,used_memory", "--format=csv,noheader"],
+        check=True, capture_output=True, text=True, timeout=15)
+    existing = [line for line in process.stdout.splitlines() if line.strip()]
+    if existing:
+        raise SessionError("Another GPU workload is already using this device")
     runtime = qwen_runtime()
-    observed = runtime.verify_hardware_and_versions(EXPECTED_GPU)
+    observed = observe_hardware(runtime)
     if observed["gpu_names"] != [EXPECTED_GPU]:
         raise SessionError("Visible GPU identity differs from the approved RTX A6000")
     query = subprocess.run(["nvidia-smi", "--query-gpu=memory.total,memory.free", "--format=csv,noheader,nounits"],
@@ -195,14 +229,10 @@ def verify_hardware(session: dict) -> dict:
     if len(rows) != 1 or len(rows[0]) != 2:
         raise SessionError("Could not verify exactly one GPU and its free memory")
     total_mib, free_mib = map(int, rows[0])
-    if total_mib < 47000 or free_mib < 36 * 1024:
+    # nvidia-smi reports MiB; the approved 48 GB capacity is decimal bytes.
+    if total_mib * 1024**2 < 48_000_000_000 or free_mib < 36 * 1024:
         raise SessionError("RTX A6000 requires at least 36 GiB free VRAM")
-    observed.update(total_gpu_mib=total_mib, free_gpu_mib=free_mib)
-    process = subprocess.run(["nvidia-smi", "--query-compute-apps=pid,process_name,used_memory", "--format=csv,noheader"],
-        check=True, capture_output=True, text=True, timeout=15)
-    observed["existing_gpu_processes"] = [line for line in process.stdout.splitlines() if line.strip()]
-    if observed["existing_gpu_processes"]:
-        raise SessionError("Another GPU workload is already using this device")
+    observed.update(total_gpu_mib=total_mib, free_gpu_mib=free_mib, existing_gpu_processes=existing)
     return observed
 
 
