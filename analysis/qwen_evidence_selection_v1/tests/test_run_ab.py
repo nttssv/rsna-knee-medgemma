@@ -86,6 +86,9 @@ class SupervisedAdapterTests(unittest.TestCase):
     def test_external_stop_request_is_exact_pod_and_once(self):
         calls=[]
         def opener(request, timeout):
+            # Default Python identification reproduced RunPod HTTP 403/1010.
+            self.assertEqual(request.get_header("User-agent"), "rsna-qwen-evidence-selection/1.0")
+            self.assertEqual(request.get_header("Authorization"), "Bearer synthetickey0123456789012345")
             calls.append((request.full_url, request.data, timeout))
             return FakeResponse()
         result=stop_at.stop_once("synthetic-pod", "synthetickey0123456789012345", opener=opener)
