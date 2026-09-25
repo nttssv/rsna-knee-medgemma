@@ -1,0 +1,135 @@
+{
+  "executed_source_commit": "1ab7b5bbc9638fc81eac17ec52e3a104c56d622a",
+  "execution_plan_sha256": "6d551f7bf19db648e11eed9766e6a47b984567e6b8fbc6e4dd660c738bf9c54a",
+  "completed_at_utc": "2026-09-25T12:06:58.227070+00:00",
+  "blocks": [
+    {
+      "block": "A1",
+      "generations": 5,
+      "condition_rows": 60,
+      "valid": 58,
+      "technical_failures": {
+        "ambiguous_evidence_error": 2
+      },
+      "accepted_label_counts": {
+        "not_mentioned": 22,
+        "negative": 19,
+        "positive": 16,
+        "uncertain": 1
+      },
+      "raw_label_counts": {
+        "not_mentioned": 22,
+        "negative": 20,
+        "positive": 17,
+        "uncertain": 1
+      },
+      "binary_decisions": 35,
+      "runtime_seconds": 158.3259486593306,
+      "peak_gpu_allocated_gib": 28.012012481689453
+    },
+    {
+      "block": "B1",
+      "generations": 5,
+      "condition_rows": 60,
+      "valid": 58,
+      "technical_failures": {
+        "ambiguous_evidence_error": 2
+      },
+      "accepted_label_counts": {
+        "not_mentioned": 25,
+        "negative": 19,
+        "positive": 13,
+        "uncertain": 1
+      },
+      "raw_label_counts": {
+        "not_mentioned": 25,
+        "negative": 20,
+        "positive": 14,
+        "uncertain": 1
+      },
+      "binary_decisions": 32,
+      "runtime_seconds": 157.2435142584145,
+      "peak_gpu_allocated_gib": 28.08200454711914
+    },
+    {
+      "block": "B2",
+      "generations": 5,
+      "condition_rows": 60,
+      "valid": 58,
+      "technical_failures": {
+        "ambiguous_evidence_error": 2
+      },
+      "accepted_label_counts": {
+        "not_mentioned": 25,
+        "negative": 19,
+        "positive": 13,
+        "uncertain": 1
+      },
+      "raw_label_counts": {
+        "not_mentioned": 25,
+        "negative": 20,
+        "positive": 14,
+        "uncertain": 1
+      },
+      "binary_decisions": 32,
+      "runtime_seconds": 162.04146206006408,
+      "peak_gpu_allocated_gib": 28.082051277160645
+    },
+    {
+      "block": "A2",
+      "generations": 5,
+      "condition_rows": 60,
+      "valid": 58,
+      "technical_failures": {
+        "ambiguous_evidence_error": 2
+      },
+      "accepted_label_counts": {
+        "not_mentioned": 22,
+        "negative": 19,
+        "positive": 16,
+        "uncertain": 1
+      },
+      "raw_label_counts": {
+        "not_mentioned": 22,
+        "negative": 20,
+        "positive": 17,
+        "uncertain": 1
+      },
+      "binary_decisions": 35,
+      "runtime_seconds": 171.5306610018015,
+      "peak_gpu_allocated_gib": 28.082051277160645
+    }
+  ],
+  "repeatability": {
+    "A": {
+      "raw_byte_identical": 5,
+      "raw_reports": 5,
+      "protocol_identical_rows": 60,
+      "valid_and_identical": 58,
+      "gate": "FAIL",
+      "output_token_ids_identical": 5
+    },
+    "B": {
+      "raw_byte_identical": 5,
+      "raw_reports": 5,
+      "protocol_identical_rows": 60,
+      "valid_and_identical": 58,
+      "gate": "FAIL",
+      "output_token_ids_identical": 5
+    }
+  },
+  "comparison_counts": {
+    "A1_vs_B1": {
+      "paired_cells": 60,
+      "raw_proposal_differences": 16,
+      "primary_parsed_row_differences": 15
+    },
+    "A2_vs_B2": {
+      "paired_cells": 60,
+      "raw_proposal_differences": 16,
+      "primary_parsed_row_differences": 15
+    }
+  },
+  "semantic_status": "PROVISIONAL_NOT_ADJUDICATED",
+  "organizer_comparison": "NOT_PERFORMED"
+}

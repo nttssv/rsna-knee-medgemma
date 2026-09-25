@@ -1,5 +1,7 @@
 # Project continuity
 
+- For any temporary RunPod API key or shutdown-control task, first read [docs/RUNPOD_TEMPORARY_KEY_SOP.md](docs/RUNPOD_TEMPORARY_KEY_SOP.md). It contains the exact UI permissions, one-shot local secret intake, mandatory application User-Agent, exact-pod checks, and disable-after-stop procedure for Luna/Sol/Astra. Reuse an existing permitted key before creating another; never infer invalid credentials from a default-urllib 403 probe. Do not open a new window or print credentials.
+
 - This GitHub repository is public by user request on 2026-09-14. Keep private data, credentials and model artifacts excluded from Git.
 - Read README.md, docs/EXPERIMENT.md, and docs/MIGRATION.md before starting work.
 - Current focus: Qwen report extraction, by user direction on 2026-09-15. MedGemma development and YOLO work are paused.

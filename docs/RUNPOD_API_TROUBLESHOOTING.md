@@ -1,5 +1,7 @@
 # RunPod API 403/1010 recovery — 25 September 2026
 
+For creation, private storage, permission scope and end-of-session disablement, follow the [temporary control-key SOP](RUNPOD_TEMPORARY_KEY_SOP.md).
+
 At 11:35–11:37 UTC (19:35–19:37 Singapore time), a read-only local comparison reproduced HTTP 403 with body `error code: 1010` using Python urllib's default User-Agent. The same public GraphQL query returned HTTP 200, 50 GPU types and no GraphQL errors with `User-Agent: rsna-qwen-evidence-selection/1.0`. An authenticated exact-pod query with that header then returned the stopped pod's correct identity, GPU, region, disk and volume fields. An authenticated REST read also succeeded.
 
 The immediate cause of the failed diagnostic was its default HTTP client identification. The earlier conclusion that the account key or watchdog could not access RunPod was unsupported: those probes omitted the application User-Agent already present in the reviewed watchdog. This recovery was also documented in the historical [control preflight](../analysis/report_labeling_llm_v3_execution_v1/CONTROL_PREFLIGHT.md). Cloudflare describes [1010](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1010/) as a client-signature denial; a 403 alone does not establish invalid credentials or denied stop permissions.
