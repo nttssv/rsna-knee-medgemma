@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "stage": "qwen_running_pod_operator_v1",
+  "real_execution_enabled": false,
+  "prepared_plan_sha256": "c4586bb0c65163244dac80344ea96f691493a1b89a5911eefcba54f2384c74fc",
+  "session_policy_sha256": "dc8b179819a4b032378b8592bb6f8d6c2879a06725e4525afaae21757cefe2bb",
+  "source_manifest_sha256": "e23e3fd65bd28bd66e94f4e71607a10d498bcda41ba0e75abc8657f52d6fdafa",
+  "resource": {
+    "pod_name": "low_brown_viper",
+    "pod_id_sha256": "f29b34744f4feaf9928240776db1472edc57377584f448a3a0b564bbda9d298f",
+    "cloud_type": "SECURE",
+    "region": "EU-SE-1",
+    "gpu_name": "NVIDIA RTX A6000",
+    "gpu_count": 1,
+    "gpu_vram_gb": 48,
+    "system_ram_gb": 50,
+    "container_disk_gb": 80,
+    "persistent_volume_gb": 0,
+    "network_volume_id": null,
+    "compute_usd_per_hour": 0.53,
+    "storage_usd_per_hour": 0.011,
+    "maximum_session_usd": 3.0,
+    "maximum_provider_seconds": 10800,
+    "shutdown_at_seconds": 10500
+  },
+  "historical_cost_usd_separate": 0.41,
+  "scope": {
+    "model_id": "Qwen/Qwen3-14B",
+    "model_revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+    "run_order": [
+      "control-1",
+      "candidate-1",
+      "candidate-2",
+      "control-2"
+    ],
+    "reports_per_block": 5,
+    "maximum_generations": 20,
+    "precision": "bfloat16",
+    "attention": "sdpa",
+    "batch_size": 1,
+    "training": false,
+    "validation_inference": false,
+    "bulk_extraction": false,
+    "retry_or_repair": false
+  }
+}
