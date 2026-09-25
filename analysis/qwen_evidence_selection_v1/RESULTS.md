@@ -4,7 +4,9 @@
 
 The offline dry run passed exact A/B prompt and input-token parity against the private five-report package. The supervised CPU rehearsal called a fake backend exactly 20 times in A1 → B1 → B2 → A2 order, five reports/block, and wrote 20 durable attempt/raw/parsed records with `SYNTHETIC: true`, zero unrun and zero GPU memory. Separate synthetic checks rejected a repeated output path, altered prompt or token artifact, absent real-session grant and incomplete generation (one attempted, zero completed, one failed, 19 unrun). A hard-timeout rehearsal killed the worker process group and retained partial artifact hashes; parser-invalid synthetic responses were recorded as technical failures without retry or repair. These are adapter checks, not report-extraction or medical-accuracy results.
 
-New execution-plan SHA-256: `b16c4759f25fa3e260907bfff73e977a5f8c98ec99217c355f054293b454420b`. Private reports, study IDs, raw outputs and the regression checklist remain outside Git.
+Source review at commit `2627428d443edf16803dfe18c2f68b0d356a2141` identified two finalization/recipe bindings. The follow-up CPU tests inject failure while writing the final parsed record and final A2 block receipt; both now return failed/nonzero despite 20 completed generations. The adapter also binds the historical Qwen config actually used by `real_encoder()` and verifies the effective encoder recipe against the A/B plan before loading weights. Seed, output-cap and revision drift fail closed. Public CI runs source checks; private five-report rehearsal remains local and is skipped when those private inputs are absent.
+
+New execution-plan SHA-256: `6d551f7bf19db648e11eed9766e6a47b984567e6b8fbc6e4dd660c738bf9c54a`. Private reports, study IDs, raw outputs and the regression checklist remain outside Git.
 
 ## Frozen baseline used to design B
 

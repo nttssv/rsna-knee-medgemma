@@ -34,6 +34,16 @@ class SupervisedAdapterTests(unittest.TestCase):
         self.assertEqual(plan["default_action"], "dry-run")
         self.assertEqual(plan["maximum_generations"], 20)
 
+    def test_effective_backend_recipe_drift_fails_before_model_load(self):
+        plan = run_ab.read(run_ab.PLAN)
+        source = run_ab.read(REPO / "analysis/qwen_report_extraction_v1/configs/experiment.json")
+        run_ab.verify_effective_recipe(source, plan)
+        for change in ({"seed": source["seed"] + 1},
+                       {"max_new_tokens": source["max_new_tokens"] + 1},
+                       {"revision": "different-revision"}):
+            with self.subTest(change=change), self.assertRaises(run_ab.GateError):
+                run_ab.verify_effective_recipe(dict(source, **change), plan)
+
     def synthetic_session(self):
         now = datetime.now(timezone.utc)
         t0 = now - timedelta(minutes=1)
@@ -176,6 +186,22 @@ class SupervisedAdapterTests(unittest.TestCase):
             receipt = run_ab.read(timed / "supervisor_result.json")
             self.assertEqual(receipt["status"], "hard_timeout")
             self.assertTrue(receipt["partial_artifacts_sha256"])
+            for behavior in ("parsed_write_error_last", "block_receipt_error_last"):
+                broken = Path(temp) / behavior
+                run = subprocess.run(base + ["--output", str(broken), "--fake-behavior", behavior],
+                                     capture_output=True, text=True, timeout=30)
+                self.assertNotEqual(run.returncode, 0, run.stderr)
+                outcome = run_ab.read(broken / "session_result.json")
+                self.assertEqual(outcome["attempted"], 20)
+                self.assertEqual(outcome["failed"], 0)  # Complete generation, failed durable finalization.
+                self.assertEqual(outcome["failure_type"], "OSError")
+                self.assertEqual(outcome["status"], "failed")
+                self.assertEqual(run_ab.read(broken / "supervisor_result.json")["status"], "child_failed")
+                if behavior == "parsed_write_error_last":
+                    self.assertEqual(outcome["parsed_records_written"], 19)
+                else:
+                    self.assertEqual(outcome["parsed_records_written"], 20)
+                    self.assertEqual(outcome["blocks_completed"], ["A1", "B1", "B2"])
 
 
 if __name__ == "__main__":

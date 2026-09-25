@@ -40,7 +40,7 @@
   "max_session_usd": 3.0,
   "resource_policy": "fresh private grant binds exact pod, region, selected reviewed GPU, signed-in rates and immutable deadline",
   "source_sha256": {
-    "analysis/qwen_evidence_selection_v1/scripts/run_ab.py": "e82140a3822d21ba6ed9cad23486cf58faf331b62d54425a05bd49a67aacdcac",
+    "analysis/qwen_evidence_selection_v1/scripts/run_ab.py": "91ce8bd6978d45c20b299d9d3a56c9379ce7a7ea383d5a9912ec75c2540a3e3e",
     "analysis/qwen_evidence_selection_v1/scripts/stop_at.py": "942ebf1b11d4c3f78da484d8b288485f9a077ce01cae27add333cb710faa293e",
     "analysis/qwen_evidence_selection_v1/scripts/experiment_core.py": "eb17ec0579311de9aa21702ba1ddafbad27f4f11cbc9fe7281ed0a50dd60751f",
     "analysis/qwen_evidence_selection_v1/configs/experiment.json": "c74770e6d606927109b2e5b96ce9efa335b0fdc0fb9c2ee0ee5dcaa3bf26d139",
@@ -53,6 +53,10 @@
     "analysis/report_labeling_llm_v2/scripts/core.py": "c44274271aacd8d23a76076154920e09daeb6fe8edb71881efbe926edd3a8015",
     "analysis/report_labeling_llm_v1/scripts/benchmark_core.py": "67eac651f9bbb4018250070a6d11515417617e97071023e55f1e56b4583a441e",
     "analysis/report_labeling_llm_v2/scripts/run_smoke.py": "e264646fc2d887209b2bbefca8b34389fb8c3a0249f861808c196912d5fa31cf",
-    "analysis/report_labeling_llm_v2/scripts/load_preflight.py": "917bdabf0e3b7b1b0308b78f738cdd400fac25f3880f5ecf1165cf477d4bff7c"
+    "analysis/report_labeling_llm_v2/scripts/load_preflight.py": "917bdabf0e3b7b1b0308b78f738cdd400fac25f3880f5ecf1165cf477d4bff7c",
+    "analysis/qwen_execution_runtime_alt_v1/configs/runtime.json": "d290e19f875fcf51a9f096f6bc32093bca3e5ba113318240e091bc88569e1737",
+    "analysis/qwen_report_extraction_v1/configs/experiment.json": "6c336fd7d97fc9add16a5ca577d1326046885ae3b4497fac98ed43193b9d6647",
+    "analysis/report_labeling_llm_v2/configs/qwen.json": "6bb926416f1677394526aba997f6553d9f09a00db7f694472b53c83b21c000de",
+    "analysis/report_labeling_llm_v2/configs/runtime.json": "c4743cd43fcc6715af96d7e7fbd20b0671b5be4c96d184e6cdb5628e9d5ad0ea"
   }
 }

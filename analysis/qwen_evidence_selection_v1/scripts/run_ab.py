@@ -37,9 +37,13 @@ REQUIRED_SOURCES = {
     "analysis/qwen_evidence_selection_v1/prompts/candidate_B.txt",
     "analysis/qwen_evidence_selection_v1/prompts/target_definitions.txt",
     "analysis/qwen_execution_runtime_alt_v1/scripts/qwen_live.py",
+    "analysis/qwen_execution_runtime_alt_v1/configs/runtime.json",
     "analysis/qwen_runtime_v1/scripts/runtime_qwen.py",
+    "analysis/qwen_report_extraction_v1/configs/experiment.json",
     "analysis/report_labeling_llm_v2/scripts/v2_runtime.py",
     "analysis/report_labeling_llm_v2/scripts/core.py",
+    "analysis/report_labeling_llm_v2/configs/qwen.json",
+    "analysis/report_labeling_llm_v2/configs/runtime.json",
     "analysis/report_labeling_llm_v1/scripts/benchmark_core.py",
     "analysis/report_labeling_llm_v2/scripts/run_smoke.py",
     "analysis/report_labeling_llm_v2/scripts/load_preflight.py",
@@ -157,7 +161,21 @@ def validate_plan(expected_sha: str) -> dict:
         or cfg["candidate_B_sha256"] != B_SHA or cfg["execution_enabled"] is not False
         or cfg["revision"] != "40c069824f4251a91eefaf281ebe4c544efd3e18"):
         raise GateError("Scientific A/B configuration changed")
+    verify_effective_recipe(read(REPO / "analysis/qwen_report_extraction_v1/configs/experiment.json"), plan)
+    verify_effective_recipe(read(REPO / "analysis/report_labeling_llm_v2/configs/qwen.json"), plan)
     return plan
+
+
+def verify_effective_recipe(cfg: dict, plan: dict) -> None:
+    expected = {"model_id": plan["model_id"], "revision": plan["model_revision"],
+        "dtype": plan["precision"], "attn_implementation": plan["attention"],
+        "batch_size": plan["batch_size"], "seed": plan["seed"],
+        "enable_thinking": plan["enable_thinking"], "do_sample": plan["do_sample"],
+        "max_input_tokens": plan["max_input_tokens"], "max_new_tokens": plan["max_new_tokens"],
+        "max_time_seconds": 300, "num_beams": 1}
+    if any(cfg.get(key) != value or type(cfg.get(key)) is not type(value)
+           for key, value in expected.items()):
+        raise GateError("Effective Qwen backend recipe differs from the A/B execution plan")
 
 
 def load_package(prepared: Path, source: Path, plan: dict):
@@ -395,6 +413,7 @@ def run_worker(args) -> bool:
         if not audit["complete"] or audit["revision"] != plan["model_revision"]:
             raise GateError("Pinned Qwen cache is incomplete")
         encoder = runtime.create_encoder(args.cache)
+    verify_effective_recipe(encoder.cfg, plan)
     arms = encode_checked(encoder, rows, prompts, tokens, synthetic=synthetic)
     write_new(args.output / "input_preflight.json", {"synthetic": synthetic,
         "exact_prompt_and_token_parity": True, "prepared_plan_sha256": PREPARED_SHA,
@@ -411,6 +430,8 @@ def run_worker(args) -> bool:
               "completed": 0, "failed": 0, "unrun": 20, "blocks_completed": [],
               "execution_plan_sha256": args.plan_sha256, "started_at": datetime.now(timezone.utc).isoformat()}
     started = time.monotonic()
+    raw_written = parsed_written = 0
+    loop_completed = False
     try:
         for block in ORDER:
             arm = block[0]
@@ -447,6 +468,7 @@ def run_worker(args) -> bool:
                         "input_tokens": encoded.input_tokens, "generation": generation,
                         "gpu_peak_allocated_gib": backend.peak_gib()}
                     append(raw, record)  # Raw and token IDs are durable before decode or parsing.
+                    raw_written += 1
                     result["completed"] += generation.get("generation_status") == "completed"
                     try:
                         primary, secondary = runtime.validate_generation(generation, backend, encoded, row["Report"])
@@ -455,22 +477,32 @@ def run_worker(args) -> bool:
                             "kind": "integrity_or_incomplete_generation", "error_type": type(exc).__name__})
                         result["failed"] += 1
                         raise
+                    if synthetic and args.fake_behavior == "parsed_write_error_last" and number == 20:
+                        raise OSError("synthetic_parsed_write_error")
                     append(parsed, {"synthetic": synthetic, "attempt": number, "arm": arm,
                         "prompt_sha256": plan["prompt_sha256"][arm], "primary_v2": primary,
                         "secondary_v1": secondary, "raw_sha256": hashlib.sha256(
                             json.dumps(record, sort_keys=True, ensure_ascii=False, allow_nan=False).encode()).hexdigest()})
+                    parsed_written += 1
                     errors = [r["status"] for r in primary["rows"] if r["status"] != "valid"]
                     if errors:
                         append(failures, {"synthetic": synthetic, "attempt": number,
                                           "kind": "parser_technical_failure", "condition_statuses": errors})
+            if synthetic and args.fake_behavior == "block_receipt_error_last" and block == "A2":
+                raise OSError("synthetic_block_receipt_error")
             write_new(args.output / (block + ".complete.json"), {"synthetic": synthetic,
                 "block": block, "completed_generations": 5,
                 "finished_at": datetime.now(timezone.utc).isoformat()})
             result["blocks_completed"].append(block)
+        loop_completed = True
     except BaseException as exc:
         result["failure_type"] = type(exc).__name__
     finally:
-        result.update(status="completed" if result["attempted"] == 20 and result["failed"] == 0 else "failed",
+        complete = (loop_completed and result["attempted"] == result["completed"] == 20
+                    and result["failed"] == 0 and raw_written == parsed_written == 20
+                    and result["blocks_completed"] == list(ORDER) and "failure_type" not in result)
+        result.update(status="completed" if complete else "failed",
+            raw_records_written=raw_written, parsed_records_written=parsed_written,
             unrun=20-result["attempted"], elapsed_seconds=time.monotonic()-started,
             peak_gpu_allocated_gib=backend.peak_gib(),
             finished_at=datetime.now(timezone.utc).isoformat(),
@@ -544,7 +576,8 @@ def main(argv=None) -> int:
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--rehearsal", action="store_true", help="Supervised 20-call SYNTHETIC CPU run")
     group.add_argument("--run", action="store_true", help="Approved real Qwen generation")
-    parser.add_argument("--fake-behavior", choices=("normal", "hang", "raise", "incomplete", "schema_error"),
+    parser.add_argument("--fake-behavior", choices=("normal", "hang", "raise", "incomplete", "schema_error",
+                        "parsed_write_error_last", "block_receipt_error_last"),
                         default="normal", help=argparse.SUPPRESS)
     parser.add_argument("--rehearsal-timeout", type=float, default=60.0, help=argparse.SUPPRESS)
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)

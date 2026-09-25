@@ -18,4 +18,6 @@ jobs:
           analysis/qwen_execution_runtime_alt_v1/tests
           analysis/qwen_execution_resource_alt_v1/tests
           tests/test_runpod_stopped_preflight.py
+      - name: Qwen evidence-selection source checks
+        run: python -m pytest -q analysis/qwen_evidence_selection_v1/tests
       - run: rsna-knee doctor
