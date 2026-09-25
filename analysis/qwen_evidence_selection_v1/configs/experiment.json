@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "experiment": "qwen_evidence_selection_v1",
+  "status": "SUPERVISED_ADAPTER_IMPLEMENTED_GPU_NOT_APPROVED",
+  "execution_enabled": false,
+  "model_id": "Qwen/Qwen3-14B",
+  "revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+  "precision": "bfloat16",
+  "attention": "sdpa",
+  "batch_size": 1,
+  "do_sample": false,
+  "seed": 20260914,
+  "enable_thinking": false,
+  "max_input_tokens": 8192,
+  "max_new_tokens": 2048,
+  "context_limit": 40960,
+  "generation_timeout_seconds": 300,
+  "hard_inference_process_timeout_seconds": 1800,
+  "stop_token_ids": [
+    151645,
+    151643
+  ],
+  "reports": 5,
+  "conditions_per_report": 12,
+  "generations_per_block": 5,
+  "maximum_generations": 20,
+  "run_order": [
+    "A1",
+    "B1",
+    "B2",
+    "A2"
+  ],
+  "operator_block_mapping": {
+    "A1": "control-1",
+    "B1": "candidate-1",
+    "B2": "candidate-2",
+    "A2": "control-2"
+  },
+  "automatic_retries": 0,
+  "repair_generations": 0,
+  "training": false,
+  "validation_inference": false,
+  "full_development_inference": false,
+  "bulk_extraction": false,
+  "primary_parser": "analysis/report_labeling_llm_v2/scripts/core.py",
+  "secondary_parser": "analysis/report_labeling_llm_v1/scripts/benchmark_core.py",
+  "source_prepared_plan_sha256": "c4586bb0c65163244dac80344ea96f691493a1b89a5911eefcba54f2384c74fc",
+  "source_input_sha256": "0a4b05ccca46ff85fd1befc077155b40837dd4787603a91b579500f04cbe5ce8",
+  "source_split_sha256": "0900a46a7d47c47451ce14c4f18237b31b72cd90b19d3af535d744ad07ef1133",
+  "control_prompt_source": "analysis/qwen_report_extraction_v1/prompts/control.txt",
+  "control_prompt_sha256": "86b3fdf3adffff5e74b3b94192580c5d771711d441d682ecba88cc64bb344a68",
+  "target_definitions_source": "analysis/qwen_report_extraction_v1/prompts/control_definitions.txt",
+  "target_definitions_sha256": "dab72cb29da5105bc6f02336b50c3488028d92b0cf1b1bfe78f1038f6fd1264b",
+  "previous_candidate_sha256": "51d338eb2f48c7b00683189e9d7e319374ed1f99e536600264c208ed2d0a3734",
+  "parser_hashes": {
+    "primary_v2": "c44274271aacd8d23a76076154920e09daeb6fe8edb71881efbe926edd3a8015",
+    "secondary_v1": "67eac651f9bbb4018250070a6d11515417617e97071023e55f1e56b4583a441e"
+  },
+  "prepared_candidate_token_counts_private": "state/runs/qwen-evidence-selection-v1-private/prepared-local-final2/tokenizer_preflight.json",
+  "private_regression_checklist": "state/runs/qwen-evidence-selection-v1-private/regression_checklist.csv",
+  "candidate_B_sha256": "f1b39d642bd4d7948be7d9460897641400968fe87657529e725507176a044ff1",
+  "runtime_hashes": {
+    "qwen_runtime_v1": "dfeb2c5db49f701bfbaa0249558138503d407803dd09e22212c9303153c845bf",
+    "operator_runner_source": "9fa6566cc03171681127eef318253baab77bc72b41dc805f8ec6a8a4dfafbb37"
+  },
+  "operator_integration_status": "READY_FOR_SUPERVISED_DRY_RUN_AND_SYNTHETIC_REHEARSAL",
+  "reference_snapshot_commit": "2f6604bb68348dd275554e66f539869763a1bff0",
+  "public_baseline_metrics": {
+    "comparison": "control-1_vs_candidate-1",
+    "cells": 60,
+    "raw_proposal_different_cells": 20,
+    "primary_parsed_row_different_cells": 18,
+    "raw_only_different_cells": 2,
+    "source": "analysis/qwen_evidence_selection_v1/configs/baseline_snapshot.json"
+  },
+  "contusion_regression_targets": [
+    "reject muscle-only contusion for bone-marrow contusion target",
+    "capture explicit bone-contusion negative"
+  ],
+  "private_prompt_plan_sha256": "a26965fa84d7d2db37d8d3812f7b4061119df4bf77690127bb27d78e0f8eda82"
+}

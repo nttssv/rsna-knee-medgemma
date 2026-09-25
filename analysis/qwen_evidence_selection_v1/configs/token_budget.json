@@ -1,0 +1,46 @@
+{
+  "status": "PASS_LOCAL_ONLY",
+  "tokenizer": "Qwen/Qwen3-14B",
+  "revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+  "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+  "transformers": "5.12.0",
+  "tokenizers": "0.22.2",
+  "huggingface_hub": "1.19.0",
+  "jinja2": "3.1.6",
+  "report_count": 5,
+  "A_input_tokens": [
+    1298,
+    1277,
+    1631,
+    1284,
+    1343
+  ],
+  "B_input_tokens": [
+    1522,
+    1501,
+    1855,
+    1508,
+    1567
+  ],
+  "A_input_tokens_min": 1277,
+  "A_input_tokens_max": 1631,
+  "B_input_tokens_min": 1501,
+  "B_input_tokens_max": 1855,
+  "B_added_tokens_per_report": [
+    224,
+    224,
+    224,
+    224,
+    224
+  ],
+  "maximum_input_tokens": 8192,
+  "maximum_new_tokens": 2048,
+  "maximum_total_context": 40960,
+  "maximum_B_input_plus_output": 3903,
+  "exact_A_prepared_token_parity": true,
+  "exact_A_completed_run_parity": true,
+  "model_weights_loaded": false,
+  "gpu_accessed": false,
+  "network_accessed": false,
+  "private_prepared_plan_sha256": "a26965fa84d7d2db37d8d3812f7b4061119df4bf77690127bb27d78e0f8eda82"
+}

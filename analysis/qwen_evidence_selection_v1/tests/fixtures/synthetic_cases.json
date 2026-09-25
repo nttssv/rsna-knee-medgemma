@@ -1,0 +1,14 @@
+[
+  {"name":"target_vs_adjacent_structure","report":"ACL fibers are intact. The posterior cruciate ligament has a complete tear.","specification":{"ACL":"negative; do not transfer PCL finding","MCL":"not_mentioned"}},
+  {"name":"explicit_negative_vs_silence","report":"No acute fracture or fracture line is present.","specification":{"Fracture":"negative","Baker's":"not_mentioned"}},
+  {"name":"one_negation_names_two_targets","report":"The ACL and MCL are intact.","specification":{"ACL":"negative","MCL":"negative"}},
+  {"name":"qualifier_in_impression","report":"FINDINGS: Fluid is visible in the joint.\nIMPRESSION: Large joint effusion.","specification":{"Effusion":"positive; quote must retain large qualifier"}},
+  {"name":"same_target_conflict","report":"The ACL is intact. The ACL also has a complete tear.","specification":{"ACL":"uncertain; same target and time conflict"}},
+  {"name":"distinct_targets_and_reusable_evidence","report":"There is no fracture. A muscle contusion is present.","specification":{"Fracture":"negative","Contusion":"not_mentioned; muscle is not bone"}},
+  {"name":"different_compartments","report":"Medial tibiofemoral cartilage is normal. Broad full-thickness loss affects the patellar facet.","specification":{"Medial OA":"negative","PF OA":"positive","Lateral OA":"not_mentioned"}},
+  {"name":"qualitative_severity_without_extent","report":"There is cartilage thinning at the trochlea.","specification":{"PF OA":"uncertain; extent/severity mapping insufficient; do not invent measurement"}},
+  {"name":"repeated_exact_phrase","report":"The ACL is intact. Elsewhere, the ACL is intact.","specification":{"ACL":"medical status negative; duplicate exact span remains technical ambiguity"}},
+  {"name":"spanish_multitarget_normality","report":"Los ligamentos cruzados y colaterales están íntegros.","specification":{"ACL":"negative","MCL":"negative"}},
+  {"name":"vein_is_not_cyst","report":"The popliteal vein is enlarged. No Baker cyst is present.","specification":{"Baker's":"negative based on explicit cyst statement, not the vein finding"}},
+  {"name":"ungraded_tear_and_unquantified_fluid","report":"An interstitial ACL tear is described. Fluid is present without a size qualifier.","specification":{"ACL":"uncertain under existing high-grade target definition","Effusion":"uncertain under existing moderate/large target definition"}}
+]

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "reference_commit": "2f6604bb68348dd275554e66f539869763a1bff0",
+  "public_snapshot": "analysis/qwen_extraction_review_2026-09-25_174955_sgt",
+  "public_snapshot_files_sha256": {
+    "RESULTS.md": "fd77dca6ab56734341c3dd489366b88c9d0214a94950e53631b46b5682b9b6ab",
+    "aggregate_summary.json": "a8b9cabcadeb009ba911b0de97161ca5e0ac37deb709d0b9d4d17491a9b93ac7",
+    "block_comparison.csv": "712472a4a51562681f87a818f612380b135a440cf7610824ba7665e3bb77a72e",
+    "repeatability_analysis.json": "5227e1898d5517ffeef12e70133897cdb543baea7f6a02bf6a4080644fb4aefb"
+  },
+  "representative_comparison": "control-1 vs candidate-1 across 60 report-condition cells",
+  "raw_proposal_different_cells": 20,
+  "primary_parsed_row_different_cells": 18,
+  "raw_only_differences": 2,
+  "contusion_regression_targets": [
+    "A muscle-only contusion must not be treated as the target bone-marrow contusion.",
+    "An explicit negative for bone contusion must not be omitted as not_mentioned."
+  ],
+  "status": "provisional development review; no adjudication; organizer labels not opened"
+}

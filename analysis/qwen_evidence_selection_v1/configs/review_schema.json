@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "review_type": "provisional report-content review; not clinical adjudication",
+  "organizer_labels_opened": false,
+  "fields": {
+    "technical_status": ["valid", "schema_error", "evidence_error", "ambiguous_evidence_error", "incomplete_generation", "other_technical_failure"],
+    "evidence_adequacy": ["adequate", "missing_target", "missing_polarity", "missing_severity_extent_or_timing", "quote_not_contiguous", "not_adjudicated"],
+    "report_consistency": ["supports_label", "contradicts_label", "mixed_same_target_evidence", "no_relevant_statement", "not_adjudicated"],
+    "explicit_evidence_omission": ["none_seen", "relevant_explicit_statement_omitted", "not_adjudicated"],
+    "semantic_status": ["reviewed_by_human", "not_adjudicated"],
+    "review_note": "free text stays private; no automatic medical correctness score",
+    "confidence_interpretation": "model self-report, not calibrated probability"
+  },
+  "repeatability": {
+    "raw_response_comparison": "byte_exact_per_report",
+    "protocol_fields": ["condition", "label", "confidence", "model_evidence", "source_span", "evidence_start", "evidence_end", "evidence_normalization_method", "evidence_normalization_applied", "technical_status"],
+    "historical_gate": "60/60 valid-and-identical; do not relax after seeing outputs"
+  },
+  "organizer_comparison": "deferred until content review; no adjudication or resolved marking by Codex"
+}
