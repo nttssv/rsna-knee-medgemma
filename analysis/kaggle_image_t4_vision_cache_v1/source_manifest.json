@@ -1,0 +1,22 @@
+{
+  "frozen_snapshot_commit": "4a4382ab8546cd872e90a3e81654291be9fa7546",
+  "prior_replica_result_commit": "2837271dbcced677cf192a96c23a24c818028333",
+  "frozen_sources": {
+    "analysis/kaggle_image_t4_v1/scripts/inference_core.py": "2b6189ec846bad84c79642697dbcbb86101d31bfcd19857f3fec350e3c98ab0e",
+    "analysis/kaggle_image_t4_v1/scripts/submission_runtime.py": "bc0d4bd51e72637adbe8fedf51a860e3e88c96d976800f1bdb73c3b8a7c2c6a8",
+    "analysis/kaggle_image_t4_v1/scripts/numerical_runtime.py": "c9fbbf1f1c781070431c732e040dd8f961dfb851550fbac42f5f445e3c408844",
+    "analysis/kaggle_image_t4_v1/scripts/build_notebook.py": "a631b9dcd4b66380a63046c9bfad3e157284cd5d586e53f4cb25c5f9d5a0b6d3",
+    "analysis/kaggle_image_t4_v1/configs/inference.json": "0b57546facec15fb5c2c476faa60e3c4e855013d38e0d4bd8805f9bdbd6ed742",
+    "analysis/kaggle_image_t4_v1/requirements-kaggle.txt": "2e46e375f6093dbd44dcef470b69e723fd2cd015dc94a91afd75a8a159878b6d"
+  },
+  "new_sources": {
+    "analysis/kaggle_image_t4_vision_cache_v1/scripts/build_notebook.py": "44ccc3af4dbc283d48dfe419b62a0dc3a4216e2e91127fc37a0a1169bc7e80b7",
+    "analysis/kaggle_image_t4_vision_cache_v1/scripts/replica_runner.py": "aee5eabb3f0a8db190262e099b06ca045052b61de6bee5761b5803f606664b52",
+    "analysis/kaggle_image_t4_vision_cache_v1/scripts/vision_cache.py": "b15b4bd8608e32ef85ef709f1dc8a5c19be71db95ae088e45236dd2b2afc3980"
+  },
+  "tests": {
+    "analysis/kaggle_image_t4_vision_cache_v1/tests/test_cache_runner.py": "e692e9a7cb891b2bfec131b1b298a204c1506f3dd07f91976a6aa51bb93657df",
+    "analysis/kaggle_image_t4_vision_cache_v1/tests/test_vision_cache.py": "b23d66279754181407b85e4289c9071e4efa131c5a7a3fe9947c515ef10ee2fa"
+  },
+  "readme_sha256": "da7398d938f08f5cd6a61e7268a5dfb62022432a169568a59e71698a3338997c"
+}
