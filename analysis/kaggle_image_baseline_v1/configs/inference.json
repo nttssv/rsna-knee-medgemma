@@ -1,0 +1,38 @@
+{
+  "snapshot_commit": "9ef96c7bf199618753324d77c96b62f2b093354a",
+  "model_id": "google/medgemma-1.5-4b-it",
+  "model_revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "adapter_sha256": "a0bbce8fade7c273dbbeeba39bf792f82eb166abf1bac3450d5100027496f448",
+  "precision": "nf4_with_bf16_autocast",
+  "attention_implementation": "eager",
+  "device_map": {
+    "": 0
+  },
+  "minimum_gpu_gib": 37.0,
+  "require_native_bf16": true,
+  "image_size": 448,
+  "slices_per_plane": 2,
+  "labels": [
+    "ACL",
+    "MCL",
+    "Medial Meniscus",
+    "Lateral Meniscus",
+    "Medial OA",
+    "Lateral OA",
+    "PF OA",
+    "Effusion",
+    "Synovitis",
+    "Baker's",
+    "Contusion",
+    "Fracture"
+  ],
+  "fallback_policy": "fail_entire_run_on_unscored_study",
+  "expected_training_versions": {
+    "torch": "2.8.0+cu128",
+    "cuda": "12.8",
+    "transformers": "4.57.6",
+    "peft": "0.20.0",
+    "bitsandbytes": "0.50.2",
+    "pydicom": "3.0.2"
+  }
+}
