@@ -25,7 +25,7 @@ series/slice preprocessing, output schema or score definition. Versions 5/6
 measured OOM and memory recovery; neither completed numerical diagnostics or
 example inference. See [version 6 evidence](DIAGNOSTIC_2026-09-26_ISOLATED.md).
 
-The prospective version after 6 keeps the existing placement policy. The frozen
+Version 7 keeps the existing placement policy. The frozen
 processor resizes rendered 448px slices to 896px (unchanged), yielding 4096
 SigLIP patch tokens. Six images × 16 heads × 4096² × FP32 is 6 GiB for one
 eager-softmax tensor, consistent with the observed allocation request. This
@@ -37,3 +37,7 @@ No attention implementation, precision, image, prompt, checkpoint or score is
 changed. Actual FP16 behavior remains subject to the repeated-input diagnostic;
 BF16 numerical parity remains unverified. Original tracebacks, input shapes,
 dtype reports and placement maps are now saved even when diagnostics fail.
+
+The real [version 7 diagnostic](DIAGNOSTIC_2026-09-26_VISION_MICROBATCH.md)
+removed the initial OOM on one T4, but failed the native finite-logit check.
+No complete example submission or BF16 parity is established.

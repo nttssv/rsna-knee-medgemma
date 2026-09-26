@@ -150,8 +150,14 @@ continuation after version 6, retaining the 120-minute bound. A failed prior
 version remains preserved; only an actual complete example can establish
 **KAGGLE_RUN_PASS**. No competition submission is authorized for this diagnostic.
 
-The next runtime bounds vision activation memory with one-image SigLIP
+The current runtime bounds vision activation memory with one-image SigLIP
 microbatches, retaining every processed image and its order, followed by the
 unchanged complete-study projector/language forward. See the precise
 [runtime change](RUNTIME_DIFF.md). Process isolation and the single → CUDA OOM
 only → one dual-T4 attempt policy remain in place.
+
+This runtime ran as private Kaggle version 7 on 26 September 2026 at 22:57 SGT.
+Single-T4 load and the first forward completed without OOM (4.774 GiB peak
+allocated), but native No/Yes logits failed the finite-value check. Execution
+stopped with no fallback, repeat or example CSV. The GPU session is off and all
+13 artifacts were saved locally. See [actual version 7 diagnostic](DIAGNOSTIC_2026-09-26_VISION_MICROBATCH.md).
