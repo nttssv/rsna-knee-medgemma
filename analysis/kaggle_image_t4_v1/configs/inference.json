@@ -1,0 +1,53 @@
+{
+  "snapshot_commit": "9ef96c7bf199618753324d77c96b62f2b093354a",
+  "runtime_variant": "kaggle_t4_fp16_v1",
+  "model_id": "google/medgemma-1.5-4b-it",
+  "model_revision": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+  "adapter_sha256": "a0bbce8fade7c273dbbeeba39bf792f82eb166abf1bac3450d5100027496f448",
+  "precision": "nf4_with_fp16_autocast",
+  "quantization_compute_dtype": "float16",
+  "unquantized_model_dtype": "float16",
+  "adapter_dtype_policy": "preserve_checkpoint_and_record",
+  "attention_implementation": "eager",
+  "device_map": {
+    "": 0
+  },
+  "minimum_gpu_gib": 14.0,
+  "minimum_free_gpu_gib_before_load": 12.0,
+  "minimum_free_gpu_gib_after_diagnostic": 1.0,
+  "require_native_bf16": false,
+  "allowed_gpu_name_fragments": ["Tesla T4"],
+  "allowed_gpu_count": [1, 2],
+  "single_gpu_max_memory": "13GiB",
+  "dual_gpu_max_memory_each": "7GiB",
+  "require_explicit_dual_device_map": true,
+  "image_size": 448,
+  "slices_per_plane": 2,
+  "labels": [
+    "ACL",
+    "MCL",
+    "Medial Meniscus",
+    "Lateral Meniscus",
+    "Medial OA",
+    "Lateral OA",
+    "PF OA",
+    "Effusion",
+    "Synovitis",
+    "Baker's",
+    "Contusion",
+    "Fracture"
+  ],
+  "fallback_policy": "fail_entire_run_on_unscored_study",
+  "expected_training_versions": {
+    "transformers": "4.57.6",
+    "huggingface-hub": "0.36.0",
+    "tokenizers": "0.22.1",
+    "peft": "0.20.0",
+    "accelerate": "1.12.0",
+    "bitsandbytes": "0.50.2",
+    "pydicom": "3.0.2",
+    "python-gdcm": "3.0.26",
+    "sentencepiece": "0.2.1",
+    "safetensors": "0.6.2"
+  }
+}
