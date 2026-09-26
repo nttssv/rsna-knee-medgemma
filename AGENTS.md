@@ -1,6 +1,7 @@
 # Project continuity
 
 - For any temporary RunPod API key or shutdown-control task, first read [docs/RUNPOD_TEMPORARY_KEY_SOP.md](docs/RUNPOD_TEMPORARY_KEY_SOP.md). It contains the exact UI permissions, one-shot local secret intake, mandatory application User-Agent, exact-pod checks, and disable-after-stop procedure for Luna/Sol/Astra. Reuse an existing permitted key before creating another; never infer invalid credentials from a default-urllib 403 probe. Do not open a new window or print credentials.
+- The 26-09-2026 development-40 live run exposed two credential-intake pitfalls: browser-session clipboard can differ from the OS clipboard, and Jupyter/xterm automation can add bracketed-paste markers. Read [the verified development-40 SOP](analysis/qwen_development40_v1/results/2026-09-26_181548_SGT/SOP.md) before another live session. Disable every lost key before replacement; never strip bytes unless the exact wrapper and key regex both pass.
 
 - This GitHub repository is public by user request on 2026-09-14. Keep private data, credentials and model artifacts excluded from Git.
 - Read README.md, docs/EXPERIMENT.md, and docs/MIGRATION.md before starting work.

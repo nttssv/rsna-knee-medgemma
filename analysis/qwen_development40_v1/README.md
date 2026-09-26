@@ -79,5 +79,19 @@ generation. The historical A/B watchdog is not accepted for this benchmark.
 Based on the completed five-report A/B session, generation averaged about
 32 seconds per report; 40 reports therefore have an inference-only estimate of
 about 22 minutes. Model loading, cache preparation, copying and provider
-conditions are additional and must be measured in the approved live session.
-No GPU execution or spending is authorized by this source milestone.
+conditions are additional and must be measured in an approved live session.
+
+## Completed live benchmark
+
+The approved baseline-A development benchmark completed on **2026-09-26**:
+40/40 generations, 480 condition rows, 442 technically valid rows, 21
+`ambiguous_evidence_error` rows and 17 `evidence_error` rows. Generation took
+1,142.35 seconds and peaked at 28.29 GiB allocated GPU memory. The private
+archive was copied locally and its archive plus internal artifact hashes were
+verified before the pod was stopped. The signed-in console then showed the pod
+not running at $0.00/hour, and the temporary control key was disabled.
+
+See [the aggregate results](results/2026-09-26_181548_SGT/RESULTS.md) and the
+[reproducible operator SOP](results/2026-09-26_181548_SGT/SOP.md). Raw reports,
+study identifiers, model responses, tokens and private receipts remain under
+ignored `state/`; they are not in Git.

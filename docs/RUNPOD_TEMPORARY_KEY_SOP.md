@@ -136,3 +136,31 @@ PY
 ```
 
 **Evidence:** The 25-09-2026 live A40 run used the existing approved control key, completed 20/20 Qwen generations, copied/verified 33 files, stopped successfully via unchanged `stop_at.stop_once()`, showed $0/hour on console, and disabled that key. The new loopback intake helper has four CPU tests (synthetic save, file permissions/overwrite/symlink refusal, origin/nonce checks, and expiry); it is not presented as a live RunPod key-creation test.
+
+## 7. Fallback đã kiểm chứng khi loopback helper bị `Refused`
+
+Phiên development-40 ngày **26-09-2026** cho thấy helper có thể bị `Refused`
+trong cả in-app browser và Chrome extension dù form được mở ở loopback. Sau hai
+đường browser thất bại, không tiếp tục tạo key theo vòng lặp. Vô hiệu hóa từng
+key đã mất trước khi tạo replacement.
+
+Nếu và chỉ nếu pod chính xác đã chạy, Jupyter của pod truy cập được, người dùng
+đã phê duyệt key tạm, và signed-in Console vẫn là đường stop độc lập, có thể lưu
+key trực tiếp vào pod:
+
+1. Tạo key đúng quyền như mục 2 và bấm **Copy**.
+2. Không giả định clipboard riêng của browser giống clipboard macOS. Giữ giá trị
+   trong browser session; không in, log hoặc trả nó qua chat/tool output.
+3. Từ Jupyter terminal, dùng `read -rs` và `umask 077`, ghi vào file `0600` ngoài
+   repo. Xóa biến shell ngay sau ghi.
+4. UI automation với xterm có thể thêm exact bracketed-paste prefix
+   `ESC[200~` và suffix `ESC[201~`. Chỉ strip khi cả hai marker hiện diện chính
+   xác quanh một chuỗi khớp `rpa_[A-Za-z0-9_-]{20,250}`; sau đó revalidate mode,
+   owner và format. Không hiển thị chuỗi.
+5. Arm watchdog pod-local ngay. Fallback này không tạo key copy ngoài pod, vì vậy
+   Console signed-in vẫn là external stop route bắt buộc.
+6. Sau khi copy/hash và xác nhận provider `$0.00/hour`, disable exact key trong
+   Credentials và ghi closeout receipt private.
+
+Chi tiết lệnh và toàn bộ lỗi đã gặp nằm trong
+[SOP development-40](../analysis/qwen_development40_v1/results/2026-09-26_181548_SGT/SOP.md).
