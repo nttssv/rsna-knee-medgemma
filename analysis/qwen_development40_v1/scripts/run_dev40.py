@@ -15,7 +15,9 @@ import math
 import os
 from pathlib import Path
 import secrets
+import shlex
 import stat
+import subprocess
 import sys
 import time
 
@@ -23,6 +25,7 @@ HERE = Path(__file__).resolve()
 ROOT = HERE.parents[1]
 REPO = ROOT.parents[1]
 PLAN = ROOT / "configs/execution_plan.json"
+STOP_SCRIPT = ROOT / "scripts/stop_at.py"
 PREPARED_PLAN_SHA = "b2c6f7e4d220ab83f5556170334fa441dac28c495e3ab9e9b8fefc8e956ca023"
 CONTROL_SHA = "86b3fdf3adffff5e74b3b94192580c5d771711d441d682ecba88cc64bb344a68"
 DEFINITIONS_SHA = "dab72cb29da5105bc6f02336b50c3488028d92b0cf1b1bfe78f1038f6fd1264b"
@@ -32,8 +35,8 @@ ALLOWLIST = {"NVIDIA A40", "NVIDIA RTX A6000", "NVIDIA L40",
              "NVIDIA RTX 6000 Ada Generation", "NVIDIA L40S"}
 REQUIRED_SOURCES = {
     "analysis/qwen_development40_v1/scripts/run_dev40.py",
+    "analysis/qwen_development40_v1/scripts/stop_at.py",
     "analysis/qwen_evidence_selection_v1/scripts/run_ab.py",
-    "analysis/qwen_evidence_selection_v1/scripts/stop_at.py",
     "analysis/qwen_evidence_selection_v1/prompts/control_A.txt",
     "analysis/qwen_evidence_selection_v1/prompts/target_definitions.txt",
     "analysis/qwen_execution_runtime_alt_v1/scripts/qwen_live.py",
@@ -237,7 +240,48 @@ def encode_checked(encoder, prompts, tokens, *, synthetic: bool):
     return result
 
 
-def validate_session(session, observation, stop, plan_sha: str, session_sha: str, plan: dict, *, now=None):
+def process_cmdline(pid: int) -> list[str]:
+    proc = Path(f"/proc/{pid}/cmdline")
+    if proc.is_file():
+        return [part.decode() for part in proc.read_bytes().rstrip(b"\0").split(b"\0")]
+    value = subprocess.run(["ps", "-ww", "-p", str(pid), "-o", "command="], check=True,
+                           capture_output=True, text=True, timeout=5).stdout.strip()
+    return shlex.split(value)
+
+
+def verify_watchdog(stop: dict, session_path: Path, plan_sha: str, session_sha: str) -> None:
+    argv, pid = stop.get("watchdog_argv"), stop.get("watchdog_pid")
+    if type(pid) is not int or pid <= 1 or not isinstance(argv, list) or len(argv) != 15 \
+            or not all(isinstance(item, str) and item for item in argv):
+        raise GateError("Development-40 shutdown process receipt is invalid")
+    expected_flags = {
+        2: "--worker", 3: "--session", 5: "--key", 7: "--pod-id",
+        9: "--plan-sha256", 11: "--result", 13: "--cancel-marker",
+    }
+    if any(argv[index] != value for index, value in expected_flags.items()) \
+            or Path(argv[0]).resolve() != Path(sys.executable).resolve() \
+            or Path(argv[1]).resolve() != STOP_SCRIPT.resolve() \
+            or Path(argv[4]).resolve() != Path(session_path).resolve() \
+            or argv[8] != stop.get("pod_id") or argv[10] != plan_sha \
+            or stop.get("execution_plan_sha256") != plan_sha \
+            or stop.get("prepared_plan_sha256") != PREPARED_PLAN_SHA \
+            or stop.get("session_sha256") != session_sha:
+        raise GateError("Development-40 shutdown command bindings are invalid")
+    for index in (4, 6, 12, 14):
+        private(Path(argv[index]))
+    if not Path(argv[4]).is_file() or sha(Path(argv[4])) != session_sha:
+        raise GateError("Development-40 shutdown session changed after arming")
+    try:
+        observed = process_cmdline(pid)
+    except (OSError, subprocess.SubprocessError, UnicodeError, ValueError):
+        raise GateError("Development-40 shutdown process is not live") from None
+    proc_cmdline = Path(f"/proc/{pid}/cmdline")
+    if observed != argv and (proc_cmdline.is_file() or observed[1:] != argv[1:]):
+        raise GateError("Development-40 shutdown process is not live at its approved command")
+
+
+def validate_session(session, observation, stop, plan_sha: str, session_sha: str, plan: dict,
+                     session_path: Path, *, now=None):
     required = {"schema_version", "approved_by_user", "execution_plan_sha256", "prepared_plan_sha256",
         "prompt_sha256", "pod_id", "region", "gpu_name", "gpu_count", "cloud_type", "container_disk_gb",
         "persistent_volume_gb", "network_volume_id", "compute_usd_per_hour", "storage_usd_per_hour",
@@ -287,15 +331,19 @@ def validate_session(session, observation, stop, plan_sha: str, session_sha: str
     observed_at = aware(observation["observed_at"])
     if not t0 <= observed_at <= now or (now - observed_at).total_seconds() > 600:
         raise GateError("Provider observation is stale")
-    expected_stop = {"pod_id", "execution_plan_sha256", "session_sha256", "shutdown_at", "checked_at",
+    expected_stop = {"schema_version", "pod_id", "execution_plan_sha256", "prepared_plan_sha256",
+                     "session_sha256", "hard_deadline", "shutdown_at", "checked_at",
                      "watchdog_pid", "watchdog_argv"}
     if (set(stop) != expected_stop or stop["pod_id"] != session["pod_id"]
+        or stop["schema_version"] != 1
         or stop["execution_plan_sha256"] != plan_sha or stop["session_sha256"] != session_sha
+        or stop["prepared_plan_sha256"] != PREPARED_PLAN_SHA
+        or stop["hard_deadline"] != session["hard_deadline"]
         or stop["shutdown_at"] != session["shutdown_at"]):
         raise GateError("Live shutdown receipt is missing or mismatched")
     if (now - aware(stop["checked_at"])).total_seconds() > 600 or aware(stop["checked_at"]) > now:
         raise GateError("Shutdown receipt is stale")
-    ab_runtime().verify_watchdog(stop)
+    verify_watchdog(stop, session_path, plan_sha, session_sha)
     room = min(plan["hard_inference_seconds"] - 1.0,
                (deadline - now).total_seconds() - plan["copy_stop_reserve_seconds"],
                (shutdown - now).total_seconds() - 1.0)
@@ -304,12 +352,12 @@ def validate_session(session, observation, stop, plan_sha: str, session_sha: str
     return room
 
 
-def check_live_step(session, stop, plan):
+def check_live_step(session, stop, plan, session_path: Path, plan_sha: str, session_sha: str):
     now = datetime.now(timezone.utc)
     if now >= aware(session["shutdown_at"]) or (aware(session["hard_deadline"]) - now).total_seconds() \
             <= plan["copy_stop_reserve_seconds"]:
         raise TimeoutError("Development run reached its copy/stop reserve")
-    ab_runtime().verify_watchdog(stop)
+    verify_watchdog(stop, session_path, plan_sha, session_sha)
 
 
 def run_worker(args) -> bool:
@@ -319,7 +367,8 @@ def run_worker(args) -> bool:
     session = observation = stop = None
     if not synthetic:
         session, observation, stop = map(private_json, (args.session, args.observation, args.shutdown_receipt))
-        validate_session(session, observation, stop, args.plan_sha256, sha(args.session), plan)
+        session_sha = sha(args.session)
+        validate_session(session, observation, stop, args.plan_sha256, session_sha, plan, args.session)
     sys.path.insert(0, str(REPO / "analysis/report_labeling_llm_v2/scripts"))
     from v2_runtime import HFEncoder
     runtime = live_runtime()
@@ -341,7 +390,7 @@ def run_worker(args) -> bool:
     if synthetic:
         backend = ab_runtime().FakeBackend(encoder, args.fake_behavior)
     else:
-        check_live_step(session, stop, plan)
+        check_live_step(session, stop, plan, args.session, args.plan_sha256, session_sha)
         backend = runtime.create_backend(encoder, args.cache, session["gpu_name"])
         write_new(args.output / "model_preflight.json", {"hardware": hardware, "backend": backend.metadata,
             "eos_ids": backend.eos, "revision": plan["model_revision"]})
@@ -364,7 +413,7 @@ def run_worker(args) -> bool:
                 if result["attempted"] >= MAX_GENERATIONS:
                     raise GateError("Forty-generation maximum reached")
                 if not synthetic:
-                    check_live_step(session, stop, plan)
+                    check_live_step(session, stop, plan, args.session, args.plan_sha256, session_sha)
                 number = result["attempted"] + 1
                 append(attempts, {"synthetic": synthetic, "attempt": number, "case_index": index,
                     "report_sha256": row["report_sha256"], "prompt_sha256": CONTROL_SHA,
@@ -525,7 +574,7 @@ def main(argv=None):
         args.session, args.observation, args.shutdown_receipt = map(private,
             (args.session, args.observation, args.shutdown_receipt))
         timeout = validate_session(private_json(args.session), private_json(args.observation),
-            private_json(args.shutdown_receipt), args.plan_sha256, sha(args.session), plan)
+            private_json(args.shutdown_receipt), args.plan_sha256, sha(args.session), plan, args.session)
     okay, status = launch(args, timeout)
     print(json.dumps({"status": status, "synthetic": args.rehearsal,
         "worker_exit_success": okay, "output": str(args.output)}, indent=2))

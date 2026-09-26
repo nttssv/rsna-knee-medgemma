@@ -1,4 +1,4 @@
-# Qwen development-40 benchmark v1
+# Qwen development benchmark of baseline A
 
 This separately versioned runner evaluates the frozen control-A extractor on all
 40 studies in the existing development split. It does not modify the completed
@@ -26,14 +26,14 @@ Its plan SHA-256 is
 All 40 inputs pass token limits; input counts range from 992 to 2,600 tokens.
 
 The execution-plan SHA-256 is
-`4978baf4e91e2841676e22d2c6a0e68a8bffbdfa3b8651e4896161f626aa684b`.
+`4af4d19ecfdd612ce96ab04c9760f1fb874b6506dd2df5e368ef4c8ccf940b52`.
 Execution is disabled by default.
 
 ## Local verification
 
 ```bash
 PY=state/runs/qwen-evidence-selection-v1-private/tokenizer-venv/bin/python
-PLAN=4978baf4e91e2841676e22d2c6a0e68a8bffbdfa3b8651e4896161f626aa684b
+PLAN=4af4d19ecfdd612ce96ab04c9760f1fb874b6506dd2df5e368ef4c8ccf940b52
 PREP=state/runs/qwen-development40-v1-private/prepared-control-a
 CACHE=state/cache/tokenizer-preflight
 
@@ -59,6 +59,22 @@ persistent/network volume, signed-in rates, at most three hours and at most
 $3. The runner rechecks watchdog liveness before every generation and uses a
 hard supervised inference timeout below 1,800 seconds with a 15-minute
 copy/stop reserve.
+
+The shutdown receipt must be created by this package's own entry point after
+the private development-40 session file exists:
+
+```bash
+"$PY" analysis/qwen_development40_v1/scripts/stop_at.py --arm \
+  --session PRIVATE_SESSION_JSON --key PRIVATE_RUNPOD_KEY \
+  --pod-id EXACT_APPROVED_POD_ID --plan-sha256 "$PLAN" \
+  --result PRIVATE_STOP_RESULT_JSON --cancel-marker PRIVATE_CANCEL_JSON \
+  --receipt PRIVATE_SHUTDOWN_RECEIPT_JSON
+```
+
+The receipt binds this execution plan, the frozen prepared plan, the exact
+session file hash, pod ID, hard deadline and shutdown time. The runner verifies
+the watchdog PID and exact command before model loading and before every
+generation. The historical A/B watchdog is not accepted for this benchmark.
 
 Based on the completed five-report A/B session, generation averaged about
 32 seconds per report; 40 reports therefore have an inference-only estimate of

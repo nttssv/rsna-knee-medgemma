@@ -36,21 +36,21 @@
   "organizer_labels_in_model_inputs": false,
   "organizer_evaluation_policy": "Open development labels only after all 40 raw and parsed outputs are durable.",
   "source_sha256": {
-    "analysis/qwen_development40_v1/scripts/run_dev40.py": "489d8473868c0456efc8b754835993122b3022cb6f2c322edcc48453d7900c29",
-    "analysis/qwen_evidence_selection_v1/scripts/run_ab.py": "91ce8bd6978d45c20b299d9d3a56c9379ce7a7ea383d5a9912ec75c2540a3e3e",
-    "analysis/qwen_evidence_selection_v1/scripts/stop_at.py": "942ebf1b11d4c3f78da484d8b288485f9a077ce01cae27add333cb710faa293e",
+    "analysis/qwen_development40_v1/scripts/run_dev40.py": "b96d17b97f2fb5801b2430389d0d780b5a2fe7c80602c6950434a9ce989f3c44",
+    "analysis/qwen_development40_v1/scripts/stop_at.py": "a56179e25389dbd023432082895c9300d9b887c54e066ced8486306e35c98579",
     "analysis/qwen_evidence_selection_v1/prompts/control_A.txt": "86b3fdf3adffff5e74b3b94192580c5d771711d441d682ecba88cc64bb344a68",
     "analysis/qwen_evidence_selection_v1/prompts/target_definitions.txt": "dab72cb29da5105bc6f02336b50c3488028d92b0cf1b1bfe78f1038f6fd1264b",
-    "analysis/qwen_execution_runtime_alt_v1/scripts/qwen_live.py": "90bd957ea45b64eb42ef709d7f2c36211de635775055ebbb4d6f71160b6fa56c",
+    "analysis/qwen_evidence_selection_v1/scripts/run_ab.py": "91ce8bd6978d45c20b299d9d3a56c9379ce7a7ea383d5a9912ec75c2540a3e3e",
     "analysis/qwen_execution_runtime_alt_v1/configs/runtime.json": "d290e19f875fcf51a9f096f6bc32093bca3e5ba113318240e091bc88569e1737",
-    "analysis/qwen_runtime_v1/scripts/runtime_qwen.py": "dfeb2c5db49f701bfbaa0249558138503d407803dd09e22212c9303153c845bf",
+    "analysis/qwen_execution_runtime_alt_v1/scripts/qwen_live.py": "90bd957ea45b64eb42ef709d7f2c36211de635775055ebbb4d6f71160b6fa56c",
     "analysis/qwen_report_extraction_v1/configs/experiment.json": "6c336fd7d97fc9add16a5ca577d1326046885ae3b4497fac98ed43193b9d6647",
-    "analysis/report_labeling_llm_v2/scripts/v2_runtime.py": "3727db11f9f9985d4a677bbe3a503e3384a373fb3030ed67587f3340e39d6d5d",
-    "analysis/report_labeling_llm_v2/scripts/core.py": "c44274271aacd8d23a76076154920e09daeb6fe8edb71881efbe926edd3a8015",
-    "analysis/report_labeling_llm_v2/scripts/run_smoke.py": "e264646fc2d887209b2bbefca8b34389fb8c3a0249f861808c196912d5fa31cf",
-    "analysis/report_labeling_llm_v2/scripts/load_preflight.py": "917bdabf0e3b7b1b0308b78f738cdd400fac25f3880f5ecf1165cf477d4bff7c",
+    "analysis/qwen_runtime_v1/scripts/runtime_qwen.py": "dfeb2c5db49f701bfbaa0249558138503d407803dd09e22212c9303153c845bf",
+    "analysis/report_labeling_llm_v1/scripts/benchmark_core.py": "67eac651f9bbb4018250070a6d11515417617e97071023e55f1e56b4583a441e",
     "analysis/report_labeling_llm_v2/configs/qwen.json": "6bb926416f1677394526aba997f6553d9f09a00db7f694472b53c83b21c000de",
     "analysis/report_labeling_llm_v2/configs/runtime.json": "c4743cd43fcc6715af96d7e7fbd20b0671b5be4c96d184e6cdb5628e9d5ad0ea",
-    "analysis/report_labeling_llm_v1/scripts/benchmark_core.py": "67eac651f9bbb4018250070a6d11515417617e97071023e55f1e56b4583a441e"
+    "analysis/report_labeling_llm_v2/scripts/core.py": "c44274271aacd8d23a76076154920e09daeb6fe8edb71881efbe926edd3a8015",
+    "analysis/report_labeling_llm_v2/scripts/load_preflight.py": "917bdabf0e3b7b1b0308b78f738cdd400fac25f3880f5ecf1165cf477d4bff7c",
+    "analysis/report_labeling_llm_v2/scripts/run_smoke.py": "e264646fc2d887209b2bbefca8b34389fb8c3a0249f861808c196912d5fa31cf",
+    "analysis/report_labeling_llm_v2/scripts/v2_runtime.py": "3727db11f9f9985d4a677bbe3a503e3384a373fb3030ed67587f3340e39d6d5d"
   }
 }
