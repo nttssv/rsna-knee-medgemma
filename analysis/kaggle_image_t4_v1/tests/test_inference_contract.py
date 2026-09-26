@@ -5,6 +5,7 @@ from pathlib import Path
 import struct
 import sys
 from types import SimpleNamespace
+import weakref
 
 import pandas as pd
 import pytest
@@ -28,6 +29,7 @@ from inference_core import (  # noqa: E402
     validate_submission,
     validate_tables,
 )
+import submission_runtime  # noqa: E402
 from submission_runtime import validate_device_map  # noqa: E402
 
 
@@ -109,6 +111,128 @@ def test_free_memory_guard_requires_headroom():
     assert validate_free_memory([13.0], 12.0)["free_gib_by_device"] == [13.0]
     with pytest.raises(ContractError, match="Insufficient free"):
         validate_free_memory([13.0, 11.9], 12.0)
+
+
+def test_single_t4_oom_cleanup_releases_traceback_before_dual_attempt(tmp_path, monkeypatch):
+    """A constructor OOM must drop traceback-held model locals before CUDA cleanup."""
+    baseline_gib = [14.46, 14.46]
+    observed_gib = baseline_gib.copy()
+    events = []
+    partial_instance = {}
+
+    class FakeCudaOOM(RuntimeError):
+        pass
+
+    class FakeCuda:
+        OutOfMemoryError = FakeCudaOOM
+
+        @staticmethod
+        def device_count():
+            return 2
+
+        @staticmethod
+        def mem_get_info(index):
+            value = observed_gib[index]
+            return int(value * 2**30), int(15 * 2**30)
+
+        @staticmethod
+        def max_memory_allocated(index):
+            return int((10.0 if index == 0 and observed_gib[0] < 12 else 0.1) * 2**30)
+
+        @staticmethod
+        def max_memory_reserved(index):
+            return int((10.2 if index == 0 and observed_gib[0] < 12 else 0.2) * 2**30)
+
+        @staticmethod
+        def empty_cache():
+            events.append(("empty_cache", sys.exc_info()[0]))
+            observed_gib[:] = baseline_gib
+
+        @staticmethod
+        def ipc_collect():
+            events.append(("ipc_collect", sys.exc_info()[0]))
+
+        @staticmethod
+        def synchronize(index):
+            events.append((f"synchronize_{index}", sys.exc_info()[0]))
+
+    class FakeTeacher:
+        def __init__(self, config, series, data_dir, base_dir, adapter_dir, placement):
+            self.placement = placement
+            self.model = object()
+            if placement == "single_gpu":
+                partial_instance["ref"] = weakref.ref(self)
+                observed_gib[0] = 4.28
+                raise FakeCudaOOM("CUDA out of memory during single-T4 construction")
+            assert observed_gib == baseline_gib
+            events.append(("dual_constructor", sys.exc_info()[0]))
+            self.device_map = {"": "0", "lm_head": "1"}
+
+        def diagnostic(self, uid):
+            return {"study": uid, "finite": True}
+
+    fake_torch = SimpleNamespace(cuda=FakeCuda, inference_mode=lambda: None)
+    monkeypatch.setitem(sys.modules, "torch", fake_torch)
+    monkeypatch.setattr(submission_runtime, "ImageTeacher", FakeTeacher)
+    original_collect = submission_runtime.gc.collect
+
+    def checked_collect():
+        events.append(("gc_collect", sys.exc_info()[0]))
+        assert partial_instance["ref"]() is None, "failed constructor is still traceback-referenced"
+        return original_collect()
+
+    monkeypatch.setattr(submission_runtime.gc, "collect", checked_collect)
+    teacher, _, diagnostic, attempts = submission_runtime.prepare_t4_teacher(
+        config(), pd.DataFrame(), tmp_path, tmp_path, tmp_path, "test-study", tmp_path / "attempts.json"
+    )
+
+    assert teacher.placement == "two_gpu"
+    assert diagnostic == {"study": "test-study", "finite": True}
+    assert [row["placement"] for row in attempts] == ["single_gpu", "two_gpu"]
+    first = attempts[0]
+    assert first["status"] == "oom"
+    assert first["free_vram_before_attempt_gib"] == pytest.approx(baseline_gib)
+    assert first["gpu_memory_at_failure"][0]["free_gib"] == pytest.approx(4.28, abs=0.01)
+    assert first["free_vram_after_cleanup_gib"] == pytest.approx(baseline_gib)
+    assert first["gpu0_recovered_within_0_5_gib"] is True
+    assert all(exc_type is None for _, exc_type in events)
+    assert [name for name, _ in events if name in {"gc_collect", "empty_cache", "ipc_collect"}] == [
+        "gc_collect", "empty_cache", "ipc_collect"
+    ]
+
+
+def test_single_t4_oom_with_cleanup_leak_blocks_dual_attempt(tmp_path, monkeypatch):
+    observed_gib = [14.4, 14.4]
+    dual_started = False
+
+    class FakeCudaOOM(RuntimeError):
+        pass
+
+    class FakeCuda:
+        OutOfMemoryError = FakeCudaOOM
+        device_count = staticmethod(lambda: 2)
+        mem_get_info = staticmethod(lambda index: (int(observed_gib[index] * 2**30), 15 * 2**30))
+        max_memory_allocated = staticmethod(lambda index: 0)
+        max_memory_reserved = staticmethod(lambda index: 0)
+        empty_cache = staticmethod(lambda: None)
+        ipc_collect = staticmethod(lambda: None)
+        synchronize = staticmethod(lambda index: None)
+
+    class FakeTeacher:
+        def __init__(self, config, series, data_dir, base_dir, adapter_dir, placement):
+            nonlocal dual_started
+            if placement == "single_gpu":
+                observed_gib[0] = 4.0
+                raise FakeCudaOOM("CUDA out of memory")
+            dual_started = True
+
+    monkeypatch.setitem(sys.modules, "torch", SimpleNamespace(cuda=FakeCuda))
+    monkeypatch.setattr(submission_runtime, "ImageTeacher", FakeTeacher)
+    with pytest.raises(ContractError, match="cleanup leak.*refusing dual-T4 attempt"):
+        submission_runtime.prepare_t4_teacher(
+            config(), pd.DataFrame(), tmp_path, tmp_path, tmp_path, "test-study", tmp_path / "attempts.json"
+        )
+    assert dual_started is False
 
 
 def test_hardware_guard_accepts_one_t4_without_claiming_bf16():

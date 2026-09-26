@@ -28,6 +28,7 @@ def build(output: Path) -> dict:
     requirements_source = (ROOT / "requirements-kaggle.txt").read_text()
     core_source = (HERE / "inference_core.py").read_text()
     runtime_source = (HERE / "submission_runtime.py").read_text()
+    isolated_source = (HERE / "isolated_runner.py").read_text()
     cells = [
         cell(
             "markdown",
@@ -49,6 +50,7 @@ def build(output: Path) -> dict:
             "os.environ['TOKENIZERS_PARALLELISM']='false'\n"
             "os.environ['HF_HUB_DISABLE_TELEMETRY']='1'\n"
             "RUN_INFERENCE=True\n"
+            "SESSION_DEADLINE_MONOTONIC=time.monotonic()+115*60\n"
             "assert platform.machine() in ('x86_64','AMD64'), f'Unsupported wheel architecture: {platform.machine()}'\n"
             "assert sys.version_info[:2] in ((3,11),(3,12)), f'Offline wheelhouse supports Python 3.11/3.12, got {sys.version}'\n"
             "print('Internet-independent mode configured')",
@@ -97,6 +99,7 @@ def build(output: Path) -> dict:
         ),
         cell("code", writefile_cell("inference_core.py", core_source)),
         cell("code", writefile_cell("submission_runtime.py", runtime_source)),
+        cell("code", writefile_cell("isolated_runner.py", isolated_source)),
         cell(
             "code",
             "import importlib, platform\n"
@@ -137,32 +140,25 @@ def build(output: Path) -> dict:
         cell(
             "code",
             "from datetime import datetime, timezone\n"
-            "from submission_runtime import prepare_t4_teacher, run_inference\n"
+            "from isolated_runner import run_isolated\n"
+            "from inference_core import validate_submission\n"
             "assert RUN_INFERENCE is True\n"
             "run_name='medgemma-image-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')\n"
             "OUT=Path('/kaggle/working')/run_name\n"
-            "teacher,load_seconds,diagnostic,placement_attempts=prepare_t4_teacher(\n"
-            " CONFIG,SERIES,DATA,BASE,ADAPTER,str(TEST.StudyInstanceUID.iloc[0]),\n"
-            " '/kaggle/working/t4_placement_attempts.json')\n"
-            "frozen_runtime={'runtime_variant':CONFIG['runtime_variant'],'placement':teacher.placement,\n"
-            " 'hf_device_map':teacher.device_map,'dtype_report':teacher.dtype_report,\n"
-            " 'load_seconds':load_seconds,'diagnostic':diagnostic,'attempts':placement_attempts}\n"
-            "frozen_json=json.dumps(frozen_runtime,sort_keys=True,indent=2)\n"
-            "frozen_sha=hashlib.sha256(frozen_json.encode()).hexdigest()\n"
-            "Path('/kaggle/working/t4_configuration_frozen.json').write_text(frozen_json)\n"
-            "print('FROZEN_T4_CONFIG_SHA256',frozen_sha)\n"
-            "print('FROZEN_T4_CONFIG',json.dumps({'placement':teacher.placement,\n"
-            " 'hf_device_map':teacher.device_map,'dtype_report':teacher.dtype_report,\n"
-            " 'load_seconds':load_seconds,'diagnostic':diagnostic,\n"
-            " 'attempts':placement_attempts},indent=2))\n"
-            "prediction,status=run_inference(CONFIG,TEST,SERIES,SAMPLE,DATA,BASE,ADAPTER,OUT,\n"
-            " teacher,load_seconds,ASSET_VERIFY_SECONDS,DEPENDENCY_INSTALL_SECONDS,diagnostic)\n"
-            "(OUT/'t4_configuration_frozen.json').write_text(frozen_json)\n"
-            "(OUT/'placement_diagnostic.json').write_text(json.dumps({'attempts':placement_attempts},indent=2))\n"
+            "request={'config_path':'/kaggle/working/inference_config.json',\n"
+            " 'data_dir':str(DATA),'base_dir':str(BASE),'adapter_dir':str(ADAPTER),\n"
+            " 'output_root':str(OUT),'asset_verification_seconds':ASSET_VERIFY_SECONDS,\n"
+            " 'dependency_install_seconds':DEPENDENCY_INSTALL_SECONDS}\n"
+            "request_path=Path('/kaggle/working/isolated_request.json')\n"
+            "request_path.write_text(json.dumps(request,indent=2))\n"
+            "result=run_isolated(request_path,SESSION_DEADLINE_MONOTONIC)\n"
+            "source=Path(result['result']['submission_path'])\n"
+            "assert sha256_file(source)==result['result']['submission_sha256']\n"
+            "prediction=pd.read_csv(source,dtype={'StudyInstanceUID':str})\n"
+            "validate_submission(prediction,TEST)\n"
             "submission=Path('/kaggle/working/submission.csv')\n"
             "assert not submission.exists(), 'Refusing to overwrite an existing submission.csv'\n"
-            "prediction.to_csv(submission,index=False)\n"
-            "print(json.dumps(status,indent=2))\n"
+            "submission.write_bytes(source.read_bytes())\n"
             "print('KAGGLE_RUN_PASS',submission,sha256_file(submission))",
         ),
     ]

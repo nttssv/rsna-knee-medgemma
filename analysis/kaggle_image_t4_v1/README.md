@@ -4,12 +4,22 @@ This is a separate inference-only adaptation based on snapshot
 `007b344b56d7c3fe1956ca913819c6bbcd19f079`. The frozen baseline package
 `analysis/kaggle_image_baseline_v1/` and the MRI pilot checkpoint are unchanged.
 
-Current state: **LOCAL_READY**, with a failed first Kaggle diagnostic preserved.
-The 2026-09-26 T4 session verified all 32 asset files and installed dependencies
-offline, then failed before model loading because the generated package
-inventory omitted two required package names. GPU was stopped; the displayed
-quota increased by approximately three minutes. No example prediction,
-submission, or score has been produced. See [the diagnostic record](DIAGNOSTIC_2026-09-26.md).
+Current state: **LOCAL_READY**; real Kaggle version 6 verified the process
+cleanup repair and then failed with a genuine dual-T4 OOM. Both GPUs recovered
+to 14.46 GiB after each worker exited. The dual attempt ran, but requested
+another 6 GiB on GPU0 with 4.81 GiB free. No example predictions/submission.
+See [the observed diagnostic](DIAGNOSTIC_2026-09-26_ISOLATED.md).
+
+The repaired notebook isolates each placement in a fresh Python process. The
+single attempt must exit and be reaped before parent-side synchronization and
+VRAM checks. Only a matching CUDA-OOM result from load/diagnostic and exit code
+42 permits one dual worker. Both GPUs still require 12 GiB free, and GPU 0 must
+recover within 0.5 GiB of baseline. No model recipe, device map or score policy
+changed. A successful worker completes the example without reloading its model.
+An OOM during full example inference, non-OOM error, missing result, timeout or
+identity mismatch stops the run without fallback. The first notebook cell sets
+one shared 115-minute worker deadline (including setup), leaving five minutes
+inside the user-approved 120-minute session cap for artifact collection/shutdown.
 
 ## Frozen image task
 
@@ -47,8 +57,16 @@ The adapter weight SHA-256 remains
   attempt with an explicit Accelerate device map. The dual map uses 7 GiB
   placement budgets per device, respects Gemma3 decoder and SigLIP encoder
   no-split classes, requires modules on both GPUs, and rejects CPU or disk
-  placement. Actual `hf_device_map`, per-module dtype/device inventory, peak
-  allocated/reserved memory per GPU and any failed attempt are saved.
+  placement. After a single-T4 OOM, failure metadata is captured without
+  retaining the exception traceback; failed model references are released,
+  Python/CUDA caches are collected, all visible GPUs are synchronized, and
+  free VRAM is remeasured on both devices. GPU 0 must recover within 0.5 GiB
+  of its pre-attempt baseline and both GPUs must still pass the unchanged
+  12-GiB gate before the dual-T4 constructor is entered. Otherwise the run
+  stops with a cleanup-leak diagnostic. The attempt log records pre-failure,
+  immediate post-failure and post-cleanup VRAM, plus whether each model load
+  actually started. Actual `hf_device_map`, per-module dtype/device inventory,
+  peak allocated/reserved memory per GPU and any failed attempt are saved.
 - The selected placement is recorded and hashed after a repeated-input
   diagnostic passes, before the full visible example is scored.
 
@@ -127,6 +145,7 @@ dataset. The notebook/model package must not be made public.
   schema/numerical checks.
 - **SUBMITTED** and **SCORED** require those actual external events.
 
-Only **LOCAL_READY** is currently achieved. The first authorized session ended
-on a non-OOM error. A new bounded Kaggle quota approval is required before
-running the corrected notebook; no previous session approval is recycled.
+Only **LOCAL_READY** is currently achieved. The user requested repair and
+continuation after version 5, retaining the 120-minute bound. A failed prior
+version remains preserved; only an actual complete example can establish
+**KAGGLE_RUN_PASS**. No competition submission is authorized for this diagnostic.

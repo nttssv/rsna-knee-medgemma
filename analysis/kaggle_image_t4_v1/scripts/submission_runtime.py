@@ -448,7 +448,7 @@ class ImageTeacher:
         return frame, timings
 
 
-def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_test_uid, attempt_log_path=None):
+def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_test_uid, attempt_log_path=None, *, only_placement=None):
     """Try one T4 first; after a CUDA OOM only, make one explicit dual-T4 attempt."""
     import torch
 
@@ -457,6 +457,10 @@ def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_te
     placements = ["single_gpu"]
     if torch.cuda.device_count() == 2:
         placements.append("two_gpu")
+    if only_placement is not None:
+        if only_placement not in placements:
+            raise ContractError(f"Unavailable isolated placement: {only_placement}")
+        placements = [only_placement]
     attempts = []
     attempt_log_path = Path(attempt_log_path) if attempt_log_path else None
 
@@ -467,24 +471,38 @@ def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_te
             temporary.write_text(json.dumps({"attempts": attempts}, indent=2, sort_keys=True))
             temporary.replace(attempt_log_path)
 
+    def free_memory_gib():
+        return [torch.cuda.mem_get_info(index)[0] / 2**30 for index in range(torch.cuda.device_count())]
+
+    def sync_all_devices():
+        for index in range(torch.cuda.device_count()):
+            torch.cuda.synchronize(index)
+
     for placement in placements:
         participating = 1 if placement == "single_gpu" else 2
-        free_gib = [torch.cuda.mem_get_info(i)[0] / 2**30 for i in range(participating)]
+        free_before_all = free_memory_gib()
+        free_gib = free_before_all[:participating]
         from inference_core import validate_free_memory
 
         validate_free_memory(free_gib, config["minimum_free_gpu_gib_before_load"])
         teacher = None
         load_started = time.monotonic()
+        attempt = {
+            "placement": placement,
+            "status": "model_load_started",
+            "model_load_started": True,
+            "free_vram_before_attempt_gib": free_before_all,
+        }
+        attempts.append(attempt)
+        persist_attempts()
+        failure = None
         try:
             teacher = ImageTeacher(config, series, data_dir, base_dir, adapter_dir, placement)
             load_seconds = time.monotonic() - load_started
             diagnostic = teacher.diagnostic(first_test_uid)
-            attempts.append({
-                "placement": placement,
-                "status": "pass",
-                "load_seconds": load_seconds,
-                "hf_device_map": teacher.device_map,
-                "diagnostic": diagnostic,
+            attempt.update({
+                "status": "pass", "load_seconds": load_seconds,
+                "hf_device_map": teacher.device_map, "diagnostic": diagnostic,
             })
             persist_attempts()
             return teacher, load_seconds, diagnostic, attempts
@@ -494,10 +512,12 @@ def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_te
                 and "out of memory" in str(error).lower()
                 and "cuda" in str(error).lower()
             )
-            attempts.append({
-                "placement": placement,
+            # Keep metadata only. Do not retain the exception or traceback: its
+            # frames can hold a partially constructed model and CUDA tensors.
+            failure = {
                 "status": "oom" if is_oom else "failed",
                 "load_or_diagnostic_seconds": time.monotonic() - load_started,
+                "free_vram_before_attempt_gib": free_before_all,
                 "error_type": type(error).__name__,
                 "error": str(error)[:500],
                 "gpu_memory_at_failure": [
@@ -507,18 +527,58 @@ def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_te
                         "peak_reserved_gib": torch.cuda.max_memory_reserved(index) / 2**30,
                         "free_gib": torch.cuda.mem_get_info(index)[0] / 2**30,
                     }
-                    for index in range(participating)
+                    for index in range(torch.cuda.device_count())
                 ],
-            })
-            persist_attempts()
+            }
+
+        # This is deliberately outside `except ... as error`: the exception
+        # target has been cleared, so its traceback no longer pins constructor
+        # locals/model tensors during cleanup.
+        if failure is not None:
             if teacher is not None:
-                del teacher
+                failed_model = getattr(teacher, "model", None)
+                if failed_model is not None:
+                    try:
+                        teacher.model = None
+                    except Exception:
+                        pass
+                    del failed_model
+                teacher = None
             gc.collect()
             torch.cuda.empty_cache()
+            ipc_collect = getattr(torch.cuda, "ipc_collect", None)
+            if callable(ipc_collect):
+                ipc_collect()
+            sync_all_devices()
+            free_after_cleanup = free_memory_gib()
+            failure["free_vram_after_cleanup_gib"] = free_after_cleanup
+            failure["gpu0_recovered_within_0_5_gib"] = (
+                abs(free_after_cleanup[0] - failure["free_vram_before_attempt_gib"][0]) <= 0.5
+            )
+            attempt.update(failure)
+            persist_attempts()
+
             if not is_oom:
-                raise
+                raise ContractError(
+                    f"{placement} model attempt failed without CUDA OOM: "
+                    f"{failure['error_type']}: {failure['error']}"
+                )
             if placement != "single_gpu" or len(placements) == 1:
-                raise
+                raise ContractError(
+                    f"{placement} CUDA OOM; no further placement is permitted: {failure['error']}"
+                )
+
+            baseline_gpu0 = failure["free_vram_before_attempt_gib"][0]
+            recovered_gpu0 = free_after_cleanup[0]
+            if abs(recovered_gpu0 - baseline_gpu0) > 0.5:
+                raise ContractError(
+                    "CUDA cleanup leak after single-T4 OOM: GPU 0 free VRAM did not recover "
+                    f"near its pre-attempt baseline ({recovered_gpu0:.2f} GiB vs "
+                    f"{baseline_gpu0:.2f} GiB; tolerance 0.50 GiB); refusing dual-T4 attempt"
+                )
+            # Re-check both devices after cleanup. The unchanged 12-GiB guard
+            # still applies to each GPU before a dual-device model load.
+            validate_free_memory(free_after_cleanup, config["minimum_free_gpu_gib_before_load"])
     raise ContractError(f"No T4 placement passed: {attempts}")
 
 
