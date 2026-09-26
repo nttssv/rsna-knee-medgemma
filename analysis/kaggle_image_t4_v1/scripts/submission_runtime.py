@@ -10,6 +10,7 @@ import json
 import gc
 from pathlib import Path
 import time
+import traceback
 
 import numpy as np
 import pandas as pd
@@ -179,6 +180,55 @@ class Imaging:
         return images, mask, metadata
 
 
+def install_vision_microbatch(model, chunk_size: int) -> dict:
+    """Bound SigLIP activation memory without dropping or resizing any image.
+
+    Only the independent image batch is split. The original projector and
+    multimodal language forward still receive every image in source order.
+    Checkpoint modules (and any Accelerate hooks) are kept, not reconstructed.
+    """
+    import torch
+    from transformers.modeling_outputs import BaseModelOutputWithPooling
+
+    if type(chunk_size) is not int or chunk_size != 1:
+        raise ContractError("Only the configured one-image vision microbatch is supported")
+    base = model.get_base_model()
+    if base.config.model_type != "gemma3":
+        raise ContractError("Vision microbatch requires the pinned Gemma3 model")
+    owner = base.model
+    original = owner.vision_tower
+    if original.config.model_type != "siglip_vision_model" or original.training:
+        raise ContractError("Vision microbatch requires the original eval-mode SigLIP tower")
+
+    class OrderedVisionMicrobatch(torch.nn.Module):
+        def __init__(self, wrapped):
+            super().__init__()
+            self.wrapped = wrapped
+            self.config = wrapped.config
+
+        def forward(self, pixel_values, **kwargs):
+            if self.training or self.wrapped.training or torch.is_grad_enabled():
+                raise ContractError("Vision microbatch is inference-only")
+            if any(kwargs.get(k) for k in ("output_attentions", "output_hidden_states")):
+                raise ContractError("Vision microbatch does not collect attention/hidden-state histories")
+            if pixel_values.ndim != 4 or pixel_values.shape[0] < 1:
+                raise ContractError("Expected a nonempty ordered image tensor")
+            hidden = []
+            for start in range(0, pixel_values.shape[0], chunk_size):
+                output = self.wrapped(pixel_values=pixel_values[start:start + chunk_size], **kwargs)
+                if output.pooler_output is not None:
+                    raise ContractError("Pinned SigLIP unexpectedly returned a pooling head")
+                hidden.append(output.last_hidden_state)
+            return BaseModelOutputWithPooling(last_hidden_state=torch.cat(hidden, dim=0))
+
+    owner.vision_tower = OrderedVisionMicrobatch(original).eval()
+    return {"vision_microbatch_images": chunk_size, "study_batch_size": 1,
+            "all_images_preserved_in_order": True,
+            "original_tower_path": "model.vision_tower",
+            "wrapped_tower_path": "model.vision_tower.wrapped",
+            "projector_unchanged": True}
+
+
 class ImageTeacher:
     def __init__(self, config: dict, series: pd.DataFrame, data_dir: Path, base_dir: Path, adapter_dir: Path, placement: str):
         import torch
@@ -223,6 +273,7 @@ class ImageTeacher:
         self.model = model
         self.device_map = {str(key): str(value) for key, value in model.hf_device_map.items()}
         validate_device_map(self.device_map, placement)
+        self.vision_runtime = install_vision_microbatch(model, config["vision_microbatch_images"])
         self.input_device = model.get_input_embeddings().weight.device
         self.dtype_report = self._dtype_report(model, torch)
         self.answer_ids = []
@@ -342,6 +393,13 @@ class ImageTeacher:
         input_dtypes = {key: str(value.dtype) for key, value in encoded.items()}
         batch = self._on_gpu(encoded, torch, self.input_device)
         model_input_dtypes = {key: str(value.dtype) for key, value in batch.items()}
+        self.last_forward_observation = {
+            "label": label,
+            "input_shapes": {key: list(value.shape) for key, value in batch.items()},
+            "input_devices": {key: str(value.device) for key, value in batch.items()},
+            "input_dtypes": model_input_dtypes,
+            "vision_runtime": self.vision_runtime,
+        }
         inference_started = time.monotonic()
         with torch.inference_mode(), torch.autocast("cuda", dtype=torch.float16):
             logits = self.model(**batch, use_cache=False, logits_to_keep=1).logits[0, -1]
@@ -362,6 +420,7 @@ class ImageTeacher:
             "input_dtypes_before_transfer": input_dtypes,
             "model_input_dtypes": model_input_dtypes,
             "input_device": str(self.input_device),
+            "input_shapes": self.last_forward_observation["input_shapes"],
         }
         del encoded, batch, logits
         return result
@@ -410,6 +469,9 @@ class ImageTeacher:
             "model_input_dtypes": first["model_input_dtypes"],
             "native_output_logits_dtype": first["native_output_logits_dtype"],
             "input_device": first["input_device"],
+            "input_shapes": first["input_shapes"],
+            "repeated_native_logits": [first, second],
+            "vision_runtime": self.vision_runtime,
             "dtype_report": self.dtype_report,
             "gpu_memory": peaks,
         }
@@ -499,6 +561,11 @@ def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_te
         try:
             teacher = ImageTeacher(config, series, data_dir, base_dir, adapter_dir, placement)
             load_seconds = time.monotonic() - load_started
+            attempt.update(status="diagnostic_started", load_seconds=load_seconds,
+                           hf_device_map=teacher.device_map,
+                           dtype_report=getattr(teacher, "dtype_report", {}),
+                           vision_runtime=getattr(teacher, "vision_runtime", {}))
+            persist_attempts()
             diagnostic = teacher.diagnostic(first_test_uid)
             attempt.update({
                 "status": "pass", "load_seconds": load_seconds,
@@ -520,6 +587,9 @@ def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_te
                 "free_vram_before_attempt_gib": free_before_all,
                 "error_type": type(error).__name__,
                 "error": str(error)[:500],
+                "failure_stage": "diagnostic" if teacher is not None else "model_load",
+                "original_traceback": traceback.format_exc(),
+                "last_forward_observation": getattr(teacher, "last_forward_observation", None),
                 "gpu_memory_at_failure": [
                     {
                         "device": index,

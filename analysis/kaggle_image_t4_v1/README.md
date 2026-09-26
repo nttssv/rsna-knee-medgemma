@@ -146,6 +146,12 @@ dataset. The notebook/model package must not be made public.
 - **SUBMITTED** and **SCORED** require those actual external events.
 
 Only **LOCAL_READY** is currently achieved. The user requested repair and
-continuation after version 5, retaining the 120-minute bound. A failed prior
+continuation after version 6, retaining the 120-minute bound. A failed prior
 version remains preserved; only an actual complete example can establish
 **KAGGLE_RUN_PASS**. No competition submission is authorized for this diagnostic.
+
+The next runtime bounds vision activation memory with one-image SigLIP
+microbatches, retaining every processed image and its order, followed by the
+unchanged complete-study projector/language forward. See the precise
+[runtime change](RUNTIME_DIFF.md). Process isolation and the single → CUDA OOM
+only → one dual-T4 attempt policy remain in place.

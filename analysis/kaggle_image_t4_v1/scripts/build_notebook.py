@@ -37,7 +37,9 @@ def build(output: Path) -> dict:
             "It never reads reports, organizer labels or Qwen outputs. It uses the frozen image-pilot preprocessing, "
             "base revision and LoRA adapter. T4 uses NF4 double quantization with FP16 compute. The runner tests one T4 first, "
             "and after a CUDA OOM may try one explicit two-T4 map. CPU/disk offload is forbidden. Any unscored study aborts; "
-            "no 0.5 fallback is emitted.\n\nExpected status after a compatible run: `KAGGLE_RUN_PASS`.",
+            "no 0.5 fallback is emitted. The vision encoder processes one image at a time, preserving all images and "
+            "their order; the original projector and language model still process the complete study.\n\n"
+            "Expected status after a compatible run: `KAGGLE_RUN_PASS`.",
         ),
         cell(
             "code",

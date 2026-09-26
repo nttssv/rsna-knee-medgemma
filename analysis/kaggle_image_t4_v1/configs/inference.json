@@ -9,6 +9,7 @@
   "unquantized_model_dtype": "float16",
   "adapter_dtype_policy": "preserve_checkpoint_and_record",
   "attention_implementation": "eager",
+  "vision_microbatch_images": 1,
   "device_map": {
     "": 0
   },

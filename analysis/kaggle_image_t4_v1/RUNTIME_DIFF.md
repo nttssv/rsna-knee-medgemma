@@ -10,6 +10,7 @@ execution for Kaggle T4 hardware.
 | Unquantized base load | BF16 | FP16 |
 | Adapter file | Frozen FP32 LoRA | Same file; actual dtype/device logged |
 | Attention | Eager | Eager |
+| Vision image scheduling | All study images in one vision batch | One image per SigLIP call, concatenate all features in order before the unchanged projector; study batch remains 1 |
 | Placement | One GPU, device 0 | Try GPU 0; after CUDA OOM, one explicit 2-GPU Accelerate map |
 | Dual-GPU handling | Not supported | 7 GiB mapping budget per T4; no decoder/vision block splits; no CPU/disk offload |
 | Inputs | BF16 floating tensors, integer IDs/masks | FP16 floating tensors on embedding device, integer IDs/masks unchanged |
@@ -20,5 +21,19 @@ execution for Kaggle T4 hardware.
 
 The T4 adaptation changes precision and may change GPU placement. It does not
 change the base checkpoint, adapter, processor, tokenizer, prompt definitions,
-series/slice preprocessing, output schema or score definition. No T4 logits,
-peak memory or example submission have been measured yet.
+series/slice preprocessing, output schema or score definition. Versions 5/6
+measured OOM and memory recovery; neither completed numerical diagnostics or
+example inference. See [version 6 evidence](DIAGNOSTIC_2026-09-26_ISOLATED.md).
+
+The prospective version after 6 keeps the existing placement policy. The frozen
+processor resizes rendered 448px slices to 896px (unchanged), yielding 4096
+SigLIP patch tokens. Six images × 16 heads × 4096² × FP32 is 6 GiB for one
+eager-softmax tensor, consistent with the observed allocation request. This
+source-based attribution is not an original internal stack trace from version 6.
+The new inference-only vision wrapper retains the loaded tower, parameters and
+Accelerate hooks and runs each image separately, reducing that tensor to 1 GiB.
+All image features are concatenated in source order and the projector runs once.
+No attention implementation, precision, image, prompt, checkpoint or score is
+changed. Actual FP16 behavior remains subject to the repeated-input diagnostic;
+BF16 numerical parity remains unverified. Original tracebacks, input shapes,
+dtype reports and placement maps are now saved even when diagnostics fail.
