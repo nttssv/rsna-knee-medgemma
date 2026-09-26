@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import struct
 import sys
+from types import SimpleNamespace
 
 import pandas as pd
 import pytest
@@ -230,3 +231,51 @@ def test_notebook_builder_emits_private_offline_notebook(tmp_path):
     assert "Refusing to overwrite an existing submission.csv" in joined
     assert "RUN_INFERENCE=True" in joined
     assert "sample_submission.csv" not in joined or "find_competition_dir" in joined
+
+
+@pytest.mark.parametrize("drift", [None, "huggingface-hub", "tokenizers"])
+def test_generated_environment_cell_records_all_pins_before_real_validator(tmp_path, drift):
+    """Exercise the generated inventory, not a manually complete test dictionary."""
+    from build_notebook import build
+
+    out = tmp_path / "notebook.ipynb"
+    build(out)
+    notebook = json.loads(out.read_text())
+    source = next(c["source"] for c in notebook["cells"] if "runtime={'python'" in c["source"])
+    nodes = ast.parse(source).body
+    def assigns(node, name):
+        return isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets)
+    start = next(i for i, n in enumerate(nodes) if assigns(n, "devices"))
+    end = next(i for i, n in enumerate(nodes) if assigns(n, "versions")) + 1
+    generated = compile(ast.Module(body=nodes[start:end], type_ignores=[]), "generated-environment-cell", "exec")
+    cfg = config()
+    queried = []
+    def observed_version(name):
+        queried.append(name)
+        return "0.0.0" if name == drift else cfg["expected_training_versions"][name]
+    cuda = SimpleNamespace(
+        device_count=lambda: 2,
+        get_device_name=lambda i: "Tesla T4",
+        get_device_capability=lambda i: (7, 5),
+        get_device_properties=lambda i: SimpleNamespace(total_memory=15 * 2**30),
+        mem_get_info=lambda i: (14 * 2**30, 15 * 2**30),
+    )
+    namespace = dict(
+        CONFIG=cfg, torch=SimpleNamespace(__version__="2.8.0+cu128", version=SimpleNamespace(cuda="12.8"), cuda=cuda),
+        platform=SimpleNamespace(python_version=lambda: "3.12.12"), version=observed_version,
+        Path=lambda path: tmp_path / Path(path).name, json=json,
+        ASSET_VERIFY_SECONDS=1.25, DEPENDENCY_INSTALL_SECONDS=2.5,
+        validate_hardware=validate_hardware, validate_free_memory=validate_free_memory,
+        validate_runtime_versions=validate_runtime_versions,
+    )
+    if drift:
+        with pytest.raises(ContractError, match=f"Package version drift for {drift}"):
+            exec(generated, namespace)
+    else:
+        exec(generated, namespace)
+        assert namespace["versions"]["packages"] == cfg["expected_training_versions"]
+    assert set(queried) == set(cfg["expected_training_versions"])
+    recorded = json.loads((tmp_path / "environment_observed.json").read_text())
+    assert recorded["runtime"]["packages"] == namespace["runtime"]["packages"]
+    assert recorded["free_memory_all_gpus_gib"] == [14.0, 14.0]
+    assert recorded["timing_seconds"] == {"asset_verification": 1.25, "dependency_install": 2.5}

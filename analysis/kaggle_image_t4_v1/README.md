@@ -4,11 +4,12 @@ This is a separate inference-only adaptation based on snapshot
 `007b344b56d7c3fe1956ca913819c6bbcd19f079`. The frozen baseline package
 `analysis/kaggle_image_baseline_v1/` and the MRI pilot checkpoint are unchanged.
 
-Current state: **LOCAL_READY**. No Kaggle GPU run, example prediction,
-submission, or score has been produced.
-The existing notebook's read-only Accelerator menu lists `GPU T4 x2`; it is
-currently a CPU draft session. Kaggle GPU quota has not been consumed for this
-adaptation.
+Current state: **LOCAL_READY**, with a failed first Kaggle diagnostic preserved.
+The 2026-09-26 T4 session verified all 32 asset files and installed dependencies
+offline, then failed before model loading because the generated package
+inventory omitted two required package names. GPU was stopped; the displayed
+quota increased by approximately three minutes. No example prediction,
+submission, or score has been produced. See [the diagnostic record](DIAGNOSTIC_2026-09-26.md).
 
 ## Frozen image task
 
@@ -62,8 +63,13 @@ same example test images is unavailable, so cross-precision parity remains
 
 The private notebook is generated locally at
 `state/kaggle_image_t4_v1/private_notebook/rsna_knee_medgemma_image_t4.ipynb`.
-Its current SHA-256 is
+The original, executed notebook SHA-256 is
 `413d598f1742e97103fc412c5bccd2c2808d866a2067c3449db5a9c02c02f30a`.
+The corrected local notebook is preserved separately as
+`state/kaggle_image_t4_v1/private_notebook/rsna_knee_medgemma_image_t4_envfix.ipynb`,
+SHA-256 `766759b1e5194a8749df1c77d2400bd5d2475351154f1c8aeead3c3d31c77d1d`.
+It inventories every configured package pin and writes observed environment,
+free memory and setup timings before running the unchanged validators.
 The model asset folder is the existing ignored local package
 `state/kaggle_image_baseline_v1/assets/`; the notebook expects one attached
 private Kaggle input containing the asset manifest, base, adapter/processor and
@@ -121,6 +127,6 @@ dataset. The notebook/model package must not be made public.
   schema/numerical checks.
 - **SUBMITTED** and **SCORED** require those actual external events.
 
-Only **LOCAL_READY** is currently achieved. A Kaggle GPU quota authorization is
-still needed before running the one-time T4 placement diagnostic and example
-inference.
+Only **LOCAL_READY** is currently achieved. The first authorized session ended
+on a non-OOM error. A new bounded Kaggle quota approval is required before
+running the corrected notebook; no previous session approval is recycled.
