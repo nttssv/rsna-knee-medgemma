@@ -25,8 +25,8 @@ that execution figure. No second run, retry or competition submission occurred.
 | Model load | 45.282 s | 45.305 s |
 | Study loop wall time | 49.399 s | 23.681 s |
 | Process completion after parallel launch | 122.101 s | 98.609 s |
-| Peak allocated memory | 4.776 GiB | 4.776 GiB |
-| Peak reserved memory | 5.662 GiB | 5.662 GiB |
+| Prediction-loop peak allocated memory | 4.776 GiB | 4.776 GiB |
+| Prediction-loop peak reserved memory | 5.662 GiB | 5.662 GiB |
 | Vision cache misses / hits | 2 / 22 | 1 / 11 |
 | Underlying six-image vision executions | 2 | 1 |
 | Vision CUDA-event time, all cache misses | 12.838 s | 6.214 s |
@@ -46,9 +46,12 @@ All 32 asset checksums were verified in **63.916 s**; offline dependency
 installation took **17.741 s**. Utilization uses 60 `nvidia-smi` samples per
 GPU, roughly two seconds apart, with zero sampling errors. Whole-window means
 include model loading and GPU1's idle tail from the 2/1 split. Memory peaks
-cover loading, diagnostic and inference. The frozen `inference_seconds`
-accumulator includes diagnostic forwards; use `study_timings.csv` for complete
-study performance, not that accumulator.
+cover each worker's full prediction loop, including resident model memory.
+Peak counters reset before that loop; loading peaks are not preserved.
+The earlier repeated-input diagnostic has its own separate peak receipt.
+The frozen `preprocessing_seconds` and `inference_seconds` accumulators
+include diagnostic work; use `study_timings.csv` for complete-study wall time,
+not those accumulators.
 
 ## Scores, numerical checks and frozen behavior
 

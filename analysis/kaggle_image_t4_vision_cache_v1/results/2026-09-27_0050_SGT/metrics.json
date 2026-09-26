@@ -157,5 +157,6 @@
     "uploaded_notebook_sha256": "d957a617f8557a29323c8bc6ded917bef81e24a3ccd828b7b0d51d54f4ea411b",
     "outputs_zip_sha256": "dfb61485e65adfe98bfc4c1bfa733bcb8252829662c7e3a2ad41bf20ec9e3e23",
     "submission_sha256": "8b66aef38061782800d830dd1c4bce4e21024a0ea34c6e404c98b9bafdb1a7ec"
-  }
+  },
+  "gpu_memory_scope": "Full worker prediction loop after peak-counter reset, including resident model memory; loading peaks not preserved; diagnostic peaks separate"
 }
