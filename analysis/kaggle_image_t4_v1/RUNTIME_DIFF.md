@@ -41,7 +41,7 @@ dtype reports and placement maps are now saved even when diagnostics fail.
 
 The real [version 7 diagnostic](DIAGNOSTIC_2026-09-26_VISION_MICROBATCH.md)
 removed the initial OOM on one T4, but failed the native finite-logit check.
-No complete example submission or BF16 parity is established.
+Version 7 did not establish a complete example submission or BF16 parity.
 
 The following version targets numerical overflow: 68 decoder post-normalization
 modules call their original RMSNorm with FP32 input, preserving the existing
@@ -66,3 +66,12 @@ Reference implementation: pinned transformers 4.57.6
 [Gemma3 RMSNorm and decoder](https://github.com/huggingface/transformers/blob/v4.57.6/src/transformers/models/gemma3/modeling_gemma3.py).
 All dependency versions remain pinned; this patch does not use the current
 Transformers main branch or alter the installed vendor source.
+
+Version 8 completed all three example studies with this numerical policy.
+Its first-forward trace found 29 finite module outputs above FP16's 65504
+range: the first was decoder layer 5 (70858.1875), and the maximum was decoder
+layer 29 (281899.8125), both FP32. This demonstrates that the observed residual
+stream needs greater range; it does not retrospectively identify the exact
+first failing operation of version 7. All 400 NF4 modules reported FP16 compute,
+and repeated diagnostic logits/scores matched exactly in this one repeat.
+See [the executed result](DIAGNOSTIC_2026-09-26_FP32_RESIDUAL.md).

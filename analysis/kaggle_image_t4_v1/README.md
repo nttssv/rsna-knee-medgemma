@@ -4,11 +4,16 @@ This is a separate inference-only adaptation based on snapshot
 `007b344b56d7c3fe1956ca913819c6bbcd19f079`. The frozen baseline package
 `analysis/kaggle_image_baseline_v1/` and the MRI pilot checkpoint are unchanged.
 
-Current state: **LOCAL_READY**; real Kaggle version 6 verified the process
-cleanup repair and then failed with a genuine dual-T4 OOM. Both GPUs recovered
-to 14.46 GiB after each worker exited. The dual attempt ran, but requested
-another 6 GiB on GPU0 with 4.81 GiB free. No example predictions/submission.
-See [the observed diagnostic](DIAGNOSTIC_2026-09-26_ISOLATED.md).
+Current state: **KAGGLE_RUN_PASS** for private Kaggle version **8**
+(script version **353028229**), executed 26 September 2026, 23:19 SGT.
+All three visible example studies completed with 36 finite model-derived
+scores, exact test IDs and submission columns. Total Kaggle duration: 625.5 s.
+One T4 was used; peak allocated/reserved memory was 4.776/5.662 GiB. The GPU
+session is off. No competition submission or score exists.
+See [the completed run and numerical correction](DIAGNOSTIC_2026-09-26_FP32_RESIDUAL.md).
+
+Earlier failures remain preserved: version 6 reached the dual-T4 attempt and
+OOM; version 7 completed a single-T4 forward but failed native-logit finiteness.
 
 The repaired notebook isolates each placement in a fresh Python process. The
 single attempt must exit and be reaped before parent-side synchronization and
@@ -119,10 +124,13 @@ only after the private notebook is attached to the competition data.
 
 Because one study requires twelve forwards, a three-study visible example
 requires 36 prediction forwards plus the two repeated ACL diagnostic forwards.
-No measured T4 throughput exists yet. The hidden-test runtime estimate and
-headroom must be computed from the completed example study times and a verified
-hidden study count; do not extrapolate from one forward. A successful example
-does not prove the hidden run will finish under Kaggle's runtime limit.
+Version 8 measured 90.14, 97.40 and 98.82 seconds for complete studies
+(all twelve prediction forwards), mean 95.45 seconds. A rough planning formula
+with 30% headroom is `339 + 1.30 * 95.45 * N` seconds, about 3.54 hours for
+100 studies. This is not a hidden-test total: the hidden study count has not
+been independently verified, and three visible examples may not represent its
+series sizes or preprocessing cost. A successful example does not prove the
+hidden run will finish under Kaggle's runtime limit.
 
 ## Build and checks
 
@@ -145,10 +153,10 @@ dataset. The notebook/model package must not be made public.
   schema/numerical checks.
 - **SUBMITTED** and **SCORED** require those actual external events.
 
-Only **LOCAL_READY** is currently achieved. The user requested repair and
-continuation after version 6, retaining the 120-minute bound. A failed prior
-version remains preserved; only an actual complete example can establish
-**KAGGLE_RUN_PASS**. No competition submission is authorized for this diagnostic.
+**KAGGLE_RUN_PASS** is achieved for version 8 only. **SUBMITTED** and
+**SCORED** have not occurred. The diagnostic session retained the 120-minute
+maximum, private assets/notebook and Internet OFF. Cross-precision parity is
+still **NUMERICAL_PARITY_UNVERIFIED**; runtime success is not clinical accuracy.
 
 The current runtime bounds vision activation memory with one-image SigLIP
 microbatches, retaining every processed image and its order, followed by the
@@ -162,9 +170,15 @@ allocated), but native No/Yes logits failed the finite-value check. Execution
 stopped with no fallback, repeat or example CSV. The GPU session is off and all
 13 artifacts were saved locally. See [actual version 7 diagnostic](DIAGNOSTIC_2026-09-26_VISION_MICROBATCH.md).
 
-The next numerical correction retains decoder post-normalization/residual
+The executed version 8 numerical correction retains decoder post-normalization/residual
 values in FP32, with checked FP16 branch inputs and unchanged NF4 compute.
 It also saves first-forward module activation metadata and fails at the first
 observed nonfinite output. See [the numerical policy and local reproduction](RUNTIME_DIFF.md).
 The user requested one new bounded run after version 7; the 120-minute maximum,
 private/offline notebook, single-GPU-first and OOM-only dual fallback remain.
+
+Executed version 8 notebook:
+`state/kaggle_image_t4_v1/private_notebook/rsna_knee_medgemma_image_t4_fp32_residual.ipynb`,
+SHA-256 `ac3734740adc506eb6bc91407afb53efcf87fe9e25bb621c51389696f974b84c`.
+All 24 output artifacts and the archive are saved and hashed under the private
+`state/kaggle_image_t4_v1/runs/20260926T151922Z/` run directory.
