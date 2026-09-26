@@ -1,0 +1,53 @@
+{
+  "status": "SUBMISSION_READY",
+  "scope": "LOCAL_PACKAGE_AND_SAVED_OUTPUT_REPLAY_NOT_NEW_GPU_INFERENCE",
+  "frozen_commit": "26dafd65b91e054577110f4c695f7d72a7660faf",
+  "notebook_sha256": "8c69cef1508f25cd946217692ee3dc719b860491bd0751406d0f2b1eded7366d",
+  "source_manifest_sha256": "657ddd697251c08f49102bf0888e7a37cc51f74a61cad13bd122aa1b07a7f277",
+  "source_bound_model_behavior_unchanged": true,
+  "saved_output_replay": {
+    "status": "V10_SAVED_OUTPUT_REPLAY_PASS",
+    "mode": "LOCAL_REPLAY_NOT_NEW_INFERENCE",
+    "studies": 3,
+    "scores": 36,
+    "native_logits_finite": true,
+    "byte_identical_final_csv": true,
+    "maximum_score_difference": 0.0,
+    "submission_sha256": "8b66aef38061782800d830dd1c4bce4e21024a0ea34c6e404c98b9bafdb1a7ec",
+    "model_loaded": false,
+    "gpu_used": false,
+    "runtime_reference_dependency": false
+  },
+  "runtime_estimate": {
+    "about_studies": 1300,
+    "observed_mean_study_seconds": 24.342448459999993,
+    "observed_max_study_seconds": 25.80155814599993,
+    "balanced_mean_hours": 4.395164305277777,
+    "balanced_max_hours": 4.658614665249988,
+    "max_plus_20_percent_and_10_minutes_hours": 5.757004264966651,
+    "internal_deadline_minutes": 530,
+    "competition_limit_minutes": 540,
+    "source_urls": [
+      "https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/data",
+      "https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/overview"
+    ]
+  },
+  "provider_observation": {
+    "checked_utc": "2026-09-26T17:01:14.039Z",
+    "existing_notebook": "Private",
+    "existing_assets": "Private",
+    "editor_internet": "OFF",
+    "editor_accelerator": "T4 x2",
+    "draft_session": "off",
+    "displayed_quota": "00:44 / 30 hrs"
+  },
+  "new_artifact_remote_uploaded": false,
+  "new_gpu_execution_performed": false,
+  "competition_submitted": false,
+  "cpu_tests": {
+    "new_tests_passed": 115,
+    "frozen_tests_passed": 218,
+    "total_passed": 333,
+    "duration_seconds": 28.22
+  }
+}

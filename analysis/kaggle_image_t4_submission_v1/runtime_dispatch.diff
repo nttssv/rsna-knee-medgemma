@@ -1,0 +1,381 @@
+--- frozen-V10/replica_runner.py
++++ submission-v1/submission_runner.py
+@@ -1 +1,6 @@
+-"""Independent V8 replicas with one same-study vision-cache optimization."""
++"""Submission-only orchestration of the frozen V10 cached image inference path.
++
++The frozen ImageTeacher, numerical runtime, configuration, and same-study cache
++are loaded unchanged. Preparation does not score an example or run the repeated
++diagnostic: every model forward belongs to one of the actual test targets.
++"""
+@@ -6 +10,0 @@
+-import hashlib
+@@ -22 +26 @@
+-                            validate_submission, validate_tables)
++                            validate_hardware, validate_submission, validate_tables)
+@@ -24,0 +29 @@
++V10_COMMIT = '26dafd65b91e054577110f4c695f7d72a7660faf'
+@@ -31 +36,2 @@
+-PARITY_ATOL = 1e-6  # Fixed before the diagnostic; relative tolerance is zero.
++CACHE_SHA256 = 'b15b4bd8608e32ef85ef709f1dc8a5c19be71db95ae088e45236dd2b2afc3980'
++CACHE_POLICY = 'same_study_exact_pixel_vision_cache_v1'
+@@ -36,2 +42,3 @@
+-    if sha256_file(path) != request.get('vision_cache_sha256'):
+-        raise ContractError('Vision cache source checksum mismatch')
++    if (sha256_file(path) != CACHE_SHA256
++            or request.get('vision_cache_sha256', CACHE_SHA256) != CACHE_SHA256):
++        raise ContractError('Frozen Version 10 vision cache source checksum mismatch')
+@@ -47,0 +55,2 @@
++    if list(test.columns) != ['StudyInstanceUID']:
++        raise ContractError('test.csv must contain only StudyInstanceUID')
+@@ -49,3 +58,4 @@
+-    if len(ids) < 2 or ids.isna().any() or not ids.is_unique:
+-        raise ContractError('Two replicas require at least two unique, non-null studies')
+-    ordered = sorted(ids.astype(str).tolist())
++    if (len(ids) == 0 or ids.isna().any() or not ids.is_unique
++            or any(not isinstance(uid, str) or not uid.strip() for uid in ids)):
++        raise ContractError('Test studies must be nonempty, unique, non-null string IDs')
++    ordered = sorted(ids.tolist())
+@@ -55,20 +65,8 @@
+-def compare_reference(prediction, test, reference_path, reference_sha256, atol=PARITY_ATOL):
+-    if not math.isfinite(atol) or atol < 0 or atol > PARITY_ATOL:
+-        raise ContractError('Cannot relax the predeclared parity tolerance')
+-    if sha256_file(Path(reference_path)) != reference_sha256:
+-        raise ContractError('Version 8 reference checksum mismatch')
+-    reference = pd.read_csv(reference_path, dtype={'StudyInstanceUID': str})
+-    validate_submission(reference, test)
+-    validate_submission(prediction, test)
+-    order = test.StudyInstanceUID.tolist()
+-    actual = prediction.set_index('StudyInstanceUID').loc[order, LABELS].to_numpy(float)
+-    expected = reference.set_index('StudyInstanceUID').loc[order, LABELS].to_numpy(float)
+-    difference = np.abs(actual - expected)
+-    result = {'reference_sha256': reference_sha256, 'atol': atol, 'rtol': 0,
+-              'compared_scores': int(difference.size),
+-              'max_absolute_difference': float(difference.max()),
+-              'exact_scores': int((difference == 0).sum()),
+-              'passed': bool((difference <= atol).all())}
+-    if not result['passed']:
+-        raise ContractError('Version 8 score parity failed: ' + json.dumps(result))
+-    return result
++def merge_predictions(pieces, test):
++    """Validate complete coverage and preserve actual test.csv row order."""
++    deterministic_shards(test)
++    combined = pd.concat(pieces, ignore_index=True)
++    validate_submission(combined, test)
++    combined = combined.set_index('StudyInstanceUID').loc[test.StudyInstanceUID].reset_index()
++    validate_submission(combined, test)
++    return combined
+@@ -98,0 +97,16 @@
++
++
++def _validate_cache(cache, shard):
++    for key, expected in {'policy': CACHE_POLICY, 'misses': len(shard),
++                          'hits': 11 * len(shard), 'underlying_vision_calls': len(shard),
++                          'cache_released': True, 'active_study': None,
++                          'decoder_forwards_per_study': 12}.items():
++        if cache.get(key) != expected:
++            raise ContractError(f'Worker vision cache accounting mismatch: {key}')
++    studies = cache.get('studies')
++    if not isinstance(studies, list) or len(studies) != len(shard):
++        raise ContractError('Worker vision cache study coverage mismatch')
++    for row, uid in zip(studies, shard):
++        if not isinstance(row, dict) or any(row.get(key) != expected for key, expected in
++                {'study_id': uid, 'misses': 1, 'hits': 11}.items()):
++            raise ContractError('Worker vision cache per-study accounting mismatch')
+@@ -111 +125,3 @@
+-                          'phase': 'inference', 'study_ids': shard}.items():
++                          'phase': 'inference', 'study_ids': shard,
++                          'score_record_count': 12 * len(shard),
++                          'model_loaded': bool(shard)}.items():
+@@ -114,7 +130,6 @@
+-    cache = result.get('vision_cache', {})
+-    for key, expected in {'misses': len(shard), 'hits': 11*len(shard),
+-                          'underlying_vision_calls': len(shard), 'cache_released': True,
+-                          'decoder_forwards_per_study': 12}.items():
+-        if cache.get(key) != expected:
+-            raise ContractError(f'Worker vision cache accounting mismatch: {key}')
+-    path = worker_dir / 'example' / 'submission.csv'
++    _validate_cache(result.get('vision_cache', {}), shard)
++    inference = result.get('inference_status', {})
++    if (inference.get('status') != 'complete'
++            or inference.get('completed_studies') != len(shard)):
++        raise ContractError('Worker inference status is incomplete')
++    path = worker_dir / 'inference' / 'submission.csv'
+@@ -127 +142,8 @@
+-    validate_submission(prediction, shard_test)
++    if shard:
++        validate_submission(prediction, shard_test)
++    elif len(prediction) or list(prediction.columns) != ['StudyInstanceUID', *LABELS]:
++        # Frozen validate_submission reduces min/max and therefore rejects an
++        # empty array. Only an explicitly empty assigned shard takes this path.
++        raise ContractError('Empty worker must produce a header-only submission')
++    if prediction.StudyInstanceUID.tolist() != shard:
++        raise ContractError('Worker submission study order differs from its shard')
+@@ -128,0 +151,11 @@
++
++
++def _study_times(worker_dir, shard):
++    timing = pd.read_csv(worker_dir / 'inference' / 'study_timings.csv',
++                         dtype={'StudyInstanceUID': str})
++    if timing['StudyInstanceUID'].tolist() != shard:
++        raise ContractError('Complete-study timing coverage/order mismatch')
++    values = timing['study_seconds'].to_numpy(float)
++    if len(values) != len(shard) or not np.isfinite(values).all() or (values <= 0).any():
++        raise ContractError('Invalid complete-study timing evidence')
++    return values.tolist()
+@@ -140,4 +172,0 @@
+-    # Reference is only used by the parent for post-inference parity, never a model input.
+-    if sha256_file(Path(request['reference_csv'])) != request['reference_sha256']:
+-        raise ContractError('Version 8 reference checksum mismatch before launch')
+-    validate_submission(pd.read_csv(request['reference_csv'], dtype={'StudyInstanceUID': str}), test)
+@@ -154,0 +184,2 @@
++    if not all(math.isfinite(value) for value in free):
++        raise ContractError('GPU free memory evidence must be finite')
+@@ -156,2 +187,2 @@
+-    if deadline_monotonic <= time.monotonic():
+-        raise ContractError('Shared session deadline already expired')
++    if not math.isfinite(deadline_monotonic) or deadline_monotonic <= time.monotonic():
++        raise ContractError('Shared session deadline already expired or invalid')
+@@ -162 +193,4 @@
+-              'free_vram_before_gib': free, 'workers': [], 'scientific_source_commit': V8_COMMIT}
++              'free_vram_before_gib': free, 'workers': [],
++              'planned_studies': len(test), 'scientific_source_commit': V8_COMMIT,
++              'vision_cache_source_commit': V10_COMMIT,
++              'vision_cache_sha256': CACHE_SHA256}
+@@ -182 +216 @@
+-                                      'started_after_parent_seconds': time.monotonic()-started,
++                                      'started_after_parent_seconds': time.monotonic() - started,
+@@ -197 +231 @@
+-                           exited_after_parent_seconds=time.monotonic()-started)
++                           exited_after_parent_seconds=time.monotonic() - started)
+@@ -202 +236 @@
+-                result, _ = _validated_receipt(row, root/f'worker_{i}', shards[i], test)
++                result, _ = _validated_receipt(row, root / f'worker_{i}', shards[i], test)
+@@ -215,2 +249,2 @@
+-                time.sleep(min(0.2, max(0, deadline_monotonic-time.monotonic())))
+-        pieces = []
++                time.sleep(min(0.2, max(0, deadline_monotonic - time.monotonic())))
++        pieces, study_times = [], []
+@@ -218 +252 @@
+-            _, prediction = _validated_receipt(row, root/f'worker_{i}', shards[i], test)
++            _, prediction = _validated_receipt(row, root / f'worker_{i}', shards[i], test)
+@@ -220,3 +254,2 @@
+-        combined = pd.concat(pieces, ignore_index=True)
+-        validate_submission(combined, test)
+-        combined = combined.set_index('StudyInstanceUID').loc[test.StudyInstanceUID].reset_index()
++            study_times.extend(_study_times(root / f'worker_{i}', shards[i]))
++        combined = merge_predictions(pieces, test)
+@@ -224,9 +257 @@
+-        # Keep outputs on failure, but never promote partial or non-parity predictions.
+-        combined.to_csv(root/'combined_candidate.csv', index=False)
+-        parity = compare_reference(combined, test, Path(request['reference_csv']), request['reference_sha256'])
+-        reference = pd.read_csv(request['reference_csv'], dtype={'StudyInstanceUID': str}).set_index('StudyInstanceUID')
+-        diffs = combined.copy()
+-        for label in LABELS:
+-            diffs[label] = combined[label].to_numpy()-reference.loc[combined.StudyInstanceUID, label].to_numpy()
+-        diffs.to_csv(root/'parity_differences.csv', index=False)
+-        atomic_json(root/'parity.json', parity)
++        combined.to_csv(root / 'combined_candidate.csv', index=False, mode='x')
+@@ -235,15 +260,7 @@
+-        final = root/'submission.csv'
+-        # Hard-link a complete candidate, atomically, without replacing any prior file.
+-        elapsed = time.monotonic()-started
+-        study_times = []
+-        for i in range(2):
+-            timing = pd.read_csv(root/f'worker_{i}'/'example'/'study_timings.csv')
+-            values = timing['study_seconds'].to_numpy(float)
+-            if len(values) != len(shards[i]) or not np.isfinite(values).all() or (values <= 0).any():
+-                raise ContractError('Invalid complete-study timing evidence')
+-            study_times.extend(values.tolist())
+-        target_met = all(seconds < 40.0 for seconds in study_times)
+-        if time.monotonic() >= deadline_monotonic:
+-            raise ContractError('Deadline reached before final submission publication')
+-        os.link(root/'combined_candidate.csv', final)
+-        status.update(under40_target_met=target_met, target_seconds_strict=40.0,
++        final = root / 'submission.csv'
++        # Publish a complete candidate atomically without replacing an existing file.
++        os.link(root / 'combined_candidate.csv', final)
++        elapsed = time.monotonic() - started
++        status.update(status='complete', final_submission_path=str(final),
++                      submission_sha256=sha256_file(final), schema=schema,
++                      completed_studies=len(test), complete_study_seconds=study_times,
+@@ -251,3 +267,0 @@
+-                      complete_study_seconds=study_times)
+-        status.update(status='UNDER40_PARITY_PASS' if target_met else 'PARITY_PASS_TARGET_NOT_MET', final_submission_path=str(final),
+-                      submission_sha256=sha256_file(final), schema=schema, parity=parity,
+@@ -255 +269 @@
+-                      seconds_per_completed_study_including_worker_setup=elapsed/len(test))
++                      seconds_per_completed_study_including_worker_setup=elapsed / len(test))
+@@ -259 +273 @@
+-            row['full_study_work_fraction_of_parallel_wall'] = row['result'].get('example_status',{}).get('total_seconds',0)/elapsed
++            row['full_study_work_fraction_of_parallel_wall'] = row['result'].get('inference_status',{}).get('total_seconds',0)/elapsed
+@@ -268 +282 @@
+-                      traceback=traceback.format_exc(), parallel_wall_seconds=time.monotonic()-started)
++                      traceback=traceback.format_exc(), parallel_wall_seconds=time.monotonic() - started)
+@@ -275,0 +290,76 @@
++def _free_memory_guard(torch, minimum):
++    torch.cuda.synchronize(0)
++    free = [torch.cuda.mem_get_info(0)[0] / 2**30]
++    if not all(math.isfinite(value) for value in free):
++        raise ContractError('GPU free memory evidence must be finite')
++    validate_free_memory(free, minimum)
++    return free
++
++
++def load_submission_teacher(config, series, data_dir, base_dir, adapter_dir,
++                            attempt_log_path=None):
++    """One frozen single-T4 load, with safety checks and no diagnostic forward."""
++    import torch
++    from numerical_runtime import verify_quantized_compute_dtype
++    from submission_runtime import ImageTeacher
++
++    if torch.cuda.device_count() != 1 or 1 not in config['allowed_gpu_count']:
++        raise ContractError('Submission model load requires exactly one visible T4')
++    before = _free_memory_guard(torch, config['minimum_free_gpu_gib_before_load'])
++    attempt = {'status': 'model_load_started', 'placement': 'single_gpu',
++               'model_load_started': True, 'free_vram_before_attempt_gib': before}
++
++    def persist():
++        if attempt_log_path is not None:
++            atomic_json(Path(attempt_log_path), {'attempts': [attempt]})
++
++    persist()
++    started = time.monotonic()
++    try:
++        # The constructor owns the original NF4/FP16 recipe, adapter attachment,
++        # model type, device map, frozen weights, microbatch, normalization policy,
++        # answer tokenization, and dtype inventory. No frozen method is patched.
++        teacher = ImageTeacher(config, series, data_dir, base_dir, adapter_dir, 'single_gpu')
++        load_seconds = time.monotonic() - started
++        quantized = verify_quantized_compute_dtype(teacher.model)
++        reserve = _free_memory_guard(torch, config['minimum_free_gpu_gib_after_diagnostic'])
++        attempt.update(status='complete', load_seconds=load_seconds,
++                       hf_device_map=teacher.device_map, dtype_report=teacher.dtype_report,
++                       numerical_policy=teacher.numerical_policy, vision_runtime=teacher.vision_runtime,
++                       observed_quantized_compute_dtypes=quantized,
++                       free_vram_after_load_gib=reserve, diagnostic_performed=False)
++        persist()
++        return teacher, load_seconds, attempt
++    except BaseException as error:
++        attempt.update(status='failed', error_type=type(error).__name__, error=str(error),
++                       traceback=traceback.format_exc(), elapsed_seconds=time.monotonic() - started)
++        persist()
++        raise
++
++
++def _validate_score_records(records, shard):
++    expected = [(uid, label) for uid in shard for label in LABELS]
++    if [(row.get('study_id'), row.get('label')) for row in records] != expected:
++        raise ContractError('Expected exactly twelve ordered target forwards per study')
++    for row in records:
++        if not all(math.isfinite(float(row[key])) for key in
++                   ('native_no_logit', 'native_yes_logit', 'yes_probability')):
++            raise ContractError('Nonfinite actual target score evidence')
++        if not 0 <= row['yes_probability'] <= 1:
++            raise ContractError('Actual target probability is outside [0, 1]')
++
++
++def _empty_worker_result(directory):
++    output = directory / 'inference'
++    output.mkdir(exist_ok=False)
++    pd.DataFrame(columns=['StudyInstanceUID', *LABELS]).to_csv(output / 'submission.csv', index=False)
++    pd.DataFrame(columns=['StudyInstanceUID', 'study_seconds']).to_csv(output / 'study_timings.csv', index=False)
++    result = {'status': 'complete', 'planned_studies': 0, 'completed_studies': 0,
++              'model_loaded': False, 'total_seconds': 0.0}
++    atomic_json(output / 'status.json', result)
++    cache = {'policy': CACHE_POLICY, 'hits': 0, 'misses': 0, 'underlying_vision_calls': 0,
++             'active_study': None, 'cache_released': True, 'studies': [],
++             'decoder_forwards_per_study': 12}
++    return result, cache
++
++
+@@ -279,0 +370,4 @@
++    receipt_path = directory / 'worker_result.json'
++    if receipt_path.exists():
++        print('Worker receipt already exists; refusing overwrite', file=sys.stderr, flush=True)
++        return 1
+@@ -281 +375 @@
+-               'status': 'running', 'placement': 'single_gpu',
++               'status': 'running', 'placement': 'single_gpu', 'model_loaded': False,
+@@ -283 +376,0 @@
+-    receipt_path = directory/'worker_result.json'
+@@ -290,0 +384,4 @@
++        config = read_config(Path(request['config_path']))
++        test, series, sample = validate_tables(Path(request['data_dir']))
++        shard = deterministic_shards(test)[worker_id]
++        receipt['study_ids'] = shard
+@@ -292,2 +388,0 @@
+-        from inference_core import validate_hardware
+-        from submission_runtime import prepare_t4_teacher, run_inference
+@@ -297 +391,0 @@
+-        config = read_config(Path(request['config_path']))
+@@ -301 +395 @@
+-                  'total_gib': prop.total_memory/2**30}
++                  'total_gib': prop.total_memory / 2**30}
+@@ -304,28 +398,28 @@
+-        test, series, sample = validate_tables(Path(request['data_dir']))
+-        shard = deterministic_shards(test)[worker_id]
+-        receipt['study_ids'] = shard
+-        shard_test = test.set_index('StudyInstanceUID', drop=False).loc[shard].reset_index(drop=True)
+-        base, adapter, data = Path(request['base_dir']), Path(request['adapter_dir']), Path(request['data_dir'])
+-        teacher, load_seconds, diagnostic, attempts = prepare_t4_teacher(
+-            config, series, data, base, adapter, str(test.StudyInstanceUID.iloc[0]),
+-            directory/'model_attempt.json', only_placement='single_gpu')
+-        atomic_json(directory/'frozen_runtime.json', {'load_seconds':load_seconds,
+-                    'diagnostic':diagnostic, 'attempts':attempts,
+-                    'hf_device_map':teacher.device_map, 'dtype_report':teacher.dtype_report})
+-        # Complete-study timing must start cold, including the first study's
+-        # DICOM processing. The unchanged baseline diagnostic cannot prime cache.
+-        teacher.images.clear()
+-        from vision_cache import install_cached_teacher
+-        teacher = install_cached_teacher(teacher)
+-        receipt.update(phase='inference', load_seconds=load_seconds)
+-        atomic_json(receipt_path, receipt)
+-        _, result = run_inference(config, shard_test, series, sample, data, base, adapter,
+-            directory/'example', teacher, load_seconds, request['asset_verification_seconds'],
+-            request['dependency_install_seconds'], diagnostic)
+-        cache_audit = teacher.vision_cache.summary()
+-        atomic_json(directory/'vision_cache.json', cache_audit)
+-        atomic_json(directory/'score_logits.json', {'scores': teacher.score_records})
+-        if (cache_audit['misses'] != len(shard) or cache_audit['hits'] != 11*len(shard)
+-                or cache_audit['underlying_vision_calls'] != len(shard)
+-                or not cache_audit['cache_released'] or len(teacher.score_records) != 12*len(shard)):
+-            raise ContractError('Unexpected cache or twelve-forward accounting')
++        if not shard:
++            result, cache_audit = _empty_worker_result(directory)
++            receipt.update(phase='inference', load_seconds=0.0, score_record_count=0)
++        else:
++            from submission_runtime import run_inference
++            from numerical_runtime import verify_quantized_compute_dtype
++            from vision_cache import install_cached_teacher
++            shard_test = test.set_index('StudyInstanceUID', drop=False).loc[shard].reset_index(drop=True)
++            base, adapter, data = Path(request['base_dir']), Path(request['adapter_dir']), Path(request['data_dir'])
++            teacher, load_seconds, metadata = load_submission_teacher(
++                config, series, data, base, adapter, directory / 'model_attempt.json')
++            atomic_json(directory / 'frozen_runtime.json', metadata)
++            teacher = install_cached_teacher(teacher)
++            receipt.update(phase='inference', load_seconds=load_seconds, model_loaded=True)
++            atomic_json(receipt_path, receipt)
++            _, result = run_inference(config, shard_test, series, sample, data, base, adapter,
++                directory / 'inference', teacher, load_seconds, request['asset_verification_seconds'],
++                request['dependency_install_seconds'], None)
++            # Validate actual target forwards; these checks execute no extra inference.
++            _validate_score_records(teacher.score_records, shard)
++            receipt['score_record_count'] = len(teacher.score_records)
++            receipt['observed_quantized_compute_dtypes'] = verify_quantized_compute_dtype(teacher.model)
++            receipt['free_vram_after_inference_gib'] = _free_memory_guard(
++                torch, config['minimum_free_gpu_gib_after_diagnostic'])
++            cache_audit = teacher.vision_cache.summary()
++            atomic_json(directory / 'score_logits.json', {'scores': teacher.score_records})
++        _validate_cache(cache_audit, shard)
++        atomic_json(directory / 'vision_cache.json', cache_audit)
+@@ -333,2 +427,2 @@
+-        path = directory/'example'/'submission.csv'
+-        receipt.update(status='complete', example_status=result, submission_path=str(path),
++        path = directory / 'inference' / 'submission.csv'
++        receipt.update(status='complete', inference_status=result, submission_path=str(path.resolve()),
+@@ -342,2 +436,2 @@
+-            atomic_json(directory/'vision_cache_partial.json', cache.summary(collect_timing=False))
+-            atomic_json(directory/'score_logits_partial.json', {'scores': teacher.score_records})
++            atomic_json(directory / 'vision_cache_partial.json', cache.summary(collect_timing=False))
++            atomic_json(directory / 'score_logits_partial.json', {'scores': teacher.score_records})

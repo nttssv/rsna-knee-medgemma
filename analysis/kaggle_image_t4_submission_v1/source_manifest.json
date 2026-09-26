@@ -1,0 +1,24 @@
+{
+  "frozen_commit": "26dafd65b91e054577110f4c695f7d72a7660faf",
+  "prepared_utc": "2026-09-26T17:06:18.739824+00:00",
+  "frozen_sources": {
+    "analysis/kaggle_image_t4_v1/scripts/inference_core.py": "2b6189ec846bad84c79642697dbcbb86101d31bfcd19857f3fec350e3c98ab0e",
+    "analysis/kaggle_image_t4_v1/scripts/submission_runtime.py": "bc0d4bd51e72637adbe8fedf51a860e3e88c96d976800f1bdb73c3b8a7c2c6a8",
+    "analysis/kaggle_image_t4_v1/scripts/numerical_runtime.py": "c9fbbf1f1c781070431c732e040dd8f961dfb851550fbac42f5f445e3c408844",
+    "analysis/kaggle_image_t4_v1/scripts/build_notebook.py": "a631b9dcd4b66380a63046c9bfad3e157284cd5d586e53f4cb25c5f9d5a0b6d3",
+    "analysis/kaggle_image_t4_v1/configs/inference.json": "0b57546facec15fb5c2c476faa60e3c4e855013d38e0d4bd8805f9bdbd6ed742",
+    "analysis/kaggle_image_t4_v1/requirements-kaggle.txt": "2e46e375f6093dbd44dcef470b69e723fd2cd015dc94a91afd75a8a159878b6d",
+    "analysis/kaggle_image_t4_vision_cache_v1/scripts/vision_cache.py": "b15b4bd8608e32ef85ef709f1dc8a5c19be71db95ae088e45236dd2b2afc3980",
+    "analysis/kaggle_image_t4_vision_cache_v1/scripts/replica_runner.py": "aee5eabb3f0a8db190262e099b06ca045052b61de6bee5761b5803f606664b52"
+  },
+  "new_sources_and_tests": {
+    "analysis/kaggle_image_t4_submission_v1/scripts/build_notebook.py": "cf70db1ea7ae07f00044847a528c0dadbb212b91d3b64e8b8bf9b605be3a4be0",
+    "analysis/kaggle_image_t4_submission_v1/scripts/submission_runner.py": "5c96fdce657f67f0bb8e60cc0c6fe7b5517646022aa69cff310b1d406365548c",
+    "analysis/kaggle_image_t4_submission_v1/scripts/verify_v10_replay.py": "dab41ba2e0b19e6ae338b0647292f75714c65cf7c41c7a8cd5863e2c028a984a",
+    "analysis/kaggle_image_t4_submission_v1/tests/test_submission_notebook.py": "4aabf4c7462c14b741a02fb36476024fd4c36cc301c7a3ee405ec746fcd0db94",
+    "analysis/kaggle_image_t4_submission_v1/tests/test_submission_runner.py": "b00205985c1375fc03c93506b4a0485c1080d569a87e9f39f0a4538dbd8ed225"
+  },
+  "notebook_sha256": "8c69cef1508f25cd946217692ee3dc719b860491bd0751406d0f2b1eded7366d",
+  "asset_manifest_sha256": "4b4e9396301bd0c80a6a4ee1fd169e5b800d482f8833dcd28e3cf0b92ab4e0d7",
+  "v10_replay_final_csv_sha256": "8b66aef38061782800d830dd1c4bce4e21024a0ea34c6e404c98b9bafdb1a7ec"
+}
