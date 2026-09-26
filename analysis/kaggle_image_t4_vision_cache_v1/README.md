@@ -1,9 +1,12 @@
 # Same-study vision cache: target below 40 seconds
 
-Status: **LOCAL_READY; GPU measurements pending.** This is a separately
+Status: **UNDER40_PARITY_PASS — real Kaggle Version 10 completed on 2026-09-27 SGT.**
+All three complete studies took **23.57–25.80 seconds**, with **36/36 scores
+exactly matching V8**. See the [measured results](results/2026-09-27_0050_SGT/RESULTS.md).
+This is a separately
 versioned optimization of the completed [two-replica diagnostic](../kaggle_image_t4_replicas_v1/README.md).
 Historical Version 8 remains **KAGGLE_RUN_PASS** and Version 9 remains
-**THROUGHPUT_READY**. Neither result establishes this candidate's performance.
+**THROUGHPUT_READY**. The new result is specific to three visible studies.
 
 The goal is strictly **<40 seconds for every complete study on each T4**,
 including image preprocessing and all twelve target forwards. It is not a
@@ -36,10 +39,10 @@ CPU tests use a tiny synthetic SigLIP model; they are not MedGemma results.
 
 The saved hidden tensor is approximately 54 MiB for the current six-image
 FP16 shape, plus approximately 28 MiB of reference pixels. Actual T4 memory
-and speed remain unmeasured. Reducing 96 seconds to 40 requires saving over
-56 seconds; removing eleven vision executions can only achieve that if vision
-costs enough of the existing runtime. The diagnostic measures that component
-with CUDA events instead of assuming a speedup.
+and speed are now measured in the linked results: peak allocated/reserved
+memory was **4.776/5.662 GiB per GPU**; the complete-study mean fell from
+95.96 to **24.34 seconds**. The diagnostic recorded vision CUDA-event time
+and verified one miss/eleven hits for every study.
 
 ## Prospective acceptance and run boundary
 

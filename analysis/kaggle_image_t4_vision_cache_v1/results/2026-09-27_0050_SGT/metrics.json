@@ -1,0 +1,161 @@
+{
+  "status": "UNDER40_PARITY_PASS",
+  "executed_source_commit": "36fa04c724a2bc6488254f743b2bcb03b60dd46e",
+  "scientific_source_commit": "4a4382ab8546cd872e90a3e81654291be9fa7546",
+  "kaggle_version": 10,
+  "script_version_id": 353048812,
+  "request_utc": "2026-09-26T16:39:52.918Z",
+  "result_date_sgt": "2026-09-27",
+  "kaggle_execution_seconds": 253.3,
+  "parallel_worker_wall_seconds": 122.132314286,
+  "complete_study_seconds": [
+    23.570321001000025,
+    25.80155814599993,
+    23.655466233000027
+  ],
+  "mean_complete_study_seconds": 24.342448459999993,
+  "maximum_complete_study_seconds": 25.80155814599993,
+  "strict_target_seconds": 40.0,
+  "parity": {
+    "atol": 1e-06,
+    "compared_scores": 36,
+    "exact_scores": 36,
+    "max_absolute_difference": 0.0,
+    "passed": true,
+    "reference_sha256": "1f3d823c4b1e689b252c041945440dcc3685d0e5810cb7fbd91583739ef739cd",
+    "rtol": 0
+  },
+  "merged_csv_max_float_difference": 9.71445146547012e-17,
+  "merged_csv_max_decimal_difference": "9E-17",
+  "merged_csv_exact_decimal_cells": 13,
+  "schema": {
+    "columns": 13,
+    "maximum_score": 0.3106943964958191,
+    "minimum_score": 0.0341004282236099,
+    "rows": 3,
+    "unique_ids": 3
+  },
+  "workers": [
+    {
+      "physical_gpu_index": 0,
+      "studies": 2,
+      "model_load_seconds": 45.28239489800001,
+      "complete_study_seconds": [
+        23.570321001000025,
+        25.801558145999934
+      ],
+      "study_loop_wall_seconds": 49.39877933500003,
+      "completion_after_launch_seconds": 122.10079391400006,
+      "peak_allocated_gib": 4.775862216949463,
+      "peak_reserved_gib": 5.662109375,
+      "sampled_gpu_utilization_mean_percent": 49.833333333333336,
+      "sampled_gpu_utilization_max_percent": 100.0,
+      "sampled_gpu_utilization_before_exit_mean_percent": 49.833333333333336,
+      "samples": 60,
+      "hf_device_map": {
+        "": "0"
+      },
+      "visible_devices": "0",
+      "native_logits_finite": true,
+      "fp32_softmax_finite": true,
+      "repeated_score_delta": 0.0,
+      "cache_misses": 2,
+      "cache_hits": 22,
+      "underlying_vision_calls": 2,
+      "cache_released": true,
+      "vision_gpu_milliseconds": 12837.93896484375,
+      "process_reaped": true
+    },
+    {
+      "physical_gpu_index": 1,
+      "studies": 1,
+      "model_load_seconds": 45.305033519999995,
+      "complete_study_seconds": [
+        23.655466233000027
+      ],
+      "study_loop_wall_seconds": 23.681181400000014,
+      "completion_after_launch_seconds": 98.60905159200001,
+      "peak_allocated_gib": 4.775862216949463,
+      "peak_reserved_gib": 5.662109375,
+      "sampled_gpu_utilization_mean_percent": 31.516666666666666,
+      "sampled_gpu_utilization_max_percent": 100.0,
+      "sampled_gpu_utilization_before_exit_mean_percent": 38.59183673469388,
+      "samples": 60,
+      "hf_device_map": {
+        "": "0"
+      },
+      "visible_devices": "1",
+      "native_logits_finite": true,
+      "fp32_softmax_finite": true,
+      "repeated_score_delta": 0.0,
+      "cache_misses": 1,
+      "cache_hits": 11,
+      "underlying_vision_calls": 1,
+      "cache_released": true,
+      "vision_gpu_milliseconds": 6214.0224609375,
+      "process_reaped": true
+    }
+  ],
+  "sampling_errors": [],
+  "timing_seconds": {
+    "asset_verification": 63.91601412700004,
+    "dependency_install": 17.741287160000013
+  },
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "cuda": "12.8",
+    "devices": [
+      {
+        "name": "Tesla T4",
+        "capability_major": 7,
+        "capability_minor": 5,
+        "total_gib": 14.56219482421875
+      },
+      {
+        "name": "Tesla T4",
+        "capability_major": 7,
+        "capability_minor": 5,
+        "total_gib": 14.56219482421875
+      }
+    ],
+    "packages": {
+      "transformers": "4.57.6",
+      "huggingface-hub": "0.36.0",
+      "tokenizers": "0.22.1",
+      "peft": "0.20.0",
+      "accelerate": "1.12.0",
+      "bitsandbytes": "0.50.2",
+      "pydicom": "3.0.2",
+      "python-gdcm": "3.0.26",
+      "sentencepiece": "0.2.1",
+      "safetensors": "0.6.2"
+    }
+  },
+  "quota": {
+    "before": "00:40 / 30 hrs",
+    "after": "00:44 / 30 hrs",
+    "displayed_delta_minutes": 4,
+    "resolution_minutes": 1,
+    "limit_minutes": 30
+  },
+  "shutdown": {
+    "draft_session": "off",
+    "active_events": 0,
+    "version_status": "Successful"
+  },
+  "privacy": {
+    "notebook": "Private",
+    "model_assets": "Private",
+    "internet": "OFF"
+  },
+  "output_files_downloaded": 48,
+  "cross_precision_status": "NUMERICAL_PARITY_UNVERIFIED",
+  "competition_submitted": false,
+  "hashes": {
+    "executed_source_manifest_sha256": "455f9e95210845ed51f471e37a73e2bc4b56d358ccff1c70e20f93047737564a",
+    "uploaded_notebook_sha256": "d957a617f8557a29323c8bc6ded917bef81e24a3ccd828b7b0d51d54f4ea411b",
+    "outputs_zip_sha256": "dfb61485e65adfe98bfc4c1bfa733bcb8252829662c7e3a2ad41bf20ec9e3e23",
+    "submission_sha256": "8b66aef38061782800d830dd1c4bce4e21024a0ea34c6e404c98b9bafdb1a7ec"
+  }
+}
