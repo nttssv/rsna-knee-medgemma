@@ -5,6 +5,13 @@ Based on completed Version 8 snapshot
 This package changes scheduling only. The original T4 package and its
 **KAGGLE_RUN_PASS** result remain unchanged.
 
+**Measured status: THROUGHPUT_READY.** Private Kaggle Version 9 completed
+all three visible studies. All 36 raw worker scores exactly match Version 8;
+the merged CSV differs only at approximately 1e-16 from float serialization.
+See [measured results](results/2026-09-27_0008_SGT/RESULTS.md).
+The approximately 17.35-hour balanced hidden-test estimate still exceeds
+the competition's nine-hour limit; this diagnostic has not been submitted.
+
 Two new Python processes receive `CUDA_VISIBLE_DEVICES=0` and `=1`
 respectively before Torch is imported. Each validates exactly one visible
 Tesla T4, loads the same frozen base/adapter on its local `cuda:0`, and runs

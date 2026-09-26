@@ -1,0 +1,117 @@
+{
+  "status": "THROUGHPUT_READY",
+  "source_commit": "7b0c075441c836ea12150a8f7ea1a88065220028",
+  "scientific_snapshot": "4a4382ab8546cd872e90a3e81654291be9fa7546",
+  "kaggle_version": 9,
+  "script_version_id": 353037882,
+  "kaggle_run_seconds": 391.4,
+  "prior_v8_run_seconds": 625.5,
+  "parallel_worker_wall_seconds": 261.76138640899995,
+  "asset_verification_seconds": 66.33295798200004,
+  "dependency_install_seconds": 17.309214403999988,
+  "schema": {
+    "columns": 13,
+    "maximum_score": 0.3106943964958191,
+    "minimum_score": 0.0341004282236099,
+    "rows": 3,
+    "unique_ids": 3
+  },
+  "raw_model_score_exact_count": 36,
+  "raw_model_score_max_abs_difference": 0.0,
+  "runner_pandas_parity": {
+    "atol": 1e-06,
+    "compared_scores": 36,
+    "exact_scores": 36,
+    "max_absolute_difference": 0.0,
+    "passed": true,
+    "reference_sha256": "1f3d823c4b1e689b252c041945440dcc3685d0e5810cb7fbd91583739ef739cd",
+    "rtol": 0
+  },
+  "final_csv_max_decimal_difference": "9E-17",
+  "final_csv_max_python_float_difference": 9.71445146547012e-17,
+  "final_csv_exact_decimal_count": 13,
+  "workers": [
+    {
+      "physical_gpu": 0,
+      "visible_gpu_count": 1,
+      "cuda_visible_devices": "0",
+      "hf_device_map": {
+        "": "0"
+      },
+      "study_count": 2,
+      "load_seconds": 42.64059264500003,
+      "study_seconds_in_shard_order": [
+        93.070468162,
+        99.07427841900005
+      ],
+      "mean_study_seconds": 96.07237329050002,
+      "study_loop_wall_seconds": 192.17129711799998,
+      "process_exit_seconds_after_parallel_start": 261.726247969,
+      "process_lifetime_fraction": 0.9998623432566036,
+      "study_work_fraction": 0.7341468493665981,
+      "memory": {
+        "device": 0,
+        "peak_allocated_gib": 4.775862216949463,
+        "peak_reserved_gib": 5.662109375
+      },
+      "gpu_utilization_samples": 128,
+      "gpu_utilization_mean_percent_full_window": 77.53125,
+      "gpu_utilization_mean_percent_until_exit": 77.53125,
+      "gpu_utilization_max_percent": 100.0,
+      "repeated_score_delta": 0.0,
+      "repeated_logits_delta": 0.0,
+      "first_nonfinite": null,
+      "adapter_attached": true,
+      "dicom_issue_rows": 0
+    },
+    {
+      "physical_gpu": 1,
+      "visible_gpu_count": 1,
+      "cuda_visible_devices": "1",
+      "hf_device_map": {
+        "": "0"
+      },
+      "study_count": 1,
+      "load_seconds": 42.708739251,
+      "study_seconds_in_shard_order": [
+        95.74049541799991
+      ],
+      "mean_study_seconds": 95.74049541799991,
+      "study_loop_wall_seconds": 95.764148353,
+      "process_exit_seconds_after_parallel_start": 167.02912685400003,
+      "process_lifetime_fraction": 0.6380856242449107,
+      "study_work_fraction": 0.36584520607393684,
+      "memory": {
+        "device": 0,
+        "peak_allocated_gib": 4.775862216949463,
+        "peak_reserved_gib": 5.662109375
+      },
+      "gpu_utilization_samples": 128,
+      "gpu_utilization_mean_percent_full_window": 42.4921875,
+      "gpu_utilization_mean_percent_until_exit": 66.32926829268293,
+      "gpu_utilization_max_percent": 100.0,
+      "repeated_score_delta": 0.0,
+      "repeated_logits_delta": 0.0,
+      "first_nonfinite": null,
+      "adapter_attached": true,
+      "dicom_issue_rows": 0
+    }
+  ],
+  "gpu_utilization_errors": [],
+  "quota_before_display": "00:33 / 30 hrs",
+  "quota_after_display": "00:40 / 30 hrs",
+  "displayed_quota_delta_minutes": 7,
+  "quota_resolution_minutes": 1,
+  "gpu_session_status": "off; 0 Active Events confirmed",
+  "cross_precision_parity": "NUMERICAL_PARITY_UNVERIFIED",
+  "submitted": false,
+  "private_notebook": true,
+  "private_assets": true,
+  "internet_enabled": false,
+  "estimated_hidden_studies": 1300,
+  "hidden_estimate_basis": "650 studies per worker at the slower observed worker mean; 3 visible studies only",
+  "estimated_hidden_seconds_no_overhead": 62447.04263882501,
+  "estimated_hidden_seconds_20pct_plus10min": 75536.45116659,
+  "downloaded_files": 42,
+  "final_csv_sha256": "8b66aef38061782800d830dd1c4bce4e21024a0ea34c6e404c98b9bafdb1a7ec"
+}
