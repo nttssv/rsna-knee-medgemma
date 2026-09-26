@@ -1,0 +1,18 @@
+{
+  "frozen_snapshot_commit": "4a4382ab8546cd872e90a3e81654291be9fa7546",
+  "frozen_sources": {
+    "analysis/kaggle_image_t4_v1/scripts/inference_core.py": "2b6189ec846bad84c79642697dbcbb86101d31bfcd19857f3fec350e3c98ab0e",
+    "analysis/kaggle_image_t4_v1/scripts/submission_runtime.py": "bc0d4bd51e72637adbe8fedf51a860e3e88c96d976800f1bdb73c3b8a7c2c6a8",
+    "analysis/kaggle_image_t4_v1/scripts/numerical_runtime.py": "c9fbbf1f1c781070431c732e040dd8f961dfb851550fbac42f5f445e3c408844",
+    "analysis/kaggle_image_t4_v1/scripts/build_notebook.py": "a631b9dcd4b66380a63046c9bfad3e157284cd5d586e53f4cb25c5f9d5a0b6d3",
+    "analysis/kaggle_image_t4_v1/configs/inference.json": "0b57546facec15fb5c2c476faa60e3c4e855013d38e0d4bd8805f9bdbd6ed742",
+    "analysis/kaggle_image_t4_v1/requirements-kaggle.txt": "2e46e375f6093dbd44dcef470b69e723fd2cd015dc94a91afd75a8a159878b6d"
+  },
+  "new_sources": {
+    "analysis/kaggle_image_t4_replicas_v1/scripts/build_notebook.py": "9a9af7a3a2d83b9d31ad2e5a67f2a08c0d1d5d142b6e259f8cd02bdcdd258c0d",
+    "analysis/kaggle_image_t4_replicas_v1/scripts/replica_runner.py": "be75619b9921e5fc6894831862997107f9ecc1ef08fc8c6c6536503d8e2b7a69"
+  },
+  "tests": {
+    "analysis/kaggle_image_t4_replicas_v1/tests/test_replica_runner.py": "b8f2f135deb458a76326f94822d23ed64ceb30df28596519e3a115b34b6b3d81"
+  }
+}
