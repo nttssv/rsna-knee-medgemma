@@ -10,6 +10,7 @@ execution for Kaggle T4 hardware.
 | Unquantized base load | BF16 | FP16 |
 | Adapter file | Frozen FP32 LoRA | Same file; actual dtype/device logged |
 | Attention | Eager | Eager |
+| Decoder numerical policy | BF16 residual stream | FP32 post-attention/post-MLP normalization results and residual additions; normalized branch inputs checked then cast FP16; NF4 compute FP16 verified after diagnostic |
 | Vision image scheduling | All study images in one vision batch | One image per SigLIP call, concatenate all features in order before the unchanged projector; study batch remains 1 |
 | Placement | One GPU, device 0 | Try GPU 0; after CUDA OOM, one explicit 2-GPU Accelerate map |
 | Dual-GPU handling | Not supported | 7 GiB mapping budget per T4; no decoder/vision block splits; no CPU/disk offload |
@@ -41,3 +42,27 @@ dtype reports and placement maps are now saved even when diagnostics fail.
 The real [version 7 diagnostic](DIAGNOSTIC_2026-09-26_VISION_MICROBATCH.md)
 removed the initial OOM on one T4, but failed the native finite-logit check.
 No complete example submission or BF16 parity is established.
+
+The following version targets numerical overflow: 68 decoder post-normalization
+modules call their original RMSNorm with FP32 input, preserving the existing
+FP32 calculation instead of narrowing its output back to FP16. The two residual
+additions consequently remain FP32. The 68 pre-normalization modules retain
+finite, range-checked FP16 branch inputs to the existing attention/MLP modules.
+Original norm parameters, LoRA and dispatch hooks remain intact. The actual NF4
+compute dtypes are verified after the repeated diagnostic. No clipping, score
+repair, model-wide conversion or fallback is allowed.
+
+Local audit found all 883 base tensors and 272 adapter tensors finite and
+representable in FP16 (base maximum absolute weight 1376; adapter 0.022903).
+With the actual layer-33 post-MLP norm weight and a synthetic 2560-dimensional
+input, the original FP16 narrowing returns Inf; FP32 returns 69671.296875,
+above FP16's 65504 limit. This reproduces a mathematical hazard, not the actual
+first failing operation in version 7. The first new diagnostic forward traces
+module outputs (including decoder residual outputs), aborts on the first
+nonfinite activation, and saves trace metadata even on failure. Attention masks
+are not treated as activations; legitimate mask -Inf is not flagged.
+
+Reference implementation: pinned transformers 4.57.6
+[Gemma3 RMSNorm and decoder](https://github.com/huggingface/transformers/blob/v4.57.6/src/transformers/models/gemma3/modeling_gemma3.py).
+All dependency versions remain pinned; this patch does not use the current
+Transformers main branch or alter the installed vendor source.

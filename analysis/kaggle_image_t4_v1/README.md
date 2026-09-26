@@ -161,3 +161,10 @@ Single-T4 load and the first forward completed without OOM (4.774 GiB peak
 allocated), but native No/Yes logits failed the finite-value check. Execution
 stopped with no fallback, repeat or example CSV. The GPU session is off and all
 13 artifacts were saved locally. See [actual version 7 diagnostic](DIAGNOSTIC_2026-09-26_VISION_MICROBATCH.md).
+
+The next numerical correction retains decoder post-normalization/residual
+values in FP32, with checked FP16 branch inputs and unchanged NF4 compute.
+It also saves first-forward module activation metadata and fails at the first
+observed nonfinite output. See [the numerical policy and local reproduction](RUNTIME_DIFF.md).
+The user requested one new bounded run after version 7; the 120-minute maximum,
+private/offline notebook, single-GPU-first and OOM-only dual fallback remain.

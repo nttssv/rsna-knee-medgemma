@@ -29,6 +29,7 @@ def build(output: Path) -> dict:
     core_source = (HERE / "inference_core.py").read_text()
     runtime_source = (HERE / "submission_runtime.py").read_text()
     isolated_source = (HERE / "isolated_runner.py").read_text()
+    numerical_source = (HERE / "numerical_runtime.py").read_text()
     cells = [
         cell(
             "markdown",
@@ -39,6 +40,8 @@ def build(output: Path) -> dict:
             "and after a CUDA OOM may try one explicit two-T4 map. CPU/disk offload is forbidden. Any unscored study aborts; "
             "no 0.5 fallback is emitted. The vision encoder processes one image at a time, preserving all images and "
             "their order; the original projector and language model still process the complete study.\n\n"
+            "Decoder post-normalization results and residual additions remain FP32 to avoid FP16 overflow; "
+            "NF4 linear compute remains FP16. Nonfinite outputs abort without clipping or repair.\n\n"
             "Expected status after a compatible run: `KAGGLE_RUN_PASS`.",
         ),
         cell(
@@ -102,6 +105,7 @@ def build(output: Path) -> dict:
         cell("code", writefile_cell("inference_core.py", core_source)),
         cell("code", writefile_cell("submission_runtime.py", runtime_source)),
         cell("code", writefile_cell("isolated_runner.py", isolated_source)),
+        cell("code", writefile_cell("numerical_runtime.py", numerical_source)),
         cell(
             "code",
             "import importlib, platform\n"

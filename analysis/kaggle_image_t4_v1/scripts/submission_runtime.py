@@ -274,6 +274,12 @@ class ImageTeacher:
         self.device_map = {str(key): str(value) for key, value in model.hf_device_map.items()}
         validate_device_map(self.device_map, placement)
         self.vision_runtime = install_vision_microbatch(model, config["vision_microbatch_images"])
+        from numerical_runtime import install_fp32_post_norms
+        if config.get("numerical_policy") != "gemma3_post_norm_and_residual_fp32_v1":
+            raise ContractError("Unexpected numerical precision policy")
+        self.numerical_policy = install_fp32_post_norms(model)
+        self.trace_path = None
+        self.numerical_trace_summary = None
         self.input_device = model.get_input_embeddings().weight.device
         self.dtype_report = self._dtype_report(model, torch)
         self.answer_ids = []
@@ -427,10 +433,19 @@ class ImageTeacher:
 
     def diagnostic(self, uid: str):
         torch = self.torch
+        from numerical_runtime import ActivationTrace, verify_quantized_compute_dtype
         for index in range(torch.cuda.device_count()):
             torch.cuda.reset_peak_memory_stats(index)
-        first = self.score_logits(uid, LABELS[0])
+        trace = ActivationTrace(self.model)
+        try:
+            with trace.capture():
+                first = self.score_logits(uid, LABELS[0])
+        finally:
+            self.numerical_trace_summary = trace.summary()
+            if self.trace_path is not None:
+                atomic_json(self.trace_path, trace.record())
         second = self.score_logits(uid, LABELS[0])
+        quantized_compute = verify_quantized_compute_dtype(self.model)
         max_logit_delta = max(
             abs(first["native_no_logit"] - second["native_no_logit"]),
             abs(first["native_yes_logit"] - second["native_yes_logit"]),
@@ -472,6 +487,9 @@ class ImageTeacher:
             "input_shapes": first["input_shapes"],
             "repeated_native_logits": [first, second],
             "vision_runtime": self.vision_runtime,
+            "numerical_policy": self.numerical_policy,
+            "observed_quantized_compute_dtypes": quantized_compute,
+            "activation_trace_summary": self.numerical_trace_summary,
             "dtype_report": self.dtype_report,
             "gpu_memory": peaks,
         }
@@ -560,10 +578,12 @@ def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_te
         failure = None
         try:
             teacher = ImageTeacher(config, series, data_dir, base_dir, adapter_dir, placement)
+            teacher.trace_path = attempt_log_path.parent / "activation_trace.json" if attempt_log_path else None
             load_seconds = time.monotonic() - load_started
             attempt.update(status="diagnostic_started", load_seconds=load_seconds,
                            hf_device_map=teacher.device_map,
                            dtype_report=getattr(teacher, "dtype_report", {}),
+                           numerical_policy=getattr(teacher, "numerical_policy", {}),
                            vision_runtime=getattr(teacher, "vision_runtime", {}))
             persist_attempts()
             diagnostic = teacher.diagnostic(first_test_uid)
@@ -590,6 +610,7 @@ def prepare_t4_teacher(config, series, data_dir, base_dir, adapter_dir, first_te
                 "failure_stage": "diagnostic" if teacher is not None else "model_load",
                 "original_traceback": traceback.format_exc(),
                 "last_forward_observation": getattr(teacher, "last_forward_observation", None),
+                "activation_trace_summary": getattr(teacher, "numerical_trace_summary", None),
                 "gpu_memory_at_failure": [
                     {
                         "device": index,

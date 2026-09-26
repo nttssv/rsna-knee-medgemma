@@ -10,6 +10,7 @@
   "adapter_dtype_policy": "preserve_checkpoint_and_record",
   "attention_implementation": "eager",
   "vision_microbatch_images": 1,
+  "numerical_policy": "gemma3_post_norm_and_residual_fp32_v1",
   "device_map": {
     "": 0
   },
